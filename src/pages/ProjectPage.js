@@ -120,8 +120,7 @@ function ProjectPage({
       setEditedProject(project);
     }
     if (!projectUuid && project?.id) {
-      const projectRouteRef = modulesManager.getRef('socialProtection.route.project');
-      history.replace(`/${projectRouteRef}/${project.id}`);
+      history.replace(`project/${project.id}`);
       setReset(true);
     }
   }, [project]);
