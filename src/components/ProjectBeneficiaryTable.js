@@ -87,6 +87,7 @@ function BaseProjectBeneficiaryTable({
           tableTitle={tableTitle}
           isGroup={isGroup}
           actions={actions}
+          workingDays={project.workingDays}
         />
         <EnrollmentDialogComponent
           open={enrollmentDialogOpen}

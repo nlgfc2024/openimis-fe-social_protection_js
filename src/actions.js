@@ -44,24 +44,34 @@ const UPLOAD_HISTORY_FULL_PROJECTION = () => [
   'dataUpload {uuid, dateCreated, dateUpdated, sourceName, sourceType, status, error, userCreated {username} }',
 ];
 
-const BENEFICIARY_FULL_PROJECTION = (modulesManager) => [
+const BENEFICIARY_PROJECTION = (modulesManager) => [
   'id',
   'benefitPlan {id}',
-  'project {id}',
   'individual {firstName, lastName, dob, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
   'status',
   'isEligible',
   'jsonExt',
 ];
 
-const GROUP_BENEFICIARY_FULL_PROJECTION = (modulesManager) => [
+const PROJECT_BENEFICIARY_PROJECTION = (modulesManager) => [
+  ...BENEFICIARY_PROJECTION(modulesManager),
+  'project {id}',
+  'projectTimeEntries { id, dayNumber, percentComplete }',
+];
+
+const GROUP_BENEFICIARY_PROJECTION = (modulesManager) => [
   'id',
   'benefitPlan {id}',
-  'project {id}',
   'group {id, code, head {uuid, firstName, lastName, dob}, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
   'status',
   'isEligible',
   'jsonExt',
+];
+
+const PROJECT_GROUP_BENEFICIARY_PROJECTION = (modulesManager) => [
+  ...GROUP_BENEFICIARY_PROJECTION(modulesManager),
+  'project {id}',
+  'projectTimeEntries { id, dayNumber, percentComplete }',
 ];
 
 const WORKFLOWS_FULL_PROJECTION = () => [
@@ -92,12 +102,12 @@ export function fetchBenefitPlans(params) {
 }
 
 export function fetchBeneficiaries(modulesManager, params) {
-  const payload = formatPageQueryWithCount('beneficiary', params, BENEFICIARY_FULL_PROJECTION(modulesManager));
+  const payload = formatPageQueryWithCount('beneficiary', params, BENEFICIARY_PROJECTION(modulesManager));
   return graphql(payload, ACTION_TYPE.SEARCH_BENEFICIARIES);
 }
 
 export function fetchProjectBeneficiaries(modulesManager, params, meta = {}) {
-  const payload = formatPageQueryWithCount('beneficiary', params, BENEFICIARY_FULL_PROJECTION(modulesManager));
+  const payload = formatPageQueryWithCount('beneficiary', params, PROJECT_BENEFICIARY_PROJECTION(modulesManager));
   return graphql(payload, ACTION_TYPE.SEARCH_PROJECT_BENEFICIARIES, meta);
 }
 
@@ -105,7 +115,7 @@ export function fetchGroupBeneficiaries(modulesManager, params) {
   const payload = formatPageQueryWithCount(
     'groupBeneficiary',
     params,
-    GROUP_BENEFICIARY_FULL_PROJECTION(modulesManager),
+    GROUP_BENEFICIARY_PROJECTION(modulesManager),
   );
   return graphql(payload, ACTION_TYPE.SEARCH_GROUP_BENEFICIARIES);
 }
@@ -114,7 +124,7 @@ export function fetchProjectGroupBeneficiaries(modulesManager, params, meta = {}
   const payload = formatPageQueryWithCount(
     'groupBeneficiary',
     params,
-    GROUP_BENEFICIARY_FULL_PROJECTION(modulesManager),
+    PROJECT_GROUP_BENEFICIARY_PROJECTION(modulesManager),
   );
   return graphql(payload, ACTION_TYPE.SEARCH_PROJECT_GROUP_BENEFICIARIES, meta);
 }

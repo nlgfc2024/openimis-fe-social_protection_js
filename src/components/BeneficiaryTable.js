@@ -136,6 +136,54 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
     });
 };
 
+const getWorkDayColumns = (translateFn, workingDays = 0) => {
+  if (!workingDays) return [];
+  return Array.from({ length: workingDays }, (_, i) => {
+    const dayNumber = i + 1;
+    return {
+      title: `${translateFn('project.day')} ${dayNumber}`,
+      field: `projectTimeEntries.${dayNumber}`,
+      type: 'numeric',
+      render: (rowData) => {
+        const entry = rowData.projectTimeEntries?.find((e) => e.dayNumber === dayNumber);
+        return entry ? entry.percentComplete : '';
+      },
+      filterComponent: NumberFilter,
+      customFilterAndSearch: (filter, rowData) => {
+        const entry = rowData.projectTimeEntries?.find((e) => e.dayNumber === dayNumber);
+        if (!entry) return false;
+        const value = entry.percentComplete;
+        if (value === null || value === undefined) return false;
+        const numValue = Number(value);
+
+        // Apply the same logic as your other numeric filters
+        if (typeof filter === 'string') {
+          if (filter === '') return true;
+          const searchNum = Number(filter);
+          if (Number.isNaN(searchNum)) return false;
+          return numValue === searchNum;
+        }
+
+        const filterValue = Number(filter?.value);
+        if (Number.isNaN(numValue)) return false;
+        if (filter?.value === undefined || filter?.value === '') return true;
+        if (Number.isNaN(filterValue)) return false;
+
+        switch (filter?.operator) {
+          case 'exact': return numValue === filterValue;
+          case 'lt': return numValue < filterValue;
+          case 'lte': return numValue <= filterValue;
+          case 'gt': return numValue > filterValue;
+          case 'gte': return numValue >= filterValue;
+          default: return numValue === filterValue;
+        }
+      },
+      align: 'center',
+      width: '100px',
+    };
+  });
+};
+
 function BeneficiaryTable({
   intl,
   theme,
@@ -148,6 +196,7 @@ function BeneficiaryTable({
   isGroup,
   appliedFilters,
   appliedPageSize,
+  workingDays,
 }) {
   const nameDoBFieldPrefix = isGroup ? 'group.head' : 'individual';
   const locationFieldPrefix = isGroup ? 'group' : 'individual';
@@ -249,6 +298,7 @@ function BeneficiaryTable({
   ] : [];
 
   const columns = useMemo(() => {
+    const workDayColumns = getWorkDayColumns(translate, workingDays);
     const allColumns = [
       ...additionalColumns || [],
       {
@@ -274,6 +324,7 @@ function BeneficiaryTable({
         },
       })),
       ...dynamicColumns,
+      ...workDayColumns,
     ];
 
     return allColumns.map((c) => ({
