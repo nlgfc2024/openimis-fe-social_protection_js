@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { injectIntl } from 'react-intl';
 import {
   formatMessage,
@@ -45,6 +45,8 @@ function BaseProjectBeneficiaryTable({
     'projectBeneficiaries.enrolled',
     { n: beneficiariesTotalCount },
   );
+  const materialTableRef = useRef();
+  const [bulkEditOpen, setBulkEditOpen] = useState(false);
 
   const dispatch = useDispatch();
   // Trigger fetch: batch & concat handled in projectBeneficiariesMiddleware & reducers
@@ -70,13 +72,124 @@ function BaseProjectBeneficiaryTable({
     </Button>
   );
 
-  const actions = rights.includes(RIGHT_PROJECT_UPDATE) ? [
-    {
-      icon: assignButtonComponentFn,
-      isFreeAction: true,
-      onClick: () => setEnrollmentDialogOpen(true),
-    },
-  ] : [];
+  const enterTimeComponentFn = () => {
+    const isEditing = materialTableRef.current?.dataManager?.bulkEditOpen;
+
+    return (
+      <Button
+        variant="contained"
+        color="primary"
+      >
+        <Typography variant="body2">
+          {isEditing
+            ? formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.saveTime')
+            : formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.enterTime')}
+        </Typography>
+      </Button>
+    );
+  };
+
+  function scrollToFirstWorkingDayColumn() {
+    const scrollContainer = materialTableRef.current?.tableContainerDiv?.current;
+    if (!scrollContainer) return;
+
+    const headerCells = scrollContainer.querySelectorAll('thead th');
+    const firstDayTitle = `${formatMessage(intl, MODULE_NAME, 'project.day')} 1`;
+    const targetHeader = Array.from(headerCells).find((th) => th.textContent.includes(firstDayTitle));
+
+    if (targetHeader) {
+      const numFrozenCols = isGroup ? 3 : 2;
+      const frozenColumns = Array.from(headerCells).slice(0, numFrozenCols);
+      const frozenWidth = frozenColumns.reduce((sum, th) => sum + th.offsetWidth, 0);
+
+      scrollContainer.scrollTo({
+        left: targetHeader.offsetLeft - frozenWidth,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  const handleToggleEdit = () => {
+    const materialTable = materialTableRef.current;
+    if (!materialTable?.dataManager) return;
+
+    const isEditing = materialTable.dataManager.bulkEditOpen;
+
+    if (isEditing) {
+      // TODO: implement API
+      // const updatedRows = Object.values(materialTable.state.bulkEditChangedRows || {});
+      // if (updatedRows.length > 0) {
+      //   dispatch({
+      //     type: REQUEST(ACTION_TYPE.UPDATE_PROJECT_BENEFICIARIES_PROGRESS),
+      //     payload: updatedRows,
+      //     meta: { projectId: project.id },
+      //   });
+      // }
+    }
+
+    const newState = !isEditing;
+    materialTable.dataManager.changeBulkEditOpen(newState);
+    materialTable.setState({
+      ...materialTable.dataManager.getRenderState(),
+    });
+    setBulkEditOpen(newState);
+
+    if (newState) {
+      // Allow the DOM to re-render the editable cells first
+      setTimeout(() => {
+        scrollToFirstWorkingDayColumn();
+      }, 300);
+    }
+  };
+
+  const cancelEditButtonFn = () => (
+    <Button variant="outlined" color="default">
+      <Typography variant="body2">
+        {formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.cancelEdit')}
+      </Typography>
+    </Button>
+  );
+
+  const handleCancelEdit = () => {
+    const materialTable = materialTableRef.current;
+    if (!materialTable?.dataManager) return;
+
+    materialTable.dataManager.changeBulkEditOpen(false);
+    materialTable.setState({
+      ...materialTable.dataManager.getRenderState(),
+    });
+    setBulkEditOpen(false);
+  };
+
+  function getTableActions() {
+    if (!rights.includes(RIGHT_PROJECT_UPDATE)) return [];
+
+    const materialTable = materialTableRef.current;
+    const tableActions = [
+      {
+        icon: assignButtonComponentFn,
+        isFreeAction: true,
+        onClick: () => setEnrollmentDialogOpen(true),
+      },
+      {
+        icon: enterTimeComponentFn,
+        isFreeAction: true,
+        onClick: handleToggleEdit,
+      },
+    ];
+
+    if (materialTable?.dataManager?.bulkEditOpen) {
+      tableActions.push({
+        icon: cancelEditButtonFn,
+        isFreeAction: true,
+        onClick: handleCancelEdit,
+      });
+    }
+
+    return tableActions;
+  }
+
+  const actions = useMemo(getTableActions, [rights, bulkEditOpen]);
 
   return (
     !!project?.id && (
@@ -88,6 +201,7 @@ function BaseProjectBeneficiaryTable({
           isGroup={isGroup}
           actions={actions}
           workingDays={project.workingDays}
+          tableRef={materialTableRef}
         />
         <EnrollmentDialogComponent
           open={enrollmentDialogOpen}

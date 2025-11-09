@@ -5,6 +5,7 @@ import _ from 'lodash';
 import {
   Select,
   MenuItem,
+  Paper,
 } from '@material-ui/core';
 import {
   withTheme,
@@ -27,9 +28,22 @@ import {
 } from '../constants';
 import NumberFilter from './MaterialTableNumberFilter';
 
+const DEFAULT_CELL_PADDING = '0 0 0 10px';
 const styles = (theme) => ({
   page: theme.page,
   paper: theme.paper.classes,
+  containerWrapper: {
+    padding: '0 20px',
+    // Patch style of a nested matertial-table element
+    // so frozen columns work correctly
+    '& > div:nth-child(2) > div:nth-child(2)': {
+      position: 'relative',
+    },
+
+    '& td': {
+      padding: DEFAULT_CELL_PADDING,
+    },
+  },
 });
 
 const getDynamicColumns = (translateFn, customFilters = []) => {
@@ -132,6 +146,7 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
         filterComponent,
         customFilterAndSearch: filterFn,
         align: 'left',
+        editable: 'never',
       };
     });
 };
@@ -197,6 +212,8 @@ function BeneficiaryTable({
   appliedFilters,
   appliedPageSize,
   workingDays,
+  tableRef,
+  classes,
 }) {
   const nameDoBFieldPrefix = isGroup ? 'group.head' : 'individual';
   const locationFieldPrefix = isGroup ? 'group' : 'individual';
@@ -294,6 +311,7 @@ function BeneficiaryTable({
     {
       title: translate('socialProtection.groupBeneficiary.code'),
       field: 'group.code',
+      editable: 'never',
     },
   ] : [];
 
@@ -304,14 +322,17 @@ function BeneficiaryTable({
       {
         title: translate('socialProtection.beneficiary.firstName'),
         field: `${nameDoBFieldPrefix}.firstName`,
+        editable: 'never',
       },
       {
         title: translate('socialProtection.beneficiary.lastName'),
         field: `${nameDoBFieldPrefix}.lastName`,
+        editable: 'never',
       },
       {
         title: translate('socialProtection.beneficiary.dob'),
         field: `${nameDoBFieldPrefix}.dob`,
+        editable: 'never',
       },
       ...Array.from({ length: LOC_LEVELS }, (_, i) => ({
         title: translate(`location.locationType.${i}`),
@@ -336,11 +357,18 @@ function BeneficiaryTable({
 
   const isSelectable = !!onSelectionChange;
 
-  const cellPadding = isSelectable ? '0' : '0 0 0 10px';
+  const cellPadding = isSelectable ? '0' : DEFAULT_CELL_PADDING;
 
   return (
     <ThemeProvider theme={tableTheme}>
       <MaterialTable
+        components={{
+          Container: (props) => (
+            <Paper elevation={2} className={classes.containerWrapper}>
+              {props.children}
+            </Paper>
+          ),
+        }}
         title={tableTitle}
         columns={columns}
         data={onQueryChange || allRows}
@@ -376,6 +404,10 @@ function BeneficiaryTable({
           doubleHorizontalScroll: true,
           tableLayout: 'fixed',
           emptyRowsWhenPaging: false,
+          ...(tableRef.current?.dataManager?.bulkEditOpen
+            ? { fixedColumns: { left: isGroup ? 3 : 2, right: 0 } }
+            : { fixedColumns: {} }),
+          actionsColumnIndex: -1,
         }}
         localization={{
           toolbar: {
@@ -400,7 +432,7 @@ function BeneficiaryTable({
         }}
         onSelectionChange={(rows) => (isSelectable && onSelectionChange(rows))}
         actions={actions}
-        style={{ padding: '0 20px' }}
+        tableRef={tableRef}
       />
     </ThemeProvider>
   );

@@ -234,7 +234,10 @@
     "save": "Save",
     "filterPlaceholder": "Filter...",
     "activeSelected": "{n} active beneficiaries selected",
-    "enrolled": "{n} Beneficiaries Assigned"
+    "enrolled": "{n} Beneficiaries Assigned",
+    "enterTime": "Enter time",
+    "saveTime": "Save",
+    "cancelEdit": "Cancel"
   },
   "common": {
     "true": "Yes",
