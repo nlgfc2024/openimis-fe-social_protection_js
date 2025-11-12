@@ -277,12 +277,19 @@ function reducer(
       };
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
-      const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => ({
-        ...beneficiary,
-        project: { id: beneficiary?.project?.id ? decodeId(beneficiary.project.id) : null },
-        jsonExt: typeof beneficiary.jsonExt === 'string' ? JSON.parse(beneficiary.jsonExt) : beneficiary.jsonExt,
-        id: decodeId(beneficiary.id),
-      }));
+      const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => {
+        const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
+        (beneficiary.projectTimeEntries || []).forEach((entry) => {
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = entry;
+        });
+        return {
+          ...beneficiary,
+          project: { id: beneficiary?.project?.id ? decodeId(beneficiary.project.id) : null },
+          jsonExt: typeof beneficiary.jsonExt === 'string' ? JSON.parse(beneficiary.jsonExt) : beneficiary.jsonExt,
+          id: decodeId(beneficiary.id),
+          projectTimeEntriesDict,
+        };
+      });
       return {
         ...state,
         fetchingProjectBeneficiaries: false,
@@ -386,6 +393,10 @@ function reducer(
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_GROUP_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
       const parsedGroupBeneficiaries = parseData(action.payload.data.groupBeneficiary)?.map((groupBeneficiary) => {
+        const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
+        (groupBeneficiary.projectTimeEntries || []).forEach((entry) => {
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = entry;
+        });
         const response = ({
           ...groupBeneficiary,
           project: { id: groupBeneficiary?.project?.id ? decodeId(groupBeneficiary.project.id) : null },
@@ -393,6 +404,7 @@ function reducer(
             ? JSON.parse(groupBeneficiary.jsonExt)
             : groupBeneficiary.jsonExt,
           id: decodeId(groupBeneficiary.id),
+          projectTimeEntriesDict,
         });
         if (response?.group?.id) {
           response.group = ({

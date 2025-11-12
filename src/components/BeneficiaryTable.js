@@ -157,21 +157,15 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
     const dayNumber = i + 1;
     return {
       title: `${translateFn('project.day')} ${dayNumber}`,
-      field: `projectTimeEntries.${dayNumber}`,
+      field: `projectTimeEntriesDict.day${dayNumber}.percentComplete`,
       type: 'numeric',
-      render: (rowData) => {
-        const entry = rowData.projectTimeEntries?.find((e) => e.dayNumber === dayNumber);
-        return entry ? entry.percentComplete : '';
-      },
       filterComponent: NumberFilter,
       customFilterAndSearch: (filter, rowData) => {
-        const entry = rowData.projectTimeEntries?.find((e) => e.dayNumber === dayNumber);
-        if (!entry) return false;
-        const value = entry.percentComplete;
+        const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
         if (value === null || value === undefined) return false;
         const numValue = Number(value);
 
-        // Apply the same logic as your other numeric filters
+        // Same logic as other numeric filters
         if (typeof filter === 'string') {
           if (filter === '') return true;
           const searchNum = Number(filter);
@@ -350,7 +344,7 @@ function BeneficiaryTable({
 
     return allColumns.map((c) => ({
       ...c,
-      width: c.field && c.field.includes('email') ? '200px' : '140px',
+      width: typeof c.field === 'string' && c.field.includes('email') ? '200px' : '140px',
       tableData: { filterValue: filters[c.title] || '' },
     }));
   }, [additionalColumns, filters, nameDoBFieldPrefix, translate, dynamicColumns]);
