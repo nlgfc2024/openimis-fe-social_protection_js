@@ -141,7 +141,9 @@ function ProjectPage({
         ACTION_TYPE.DELETE_PROJECT,
         ACTION_TYPE.UNDO_DELETE_PROJECT,
       ].includes(mutation?.actionType)) {
-        back();
+        history.push(
+          `/${modulesManager.getRef('socialProtection.route.benefitPlan')}/${benefitPlanId}`,
+        );
       }
 
       if (mutation?.clientMutationId && !projectUuid) {
