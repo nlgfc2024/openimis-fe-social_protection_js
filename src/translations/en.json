@@ -103,6 +103,7 @@
   "socialProtection.beneficiary.task.individual.id": "Individual",
   "socialProtection.beneficiary.task.benefitPlan.id": "Program",
   "socialProtection.calculation.tasks.title": "Payment Verification Tasks",
+  "socialProtection.BenefitPlanPicker.label": "Program",
   "socialProtection.BenefitPlanPicker.placeholder": "Please select a Program",
   "socialProtection.benefitPlan.suspend.confirm.title": "Suspend program {code} {name}",
   "socialProtection.benefitPlan.suspend.confirm.message": "Are you sure you want to suspend the program?",
