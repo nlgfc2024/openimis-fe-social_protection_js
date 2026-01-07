@@ -398,7 +398,7 @@ function BeneficiaryTable({
           doubleHorizontalScroll: true,
           tableLayout: 'fixed',
           emptyRowsWhenPaging: false,
-          ...(tableRef.current?.dataManager?.bulkEditOpen
+          ...(tableRef?.current?.dataManager?.bulkEditOpen
             ? { fixedColumns: { left: isGroup ? 3 : 2, right: 0 } }
             : { fixedColumns: {} }),
           actionsColumnIndex: -1,

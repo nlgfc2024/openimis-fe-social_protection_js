@@ -779,3 +779,82 @@ export function enrollGroupProject(params, clientMutationLabel) {
     },
   );
 }
+
+function formatTimeEntriesGQL(timeEntries) {
+  if (!timeEntries || timeEntries.length === 0) {
+    return '[]';
+  }
+
+  const formatted = timeEntries.map((entry) => {
+    const fields = [];
+    if (entry.id) {
+      fields.push(`id: "${entry.id}"`);
+    }
+    if (entry.beneficiaryId) {
+      fields.push(`beneficiaryId: "${entry.beneficiaryId}"`);
+    }
+    if (entry.groupBeneficiaryId) {
+      fields.push(`groupBeneficiaryId: "${entry.groupBeneficiaryId}"`);
+    }
+    fields.push(`dayNumber: ${entry.dayNumber}`);
+    fields.push(`percentComplete: ${entry.percentComplete}`);
+
+    return `{ ${fields.join(', ')} }`;
+  });
+
+  return `[${formatted.join(', ')}]`;
+}
+
+export function bulkUpdateBeneficiaryTimeEntries(params, clientMutationLabel) {
+  const timeEntriesGQL = formatTimeEntriesGQL(params.timeEntries || []);
+  const gqlParams = `projectId: "${params.projectId}", timeEntries: ${timeEntriesGQL}`;
+
+  const mutation = formatMutation(
+    'bulkUpdateBeneficiaryTimeEntries',
+    gqlParams,
+    clientMutationLabel,
+  );
+
+  const requestedDateTime = new Date();
+
+  return graphql(
+    mutation.payload,
+    [
+      REQUEST(ACTION_TYPE.MUTATION),
+      SUCCESS(ACTION_TYPE.BULK_UPDATE_BENEFICIARY_TIME_ENTRIES),
+      ERROR(ACTION_TYPE.MUTATION),
+    ],
+    {
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime,
+    },
+  );
+}
+
+export function bulkUpdateGroupBeneficiaryTimeEntries(params, clientMutationLabel) {
+  const timeEntriesGQL = formatTimeEntriesGQL(params.timeEntries || []);
+  const gqlParams = `projectId: "${params.projectId}", timeEntries: ${timeEntriesGQL}`;
+
+  const mutation = formatMutation(
+    'bulkUpdateGroupBeneficiaryTimeEntries',
+    gqlParams,
+    clientMutationLabel,
+  );
+
+  const requestedDateTime = new Date();
+
+  return graphql(
+    mutation.payload,
+    [
+      REQUEST(ACTION_TYPE.MUTATION),
+      SUCCESS(ACTION_TYPE.BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES),
+      ERROR(ACTION_TYPE.MUTATION),
+    ],
+    {
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime,
+    },
+  );
+}

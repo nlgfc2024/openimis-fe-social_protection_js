@@ -57,6 +57,8 @@ export const ACTION_TYPE = {
   PROJECT_NAME_SET_VALID: 'PROJECT_NAME_SET_VALID',
   PROJECT_ENROLL: 'PROJECT_ENROLL',
   PROJECT_ENROLL_GROUP: 'PROJECT_ENROLL_GROUP',
+  BULK_UPDATE_BENEFICIARY_TIME_ENTRIES: 'BULK_UPDATE_BENEFICIARY_TIME_ENTRIES',
+  BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES: 'BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES',
 };
 
 function reducer(
@@ -280,7 +282,10 @@ function reducer(
       const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => {
         const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
         (beneficiary.projectTimeEntries || []).forEach((entry) => {
-          projectTimeEntriesDict[`day${entry.dayNumber}`] = entry;
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = {
+            ...entry,
+            id: entry.id ? decodeId(entry.id) : null,
+          };
         });
         return {
           ...beneficiary,
@@ -395,7 +400,10 @@ function reducer(
       const parsedGroupBeneficiaries = parseData(action.payload.data.groupBeneficiary)?.map((groupBeneficiary) => {
         const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
         (groupBeneficiary.projectTimeEntries || []).forEach((entry) => {
-          projectTimeEntriesDict[`day${entry.dayNumber}`] = entry;
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = {
+            ...entry,
+            id: entry.id ? decodeId(entry.id) : null,
+          };
         });
         const response = ({
           ...groupBeneficiary,
@@ -1003,6 +1011,10 @@ function reducer(
       return dispatchMutationResp(state, 'enrollProject', action);
     case SUCCESS(ACTION_TYPE.PROJECT_ENROLL_GROUP):
       return dispatchMutationResp(state, 'enrollGroupProject', action);
+    case SUCCESS(ACTION_TYPE.BULK_UPDATE_BENEFICIARY_TIME_ENTRIES):
+      return dispatchMutationResp(state, 'bulkUpdateBeneficiaryTimeEntries', action);
+    case SUCCESS(ACTION_TYPE.BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES):
+      return dispatchMutationResp(state, 'bulkUpdateGroupBeneficiaryTimeEntries', action);
     case SUCCESS(ACTION_TYPE.RESOLVE_TASK):
       return dispatchMutationResp(state, 'resolveTask', action);
     case REQUEST(ACTION_TYPE.TASK_MUTATION):

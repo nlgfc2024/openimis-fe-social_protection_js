@@ -22,6 +22,10 @@ import {
 } from '../dialogs/ProjectEnrollmentDialog';
 import { REQUEST } from '../util/action-type';
 import { ACTION_TYPE } from '../reducer';
+import {
+  bulkUpdateBeneficiaryTimeEntries,
+  bulkUpdateGroupBeneficiaryTimeEntries,
+} from '../actions';
 
 function BaseProjectBeneficiaryTable({
   project,
@@ -116,15 +120,60 @@ function BaseProjectBeneficiaryTable({
     const isEditing = materialTable.dataManager.bulkEditOpen;
 
     if (isEditing) {
-      // TODO: implement API
-      // const updatedRows = Object.values(materialTable.state.bulkEditChangedRows || {});
-      // if (updatedRows.length > 0) {
-      //   dispatch({
-      //     type: REQUEST(ACTION_TYPE.UPDATE_PROJECT_BENEFICIARIES_PROGRESS),
-      //     payload: updatedRows,
-      //     meta: { projectId: project.id },
-      //   });
-      // }
+      // Save time entries
+      const updatedRows = Object.values(materialTable.dataManager.bulkEditChangedRows || {});
+
+      if (updatedRows.length > 0) {
+        const timeEntries = [];
+
+        updatedRows.forEach(({ newData, oldData }) => {
+          // Compare oldData with newData to find actual changes
+          const newEntries = newData.projectTimeEntriesDict || {};
+          const oldEntries = oldData.projectTimeEntriesDict || {};
+
+          // Get all day keys from both old and new
+          const allDayKeys = new Set([
+            ...Object.keys(newEntries).filter((k) => k.startsWith('day')),
+            ...Object.keys(oldEntries).filter((k) => k.startsWith('day')),
+          ]);
+
+          allDayKeys.forEach((key) => {
+            const dayNumber = parseInt(key.replace('day', ''), 10);
+            const newEntry = newEntries[key];
+            const oldEntry = oldEntries[key];
+
+            const oldPercent = oldEntry?.percentComplete;
+            const newPercent = newEntry?.percentComplete;
+
+            // Normalize new value: empty string, undefined, NaN, null to 0 (0 means no progress/cleared)
+            const normalizedNew = newPercent || 0;
+
+            // Compare raw old value with normalized new value
+            // This handles the case where oldPercent is undefined and we want to set it to 0
+            if (oldPercent !== normalizedNew) {
+              timeEntries.push({
+                id: newEntry?.id || oldEntry?.id || null,
+                [isGroup ? 'groupBeneficiaryId' : 'beneficiaryId']: newData.id,
+                dayNumber,
+                percentComplete: normalizedNew,
+              });
+            }
+          });
+        });
+
+        if (timeEntries.length > 0) {
+          const params = {
+            projectId: project.id,
+            timeEntries,
+          };
+
+          const action = isGroup
+            ? bulkUpdateGroupBeneficiaryTimeEntries(params, 'Update project time entries')
+            : bulkUpdateBeneficiaryTimeEntries(params, 'Update project time entries');
+
+          dispatch(action);
+        }
+      }
     }
 
     const newState = !isEditing;
