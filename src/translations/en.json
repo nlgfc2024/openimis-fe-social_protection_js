@@ -188,6 +188,10 @@
   "socialProtection.project.statusPicker.COMPLETED": "Completed",
   "socialProtection.project.benefitPlan": "Program",
   "project": {
+    "picker": {
+      "label": "Projects",
+      "placeholder": "Select projects..."
+    },
     "activityPicker": {
       "label": "Activity",
       "null": ""
