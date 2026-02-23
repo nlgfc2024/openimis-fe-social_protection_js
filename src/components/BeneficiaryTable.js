@@ -92,8 +92,7 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
 
           filterFn = (filter, rowData) => {
             const value = rowData.jsonExt?.[field];
-            if (value === null || value === undefined) return false;
-            const numValue = Number(value);
+            const numValue = (value === null || value === undefined) ? 0 : Number(value);
 
             // Handle case when filter is a string (global search)
             if (typeof filter === 'string') {
@@ -162,8 +161,7 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
       filterComponent: NumberFilter,
       customFilterAndSearch: (filter, rowData) => {
         const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
-        if (value === null || value === undefined) return false;
-        const numValue = Number(value);
+        const numValue = (value === null || value === undefined) ? 0 : Number(value);
 
         // Same logic as other numeric filters
         if (typeof filter === 'string') {
