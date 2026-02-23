@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { injectIntl } from 'react-intl';
 import MaterialTable from 'material-table';
 import _ from 'lodash';
@@ -212,9 +212,9 @@ function BeneficiaryTable({
   const nameDoBFieldPrefix = isGroup ? 'group.head' : 'individual';
   const locationFieldPrefix = isGroup ? 'group' : 'individual';
 
-  const translate = (key) => formatMessage(intl, MODULE_NAME, key);
+  const translate = useCallback((key) => formatMessage(intl, MODULE_NAME, key), [intl]);
 
-  const [filters, setFilters] = React.useState({});
+  const initialFiltersRef = useRef(appliedFilters || {});
   const [jsonExtFilters, setJsonExtFilters] = React.useState({});
 
   const dispatch = useDispatch();
@@ -225,7 +225,7 @@ function BeneficiaryTable({
 
   useEffect(() => {
     if (appliedFilters) {
-      setFilters(appliedFilters);
+      initialFiltersRef.current = appliedFilters;
     }
   }, [appliedFilters]);
 
@@ -301,18 +301,17 @@ function BeneficiaryTable({
     },
   });
 
-  const additionalColumns = isGroup ? [
-    {
-      title: translate('socialProtection.groupBeneficiary.code'),
-      field: 'group.code',
-      editable: 'never',
-    },
-  ] : [];
-
   const columns = useMemo(() => {
+    const additionalColumns = isGroup ? [
+      {
+        title: translate('socialProtection.groupBeneficiary.code'),
+        field: 'group.code',
+        editable: 'never',
+      },
+    ] : [];
     const workDayColumns = getWorkDayColumns(translate, workingDays);
     const allColumns = [
-      ...additionalColumns || [],
+      ...additionalColumns,
       {
         title: translate('socialProtection.beneficiary.firstName'),
         field: `${nameDoBFieldPrefix}.firstName`,
@@ -345,9 +344,9 @@ function BeneficiaryTable({
     return allColumns.map((c) => ({
       ...c,
       width: typeof c.field === 'string' && c.field.includes('email') ? '200px' : '140px',
-      tableData: { filterValue: filters[c.title] || '' },
+      tableData: { filterValue: initialFiltersRef.current[c.title] || '' },
     }));
-  }, [additionalColumns, filters, nameDoBFieldPrefix, translate, dynamicColumns]);
+  }, [isGroup, nameDoBFieldPrefix, locationFieldPrefix, translate, dynamicColumns, workingDays]);
 
   const isSelectable = !!onSelectionChange;
 
@@ -412,17 +411,6 @@ function BeneficiaryTable({
               filterPlaceHolder: translate('projectBeneficiaries.filterPlaceholder'),
             },
           },
-        }}
-        onFilterChange={(appliedFilters) => {
-          // This is only triggered for local data
-          const updatedFilters = {};
-          appliedFilters.forEach((filter) => {
-            if (filter?.value !== undefined) {
-              // keyed by column title because not all columns have field
-              updatedFilters[filter.column.title] = filter.value;
-            }
-          });
-          setFilters(updatedFilters);
         }}
         onSelectionChange={(rows) => (isSelectable && onSelectionChange(rows))}
         actions={actions}
