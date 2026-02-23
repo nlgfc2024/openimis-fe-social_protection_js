@@ -6,6 +6,8 @@ import {
   Select,
   MenuItem,
   Paper,
+  TextField,
+  InputAdornment,
 } from '@material-ui/core';
 import {
   withTheme,
@@ -150,6 +152,27 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
     });
 };
 
+function PercentageEditField({ value, onChange }) {
+  const numValue = value === undefined || value === null || value === '' ? '' : Number(value);
+  const isInvalid = numValue !== '' && (numValue < 0 || numValue > 100);
+
+  return (
+    <TextField
+      type="number"
+      value={numValue}
+      onChange={(e) => onChange(e.target.value)}
+      inputProps={{ min: 0, max: 100 }}
+      error={isInvalid}
+      helperText={isInvalid ? '0-100' : ''}
+      InputProps={{
+        endAdornment: <InputAdornment position="end">%</InputAdornment>,
+      }}
+      style={{ width: '80px' }}
+      size="small"
+    />
+  );
+}
+
 const getWorkDayColumns = (translateFn, workingDays = 0) => {
   if (!workingDays) return [];
   return Array.from({ length: workingDays }, (_, i) => {
@@ -158,7 +181,14 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
       title: `${translateFn('project.day')} ${dayNumber}`,
       field: `projectTimeEntriesDict.day${dayNumber}.percentComplete`,
       type: 'numeric',
+      render: (rowData) => {
+        const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
+        return value !== undefined && value !== null ? `${value}%` : '';
+      },
       filterComponent: NumberFilter,
+      editComponent: (props) => (
+        <PercentageEditField value={props.value} onChange={props.onChange} />
+      ),
       customFilterAndSearch: (filter, rowData) => {
         const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
         const numValue = (value === null || value === undefined) ? 0 : Number(value);
