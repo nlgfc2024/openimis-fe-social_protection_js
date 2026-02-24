@@ -328,6 +328,7 @@ function BeneficiaryTable({
         title: translate('socialProtection.groupBeneficiary.code'),
         field: 'group.code',
         editable: 'never',
+        defaultSort: 'asc',
       },
     ] : [];
     const workDayColumns = getWorkDayColumns(translate, workingDays);
@@ -342,6 +343,7 @@ function BeneficiaryTable({
         title: translate('socialProtection.beneficiary.lastName'),
         field: `${nameDoBFieldPrefix}.lastName`,
         editable: 'never',
+        ...(!isGroup && { defaultSort: 'asc' }),
       },
       {
         title: translate('socialProtection.beneficiary.dob'),
