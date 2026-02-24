@@ -33,6 +33,35 @@ import {
 import NumberFilter from './MaterialTableNumberFilter';
 
 const DEFAULT_CELL_PADDING = '0 0 0 10px';
+
+const createNumericFilterFn = (getValue) => (filter, rowData) => {
+  const value = getValue(rowData);
+  const numValue = (value === null || value === undefined) ? 0 : Number(value);
+
+  // Handle case when filter is a string (global search)
+  if (typeof filter === 'string') {
+    if (filter === '') return true;
+    const searchNum = Number(filter);
+    if (Number.isNaN(searchNum)) return false;
+    return numValue === searchNum;
+  }
+
+  // Handle case when filter is an object (column filter)
+  const filterValue = Number(filter?.value);
+  if (Number.isNaN(numValue)) return false;
+  if (filter?.value === undefined || filter?.value === '') return true;
+  if (Number.isNaN(filterValue)) return false;
+
+  switch (filter?.operator) {
+    case 'exact': return numValue === filterValue;
+    case 'lt': return numValue < filterValue;
+    case 'lte': return numValue <= filterValue;
+    case 'gt': return numValue > filterValue;
+    case 'gte': return numValue >= filterValue;
+    default: return numValue === filterValue;
+  }
+};
+
 const styles = (theme) => ({
   page: theme.page,
   paper: theme.paper.classes,
@@ -93,34 +122,7 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
         case 'integer':
         case 'numeric':
           filterComponent = NumberFilter;
-
-          filterFn = (filter, rowData) => {
-            const value = rowData.jsonExt?.[field];
-            const numValue = (value === null || value === undefined) ? 0 : Number(value);
-
-            // Handle case when filter is a string (global search)
-            if (typeof filter === 'string') {
-              if (filter === '') return true; // Empty search matches all
-              const searchNum = Number(filter);
-              if (Number.isNaN(searchNum)) return false;
-              return numValue === searchNum; // Exact match for global search
-            }
-
-            // Handle case when filter is an object (column filter)
-            const filterValue = Number(filter?.value);
-            if (Number.isNaN(numValue)) return false;
-            if (filter?.value === undefined || filter?.value === '') return true;
-            if (Number.isNaN(filterValue)) return false;
-
-            switch (filter?.operator) {
-              case 'exact': return numValue === filterValue;
-              case 'lt': return numValue < filterValue;
-              case 'lte': return numValue <= filterValue;
-              case 'gt': return numValue > filterValue;
-              case 'gte': return numValue >= filterValue;
-              default: return numValue === filterValue;
-            }
-          };
+          filterFn = createNumericFilterFn((rowData) => rowData.jsonExt?.[field]);
           break;
 
         case 'date':
@@ -198,32 +200,9 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
       },
       filterComponent: NumberFilter,
       editComponent: PercentageEditField,
-      customFilterAndSearch: (filter, rowData) => {
-        const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
-        const numValue = (value === null || value === undefined) ? 0 : Number(value);
-
-        // Same logic as other numeric filters
-        if (typeof filter === 'string') {
-          if (filter === '') return true;
-          const searchNum = Number(filter);
-          if (Number.isNaN(searchNum)) return false;
-          return numValue === searchNum;
-        }
-
-        const filterValue = Number(filter?.value);
-        if (Number.isNaN(numValue)) return false;
-        if (filter?.value === undefined || filter?.value === '') return true;
-        if (Number.isNaN(filterValue)) return false;
-
-        switch (filter?.operator) {
-          case 'exact': return numValue === filterValue;
-          case 'lt': return numValue < filterValue;
-          case 'lte': return numValue <= filterValue;
-          case 'gt': return numValue > filterValue;
-          case 'gte': return numValue >= filterValue;
-          default: return numValue === filterValue;
-        }
-      },
+      customFilterAndSearch: createNumericFilterFn(
+        (rowData) => rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete,
+      ),
       align: 'center',
       width: '100px',
     };
