@@ -4,8 +4,10 @@ import {
   formatMessage,
   formatMessageWithValues,
   useModulesManager,
+  coreAlert,
 } from '@openimis/fe-core';
 import { connect, useDispatch } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import {
   Button,
   Typography,
@@ -36,6 +38,7 @@ function BaseProjectBeneficiaryTable({
   fetchingBeneficiaries,
   beneficiaries,
   beneficiariesTotalCount,
+  coreAlert: showAlert,
 }) {
   const orderBy = isGroup ? 'orderBy: ["group__code"]' : 'orderBy: ["individual__last_name", "individual__first_name"]';
   const actionType = isGroup
@@ -145,8 +148,10 @@ function BaseProjectBeneficiaryTable({
             const oldPercent = oldEntry?.percentComplete;
             const newPercent = newEntry?.percentComplete;
 
-            // Normalize new value: empty string, undefined, NaN, null to 0 (0 means no progress/cleared)
-            const normalizedNew = newPercent || 0;
+            // Normalize: empty string, undefined, NaN, null to 0
+            const normalizedNew = newPercent === '' || newPercent === undefined || newPercent === null
+              ? 0
+              : Number(newPercent);
 
             // Compare raw old value with normalized new value
             // This handles the case where oldPercent is undefined and we want to set it to 0
@@ -160,6 +165,18 @@ function BaseProjectBeneficiaryTable({
             }
           });
         });
+
+        const invalidEntries = timeEntries.filter(
+          (entry) => entry.percentComplete < 0 || entry.percentComplete > 100,
+        );
+
+        if (invalidEntries.length > 0) {
+          showAlert(
+            formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.title'),
+            formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.message'),
+          );
+          return;
+        }
 
         if (timeEntries.length > 0) {
           const params = {
@@ -273,8 +290,11 @@ const mapStateToPropsIndividual = (state) => ({
   beneficiariesTotalCount: state.socialProtection.projectBeneficiariesTotalCount,
 });
 
+const mapDispatchToProps = (dispatch) => bindActionCreators({ coreAlert }, dispatch);
+
 const ConnectedProjectBeneficiaryTable = connect(
   mapStateToPropsIndividual,
+  mapDispatchToProps,
 )(BaseProjectBeneficiaryTable);
 
 export const ProjectBeneficiaryTable = injectIntl((props) => (
@@ -294,6 +314,7 @@ const mapStateToPropsGroup = (state) => ({
 
 const ConnectedProjectGroupBeneficiaryTable = connect(
   mapStateToPropsGroup,
+  mapDispatchToProps,
 )(BaseProjectBeneficiaryTable);
 
 export const ProjectGroupBeneficiaryTable = injectIntl((props) => (
