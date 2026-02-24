@@ -203,6 +203,11 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
       customFilterAndSearch: createNumericFilterFn(
         (rowData) => rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete,
       ),
+      customSort: (a, b) => {
+        const aVal = a.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete ?? 0;
+        const bVal = b.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete ?? 0;
+        return aVal - bVal;
+      },
       align: 'center',
       width: '100px',
     };
