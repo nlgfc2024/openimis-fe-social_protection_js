@@ -353,16 +353,30 @@ function BeneficiaryTable({
         editable: 'never',
         ...(isGroup && { orderField: 'head_dob' }),
       },
-      ...Array.from({ length: LOC_LEVELS }, (_, i) => ({
-        title: translate(`location.locationType.${i}`),
-        type: 'location',
-        level: i,
-        render: (rowData) => locationFormatter(rowData?.[locationFieldPrefix]?.location)[i] || '',
-        customFilterAndSearch: (term, rowData) => {
-          const locName = locationFormatter(rowData?.[locationFieldPrefix]?.location)[i].toLowerCase() || '';
-          return locName.includes(term.toLowerCase());
-        },
-      })),
+      ...Array.from({ length: LOC_LEVELS }, (_, i) => {
+        // Build the orderField path for remote sorting: level 3 (village) = location__name,
+        // level 2 (ward) = location__parent__name, etc.
+        const parentChain = Array(LOC_LEVELS - 1 - i).fill('parent').join('__');
+        const locationPath = parentChain ? `location__${parentChain}__name` : 'location__name';
+        const orderField = `${locationFieldPrefix}__${locationPath}`;
+
+        return {
+          title: translate(`location.locationType.${i}`),
+          type: 'location',
+          level: i,
+          orderField,
+          render: (rowData) => locationFormatter(rowData?.[locationFieldPrefix]?.location)[i] || '',
+          customSort: (a, b) => {
+            const aLoc = locationFormatter(a?.[locationFieldPrefix]?.location)[i] || '';
+            const bLoc = locationFormatter(b?.[locationFieldPrefix]?.location)[i] || '';
+            return aLoc.localeCompare(bLoc);
+          },
+          customFilterAndSearch: (term, rowData) => {
+            const locName = locationFormatter(rowData?.[locationFieldPrefix]?.location)[i].toLowerCase() || '';
+            return locName.includes(term.toLowerCase());
+          },
+        };
+      }),
       ...dynamicColumns,
       ...workDayColumns,
     ];
