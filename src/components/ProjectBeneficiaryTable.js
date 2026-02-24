@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, {
+  useState, useEffect, useRef, useMemo,
+} from 'react';
 import { injectIntl } from 'react-intl';
 import {
   formatMessage,

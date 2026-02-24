@@ -47,7 +47,7 @@ const UPLOAD_HISTORY_FULL_PROJECTION = () => [
 const BENEFICIARY_PROJECTION = (modulesManager) => [
   'id',
   'benefitPlan {id}',
-  'individual {firstName, lastName, dob, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
+  `individual {firstName, lastName, dob, location${modulesManager.getProjection('location.Location.FlatProjection')}}`,
   'status',
   'isEligible',
   'jsonExt',
@@ -59,14 +59,17 @@ const PROJECT_BENEFICIARY_PROJECTION = (modulesManager) => [
   'projectTimeEntries { id, dayNumber, percentComplete }',
 ];
 
-const GROUP_BENEFICIARY_PROJECTION = (modulesManager) => [
-  'id',
-  'benefitPlan {id}',
-  'group {id, code, head {uuid, firstName, lastName, dob}, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
-  'status',
-  'isEligible',
-  'jsonExt',
-];
+const GROUP_BENEFICIARY_PROJECTION = (modulesManager) => {
+  const locationProjection = modulesManager.getProjection('location.Location.FlatProjection');
+  return [
+    'id',
+    'benefitPlan {id}',
+    `group {id, code, head {uuid, firstName, lastName, dob}, location${locationProjection}}`,
+    'status',
+    'isEligible',
+    'jsonExt',
+  ];
+};
 
 const PROJECT_GROUP_BENEFICIARY_PROJECTION = (modulesManager) => [
   ...GROUP_BENEFICIARY_PROJECTION(modulesManager),
@@ -87,7 +90,7 @@ const PROJECT_FULL_PROJECTION = (modulesManager) => [
   'targetBeneficiaries',
   'workingDays',
   'activity {id, name}',
-  'location' + modulesManager.getProjection('location.Location.FlatProjection'),
+  `location${modulesManager.getProjection('location.Location.FlatProjection')}`,
   'allowsMultipleEnrollments',
   'isDeleted',
   'userUpdated {username}',

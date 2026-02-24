@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Tooltip } from '@material-ui/core';
+import { TextField } from '@material-ui/core';
 import {
   Autocomplete,
   useGraphqlQuery,
@@ -113,15 +113,13 @@ function ProjectPicker({
         isDeleted: false,
       })}
       renderInput={(inputProps) => (
-        <Tooltip title="">
-          <TextField
-            /* eslint-disable-next-line react/jsx-props-no-spreading */
-            {...inputProps}
-            required={required}
-            label={(withLabel && label) || formatMessage('project.picker.label')}
-            placeholder={placeholderStr}
-          />
-        </Tooltip>
+        <TextField
+          /* eslint-disable-next-line react/jsx-props-no-spreading */
+          {...inputProps}
+          required={required}
+          label={(withLabel && label) || formatMessage('project.picker.label')}
+          placeholder={placeholderStr}
+        />
       )}
     />
   );

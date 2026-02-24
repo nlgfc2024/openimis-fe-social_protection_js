@@ -1,4 +1,6 @@
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, {
+  useMemo, useEffect, useRef, useCallback,
+} from 'react';
 import { injectIntl } from 'react-intl';
 import MaterialTable from 'material-table';
 import _ from 'lodash';
@@ -36,7 +38,7 @@ const styles = (theme) => ({
   paper: theme.paper.classes,
   containerWrapper: {
     padding: '0 20px',
-    // Patch style of a nested matertial-table element
+    // Patch style of a nested material-table element
     // so frozen columns work correctly
     '& > div:nth-child(2) > div:nth-child(2)': {
       position: 'relative',
@@ -161,15 +163,24 @@ function PercentageEditField({ value, onChange }) {
       type="number"
       value={numValue}
       onChange={(e) => onChange(e.target.value)}
-      inputProps={{ min: 0, max: 100 }}
       error={isInvalid}
       helperText={isInvalid ? '0-100' : ''}
       InputProps={{
+        min: 0,
+        max: 100,
         endAdornment: <InputAdornment position="end">%</InputAdornment>,
       }}
       style={{ width: '80px' }}
       size="small"
     />
+  );
+}
+
+function TableContainer({ children, className }) {
+  return (
+    <Paper elevation={2} className={className}>
+      {children}
+    </Paper>
   );
 }
 
@@ -186,9 +197,7 @@ const getWorkDayColumns = (translateFn, workingDays = 0) => {
         return value !== undefined && value !== null ? `${value}%` : '';
       },
       filterComponent: NumberFilter,
-      editComponent: (props) => (
-        <PercentageEditField value={props.value} onChange={props.onChange} />
-      ),
+      editComponent: PercentageEditField,
       customFilterAndSearch: (filter, rowData) => {
         const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
         const numValue = (value === null || value === undefined) ? 0 : Number(value);
@@ -380,16 +389,20 @@ function BeneficiaryTable({
 
   const cellPadding = isSelectable ? '0' : DEFAULT_CELL_PADDING;
 
+  const ContainerComponent = useCallback(
+    (props) => <TableContainer className={classes.containerWrapper}>{props.children}</TableContainer>,
+    [classes.containerWrapper],
+  );
+
+  const tableComponents = useMemo(
+    () => ({ Container: ContainerComponent }),
+    [ContainerComponent],
+  );
+
   return (
     <ThemeProvider theme={tableTheme}>
       <MaterialTable
-        components={{
-          Container: (props) => (
-            <Paper elevation={2} className={classes.containerWrapper}>
-              {props.children}
-            </Paper>
-          ),
-        }}
+        components={tableComponents}
         title={tableTitle}
         columns={columns}
         data={onQueryChange || allRows}
