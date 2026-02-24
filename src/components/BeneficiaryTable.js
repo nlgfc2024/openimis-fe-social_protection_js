@@ -156,7 +156,7 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
     });
 };
 
-function PercentageEditField({ value, onChange }) {
+function PercentageEditField({ value, onChange, columnDef }) {
   const numValue = value === undefined || value === null || value === '' ? '' : Number(value);
   const isInvalid = numValue !== '' && (numValue < 0 || numValue > 100);
 
@@ -167,12 +167,12 @@ function PercentageEditField({ value, onChange }) {
       onChange={(e) => onChange(e.target.value)}
       error={isInvalid}
       helperText={isInvalid ? '0-100' : ''}
+      placeholder={columnDef?.title}
       InputProps={{
         min: 0,
         max: 100,
         endAdornment: <InputAdornment position="end">%</InputAdornment>,
       }}
-      style={{ width: '80px' }}
       size="small"
     />
   );
