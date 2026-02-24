@@ -338,17 +338,20 @@ function BeneficiaryTable({
         title: translate('socialProtection.beneficiary.firstName'),
         field: `${nameDoBFieldPrefix}.firstName`,
         editable: 'never',
+        ...(isGroup && { orderField: 'head_first_name' }),
       },
       {
         title: translate('socialProtection.beneficiary.lastName'),
         field: `${nameDoBFieldPrefix}.lastName`,
         editable: 'never',
         ...(!isGroup && { defaultSort: 'asc' }),
+        ...(isGroup && { orderField: 'head_last_name' }),
       },
       {
         title: translate('socialProtection.beneficiary.dob'),
         field: `${nameDoBFieldPrefix}.dob`,
         editable: 'never',
+        ...(isGroup && { orderField: 'head_dob' }),
       },
       ...Array.from({ length: LOC_LEVELS }, (_, i) => ({
         title: translate(`location.locationType.${i}`),

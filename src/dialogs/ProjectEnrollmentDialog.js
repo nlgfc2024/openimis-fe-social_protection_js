@@ -192,7 +192,8 @@ function ProjectEnrollmentDialog({
 
     if (orderBy) {
       const prefix = orderDirection === 'desc' ? '-' : '';
-      gqlFilters.push(`orderBy: ["${prefix}${convertFieldName(orderBy.field)}"]`);
+      const fieldName = orderBy.orderField || convertFieldName(orderBy.field);
+      gqlFilters.push(`orderBy: ["${prefix}${fieldName}"]`);
     }
 
     const response = await fetchBeneficiaries(modulesManager, gqlFilters);
