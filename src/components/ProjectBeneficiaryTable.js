@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useRef, useMemo,
+  useState, useEffect, useRef, useMemo, useCallback,
 } from 'react';
 import { injectIntl } from 'react-intl';
 import {
@@ -56,8 +56,40 @@ function BaseProjectBeneficiaryTable({
   );
   const materialTableRef = useRef();
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState({});
 
   const dispatch = useDispatch();
+
+  const handleTimeEntryChange = useCallback((enrollmentId, dayKey, value, originalEntry, rowData) => {
+    setPendingChanges((prev) => {
+      const existing = prev[enrollmentId];
+      const oldData = existing?.oldData || rowData;
+      const currentNewData = existing?.newData || rowData;
+
+      const newData = {
+        ...currentNewData,
+        projectTimeEntriesDict: {
+          ...currentNewData.projectTimeEntriesDict,
+          [dayKey]: {
+            ...currentNewData.projectTimeEntriesDict?.[dayKey],
+            id: originalEntry?.id,
+            percentComplete: value,
+          },
+        },
+      };
+
+      return {
+        ...prev,
+        [enrollmentId]: { oldData, newData },
+      };
+    });
+  }, []);
+
+  const mergedBeneficiaries = useMemo(() => beneficiaries.map((row) => {
+    const changes = pendingChanges[row.enrollmentId];
+    if (!changes?.newData) return row;
+    return changes.newData;
+  }), [beneficiaries, pendingChanges]);
   // Trigger fetch: batch & concat handled in projectBeneficiariesMiddleware & reducers
   useEffect(() => {
     if (project?.benefitPlan?.id) {
@@ -125,80 +157,74 @@ function BaseProjectBeneficiaryTable({
     const isEditing = materialTable.dataManager.bulkEditOpen;
 
     if (isEditing) {
-      // Save time entries
-      const updatedRows = Object.values(materialTable.dataManager.bulkEditChangedRows || {});
+      const bulkEditRows = Object.values(materialTable.dataManager.bulkEditChangedRows || {});
+      const processedIds = new Set(bulkEditRows.map(({ newData }) => newData.enrollmentId));
 
-      if (updatedRows.length > 0) {
-        const timeEntries = [];
+      // Merge MaterialTable's tracked changes from bulkEditRows
+      // with pendingChanges tracking rows edited the filtered out
+      const pendingRows = Object.values(pendingChanges)
+        .filter(({ newData }) => !processedIds.has(newData.enrollmentId));
+      const allChangedRows = [...bulkEditRows, ...pendingRows];
 
-        updatedRows.forEach(({ newData, oldData }) => {
-          // Compare oldData with newData to find actual changes
-          const newEntries = newData.projectTimeEntriesDict || {};
-          const oldEntries = oldData.projectTimeEntriesDict || {};
+      const timeEntries = [];
+      allChangedRows.forEach(({ newData, oldData }) => {
+        const newEntries = newData.projectTimeEntriesDict || {};
+        const oldEntries = oldData.projectTimeEntriesDict || {};
 
-          // Get all day keys from both old and new
-          const allDayKeys = new Set([
-            ...Object.keys(newEntries).filter((k) => k.startsWith('day')),
-            ...Object.keys(oldEntries).filter((k) => k.startsWith('day')),
-          ]);
+        const allDayKeys = new Set([
+          ...Object.keys(newEntries).filter((k) => k.startsWith('day')),
+          ...Object.keys(oldEntries).filter((k) => k.startsWith('day')),
+        ]);
 
-          allDayKeys.forEach((key) => {
-            const dayNumber = parseInt(key.replace('day', ''), 10);
-            const newEntry = newEntries[key];
-            const oldEntry = oldEntries[key];
+        allDayKeys.forEach((dayKey) => {
+          const newEntry = newEntries[dayKey];
+          const oldEntry = oldEntries[dayKey];
+          const oldPercent = oldEntry?.percentComplete;
+          const newPercent = newEntry?.percentComplete;
 
-            const oldPercent = oldEntry?.percentComplete;
-            const newPercent = newEntry?.percentComplete;
+          const normalizedNew = newPercent === '' || newPercent === undefined || newPercent === null
+            ? 0
+            : Number(newPercent);
 
-            // Normalize: empty string, undefined, NaN, null to 0
-            const normalizedNew = newPercent === '' || newPercent === undefined || newPercent === null
-              ? 0
-              : Number(newPercent);
-
-            // Compare raw old value with normalized new value
-            // This handles the case where oldPercent is undefined and we want to set it to 0
-            if (oldPercent !== normalizedNew) {
-              timeEntries.push({
-                id: newEntry?.id || oldEntry?.id || null,
-                enrollmentId: newData.enrollmentId,
-                dayNumber,
-                percentComplete: normalizedNew,
-              });
-            }
-          });
+          if (oldPercent !== normalizedNew) {
+            timeEntries.push({
+              id: newEntry?.id || oldEntry?.id || null,
+              enrollmentId: newData.enrollmentId,
+              dayNumber: parseInt(dayKey.replace('day', ''), 10),
+              percentComplete: normalizedNew,
+            });
+          }
         });
+      });
 
-        const invalidEntries = timeEntries.filter(
-          (entry) => entry.percentComplete < 0 || entry.percentComplete > 100,
+      const hasInvalidEntries = timeEntries.some(
+        (e) => e.percentComplete < 0 || e.percentComplete > 100,
+      );
+
+      if (hasInvalidEntries) {
+        showAlert(
+          formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.title'),
+          formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.message'),
+        );
+        return;
+      }
+
+      if (timeEntries.length > 0) {
+        const mutationLabel = formatMessageWithValues(
+          intl,
+          MODULE_NAME,
+          'projectBeneficiaries.timeEntry.mutationLabel',
+          { n: timeEntries.length, name: project.name },
         );
 
-        if (invalidEntries.length > 0) {
-          showAlert(
-            formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.title'),
-            formatMessage(intl, MODULE_NAME, 'projectBeneficiaries.timeEntry.validation.message'),
-          );
-          return;
-        }
+        const action = isGroup
+          ? bulkUpdateGroupBeneficiaryTimeEntries({ timeEntries }, mutationLabel)
+          : bulkUpdateBeneficiaryTimeEntries({ timeEntries }, mutationLabel);
 
-        if (timeEntries.length > 0) {
-          const params = {
-            timeEntries,
-          };
-
-          const mutationLabel = formatMessageWithValues(
-            intl,
-            MODULE_NAME,
-            'projectBeneficiaries.timeEntry.mutationLabel',
-            { n: timeEntries.length, name: project.name },
-          );
-
-          const action = isGroup
-            ? bulkUpdateGroupBeneficiaryTimeEntries(params, mutationLabel)
-            : bulkUpdateBeneficiaryTimeEntries(params, mutationLabel);
-
-          dispatch(action);
-        }
+        dispatch(action);
       }
+
+      setPendingChanges({});
     }
 
     const newState = !isEditing;
@@ -209,7 +235,6 @@ function BaseProjectBeneficiaryTable({
     setBulkEditOpen(newState);
 
     if (newState) {
-      // Allow the DOM to re-render the editable cells first
       setTimeout(() => {
         scrollToFirstWorkingDayColumn();
       }, 300);
@@ -233,6 +258,7 @@ function BaseProjectBeneficiaryTable({
       ...materialTable.dataManager.getRenderState(),
     });
     setBulkEditOpen(false);
+    setPendingChanges({});
   };
 
   function getTableActions() {
@@ -269,13 +295,14 @@ function BaseProjectBeneficiaryTable({
     !!project?.id && (
       <>
         <BeneficiaryTable
-          allRows={beneficiaries}
+          allRows={mergedBeneficiaries}
           fetchingBeneficiaries={fetchingBeneficiaries}
           tableTitle={tableTitle}
           isGroup={isGroup}
           actions={actions}
           workingDays={project.workingDays}
           tableRef={materialTableRef}
+          onTimeEntryChange={handleTimeEntryChange}
         />
         <EnrollmentDialogComponent
           open={enrollmentDialogOpen}

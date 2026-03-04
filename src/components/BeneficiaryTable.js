@@ -156,15 +156,28 @@ const getDynamicColumns = (translateFn, customFilters = []) => {
     });
 };
 
-function PercentageEditField({ value, onChange, columnDef }) {
+function PercentageEditField({
+  value, onChange, columnDef, rowData, onTimeEntryChange, dayKey,
+}) {
   const numValue = value === undefined || value === null || value === '' ? '' : Number(value);
   const isInvalid = numValue !== '' && (numValue < 0 || numValue > 100);
+
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    onChange(newValue);
+
+    const effectiveDayKey = dayKey || columnDef?.dayKey;
+    if (onTimeEntryChange && rowData?.enrollmentId && effectiveDayKey) {
+      const originalEntry = rowData.projectTimeEntriesDict?.[effectiveDayKey];
+      onTimeEntryChange(rowData.enrollmentId, effectiveDayKey, newValue, originalEntry, rowData);
+    }
+  };
 
   return (
     <TextField
       type="number"
       value={numValue}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={handleChange}
       error={isInvalid}
       helperText={isInvalid ? '0-100' : ''}
       placeholder={columnDef?.title}
@@ -186,26 +199,30 @@ function TableContainer({ children, className }) {
   );
 }
 
-const getWorkDayColumns = (translateFn, workingDays = 0) => {
+const getWorkDayColumns = (translateFn, workingDays = 0, onTimeEntryChange) => {
   if (!workingDays) return [];
   return Array.from({ length: workingDays }, (_, i) => {
     const dayNumber = i + 1;
+    const dayKey = `day${dayNumber}`;
     return {
       title: `${translateFn('project.day')} ${dayNumber}`,
-      field: `projectTimeEntriesDict.day${dayNumber}.percentComplete`,
+      field: `projectTimeEntriesDict.${dayKey}.percentComplete`,
+      dayKey,
       type: 'numeric',
       render: (rowData) => {
-        const value = rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete;
+        const value = rowData.projectTimeEntriesDict?.[dayKey]?.percentComplete;
         return value !== undefined && value !== null ? `${value}%` : '';
       },
       filterComponent: NumberFilter,
-      editComponent: PercentageEditField,
+      editComponent: (props) => (
+        <PercentageEditField {...props} onTimeEntryChange={onTimeEntryChange} dayKey={dayKey} />
+      ),
       customFilterAndSearch: createNumericFilterFn(
-        (rowData) => rowData.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete,
+        (rowData) => rowData.projectTimeEntriesDict?.[dayKey]?.percentComplete,
       ),
       customSort: (a, b) => {
-        const aVal = a.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete ?? 0;
-        const bVal = b.projectTimeEntriesDict?.[`day${dayNumber}`]?.percentComplete ?? 0;
+        const aVal = a.projectTimeEntriesDict?.[dayKey]?.percentComplete ?? 0;
+        const bVal = b.projectTimeEntriesDict?.[dayKey]?.percentComplete ?? 0;
         return aVal - bVal;
       },
       align: 'center',
@@ -229,6 +246,7 @@ function BeneficiaryTable({
   workingDays,
   tableRef,
   classes,
+  onTimeEntryChange,
 }) {
   const nameDoBFieldPrefix = isGroup ? 'group.head' : 'individual';
   const locationFieldPrefix = isGroup ? 'group' : 'individual';
@@ -331,7 +349,7 @@ function BeneficiaryTable({
         defaultSort: 'asc',
       },
     ] : [];
-    const workDayColumns = getWorkDayColumns(translate, workingDays);
+    const workDayColumns = getWorkDayColumns(translate, workingDays, onTimeEntryChange);
     const allColumns = [
       ...additionalColumns,
       {
@@ -386,7 +404,7 @@ function BeneficiaryTable({
       width: typeof c.field === 'string' && c.field.includes('email') ? '200px' : '140px',
       tableData: { filterValue: initialFiltersRef.current[c.title] || '' },
     }));
-  }, [isGroup, nameDoBFieldPrefix, locationFieldPrefix, translate, dynamicColumns, workingDays]);
+  }, [isGroup, nameDoBFieldPrefix, locationFieldPrefix, translate, dynamicColumns, workingDays, onTimeEntryChange]);
 
   const isSelectable = !!onSelectionChange;
 
