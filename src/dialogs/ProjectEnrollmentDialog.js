@@ -106,7 +106,7 @@ function ProjectEnrollmentDialog({
       'isDeleted: false',
       'status: ACTIVE',
       `villageOrChildOf: ${decodeId(project.location.id)}`,
-      `projectAllowsMultipleEnrollments: "${project.id}"`,
+      `eligibleForProject: "${project.id}"`,
       `first: ${newPageSize}`,
       `offset: ${offset}`,
     ];

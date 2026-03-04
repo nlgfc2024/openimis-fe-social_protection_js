@@ -246,7 +246,8 @@
       "validation": {
         "title": "Invalid Time Entry",
         "message": "Percentage values must be between 0 and 100. Please correct the highlighted fields before saving."
-      }
+      },
+      "mutationLabel": "Saved {n} time entries for project {name}"
     }
   },
   "common": {

@@ -55,8 +55,7 @@ const BENEFICIARY_PROJECTION = (modulesManager) => [
 
 const PROJECT_BENEFICIARY_PROJECTION = (modulesManager) => [
   ...BENEFICIARY_PROJECTION(modulesManager),
-  'project {id}',
-  'projectTimeEntries { id, dayNumber, percentComplete }',
+  'projectEnrollments { id, project {id}, timeEntries { id, dayNumber, percentComplete } }',
 ];
 
 const GROUP_BENEFICIARY_PROJECTION = (modulesManager) => {
@@ -73,8 +72,7 @@ const GROUP_BENEFICIARY_PROJECTION = (modulesManager) => {
 
 const PROJECT_GROUP_BENEFICIARY_PROJECTION = (modulesManager) => [
   ...GROUP_BENEFICIARY_PROJECTION(modulesManager),
-  'project {id}',
-  'projectTimeEntries { id, dayNumber, percentComplete }',
+  'projectEnrollments { id, project {id}, timeEntries { id, dayNumber, percentComplete } }',
 ];
 
 const WORKFLOWS_FULL_PROJECTION = () => [
@@ -793,12 +791,7 @@ function formatTimeEntriesGQL(timeEntries) {
     if (entry.id) {
       fields.push(`id: "${entry.id}"`);
     }
-    if (entry.beneficiaryId) {
-      fields.push(`beneficiaryId: "${entry.beneficiaryId}"`);
-    }
-    if (entry.groupBeneficiaryId) {
-      fields.push(`groupBeneficiaryId: "${entry.groupBeneficiaryId}"`);
-    }
+    fields.push(`enrollmentId: "${entry.enrollmentId}"`);
     fields.push(`dayNumber: ${entry.dayNumber}`);
     fields.push(`percentComplete: ${entry.percentComplete}`);
 
@@ -810,7 +803,7 @@ function formatTimeEntriesGQL(timeEntries) {
 
 export function bulkUpdateBeneficiaryTimeEntries(params, clientMutationLabel) {
   const timeEntriesGQL = formatTimeEntriesGQL(params.timeEntries || []);
-  const gqlParams = `projectId: "${params.projectId}", timeEntries: ${timeEntriesGQL}`;
+  const gqlParams = `timeEntries: ${timeEntriesGQL}`;
 
   const mutation = formatMutation(
     'bulkUpdateBeneficiaryTimeEntries',
@@ -837,7 +830,7 @@ export function bulkUpdateBeneficiaryTimeEntries(params, clientMutationLabel) {
 
 export function bulkUpdateGroupBeneficiaryTimeEntries(params, clientMutationLabel) {
   const timeEntriesGQL = formatTimeEntriesGQL(params.timeEntries || []);
-  const gqlParams = `projectId: "${params.projectId}", timeEntries: ${timeEntriesGQL}`;
+  const gqlParams = `timeEntries: ${timeEntriesGQL}`;
 
   const mutation = formatMutation(
     'bulkUpdateGroupBeneficiaryTimeEntries',

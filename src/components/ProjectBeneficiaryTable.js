@@ -160,7 +160,7 @@ function BaseProjectBeneficiaryTable({
             if (oldPercent !== normalizedNew) {
               timeEntries.push({
                 id: newEntry?.id || oldEntry?.id || null,
-                [isGroup ? 'groupBeneficiaryId' : 'beneficiaryId']: newData.id,
+                enrollmentId: newData.enrollmentId,
                 dayNumber,
                 percentComplete: normalizedNew,
               });
@@ -182,13 +182,19 @@ function BaseProjectBeneficiaryTable({
 
         if (timeEntries.length > 0) {
           const params = {
-            projectId: project.id,
             timeEntries,
           };
 
+          const mutationLabel = formatMessageWithValues(
+            intl,
+            MODULE_NAME,
+            'projectBeneficiaries.timeEntry.mutationLabel',
+            { n: timeEntries.length, name: project.name },
+          );
+
           const action = isGroup
-            ? bulkUpdateGroupBeneficiaryTimeEntries(params, 'Update project time entries')
-            : bulkUpdateBeneficiaryTimeEntries(params, 'Update project time entries');
+            ? bulkUpdateGroupBeneficiaryTimeEntries(params, mutationLabel)
+            : bulkUpdateBeneficiaryTimeEntries(params, mutationLabel);
 
           dispatch(action);
         }

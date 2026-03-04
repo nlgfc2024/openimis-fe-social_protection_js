@@ -280,8 +280,10 @@ function reducer(
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
       const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => {
-        const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
-        (beneficiary.projectTimeEntries || []).forEach((entry) => {
+        const projectTimeEntriesDict = {};
+        const enrollment = beneficiary.projectEnrollments?.[0];
+        const timeEntries = enrollment?.timeEntries || [];
+        timeEntries.forEach((entry) => {
           projectTimeEntriesDict[`day${entry.dayNumber}`] = {
             ...entry,
             id: entry.id ? decodeId(entry.id) : null,
@@ -289,7 +291,8 @@ function reducer(
         });
         return {
           ...beneficiary,
-          project: { id: beneficiary?.project?.id ? decodeId(beneficiary.project.id) : null },
+          enrollmentId: enrollment?.id ? decodeId(enrollment.id) : null,
+          project: { id: enrollment?.project?.id ? decodeId(enrollment.project.id) : null },
           jsonExt: typeof beneficiary.jsonExt === 'string' ? JSON.parse(beneficiary.jsonExt) : beneficiary.jsonExt,
           id: decodeId(beneficiary.id),
           projectTimeEntriesDict,
@@ -398,8 +401,10 @@ function reducer(
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_GROUP_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
       const parsedGroupBeneficiaries = parseData(action.payload.data.groupBeneficiary)?.map((groupBeneficiary) => {
-        const projectTimeEntriesDict = {}; // dict from array for bulk edit in material-table
-        (groupBeneficiary.projectTimeEntries || []).forEach((entry) => {
+        const projectTimeEntriesDict = {};
+        const groupEnrollment = groupBeneficiary.projectEnrollments?.[0];
+        const groupTimeEntries = groupEnrollment?.timeEntries || [];
+        groupTimeEntries.forEach((entry) => {
           projectTimeEntriesDict[`day${entry.dayNumber}`] = {
             ...entry,
             id: entry.id ? decodeId(entry.id) : null,
@@ -407,7 +412,8 @@ function reducer(
         });
         const response = ({
           ...groupBeneficiary,
-          project: { id: groupBeneficiary?.project?.id ? decodeId(groupBeneficiary.project.id) : null },
+          enrollmentId: groupEnrollment?.id ? decodeId(groupEnrollment.id) : null,
+          project: { id: groupEnrollment?.project?.id ? decodeId(groupEnrollment.project.id) : null },
           jsonExt: typeof groupBeneficiary.jsonExt === 'string'
             ? JSON.parse(groupBeneficiary.jsonExt)
             : groupBeneficiary.jsonExt,
