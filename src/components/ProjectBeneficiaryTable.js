@@ -85,7 +85,7 @@ function BaseProjectBeneficiaryTable({
     });
   }, []);
 
-  const mergedBeneficiaries = useMemo(() => beneficiaries||[].map((row) => {
+  const mergedBeneficiaries = useMemo(() => (beneficiaries || []).map((row) => {
     const changes = pendingChanges[row.enrollmentId];
     if (!changes?.newData) return row;
     return changes.newData;
@@ -334,6 +334,7 @@ const ConnectedProjectBeneficiaryTable = connect(
 
 export const ProjectBeneficiaryTable = injectIntl((props) => (
   <ConnectedProjectBeneficiaryTable
+    // eslint-disable-next-line react/jsx-props-no-spreading
     {...props}
     EnrollmentDialogComponent={ProjectBeneficiariyEnrollmentDialog}
   />
@@ -354,6 +355,7 @@ const ConnectedProjectGroupBeneficiaryTable = connect(
 
 export const ProjectGroupBeneficiaryTable = injectIntl((props) => (
   <ConnectedProjectGroupBeneficiaryTable
+    // eslint-disable-next-line react/jsx-props-no-spreading
     {...props}
     isGroup
     EnrollmentDialogComponent={ProjectGroupBeneficiaryEnrollmentDialog}

@@ -199,7 +199,7 @@ function TableContainer({ children, className }) {
   );
 }
 
-const getWorkDayColumns = (translateFn, workingDays = 0, onTimeEntryChange) => {
+const getWorkDayColumns = (translateFn, onTimeEntryChange, workingDays = 0) => {
   if (!workingDays) return [];
   return Array.from({ length: workingDays }, (_, i) => {
     const dayNumber = i + 1;
@@ -215,6 +215,7 @@ const getWorkDayColumns = (translateFn, workingDays = 0, onTimeEntryChange) => {
       },
       filterComponent: NumberFilter,
       editComponent: (props) => (
+        // eslint-disable-next-line react/jsx-props-no-spreading
         <PercentageEditField {...props} onTimeEntryChange={onTimeEntryChange} dayKey={dayKey} />
       ),
       customFilterAndSearch: createNumericFilterFn(
@@ -349,7 +350,7 @@ function BeneficiaryTable({
         defaultSort: 'asc',
       },
     ] : [];
-    const workDayColumns = getWorkDayColumns(translate, workingDays, onTimeEntryChange);
+    const workDayColumns = getWorkDayColumns(translate, onTimeEntryChange, workingDays);
     const allColumns = [
       ...additionalColumns,
       {
