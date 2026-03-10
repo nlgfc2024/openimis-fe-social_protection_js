@@ -85,7 +85,7 @@ function BaseProjectBeneficiaryTable({
     });
   }, []);
 
-  const mergedBeneficiaries = useMemo(() => beneficiaries.map((row) => {
+  const mergedBeneficiaries = useMemo(() => beneficiaries||[].map((row) => {
     const changes = pendingChanges[row.enrollmentId];
     if (!changes?.newData) return row;
     return changes.newData;
