@@ -57,6 +57,8 @@ export const ACTION_TYPE = {
   PROJECT_NAME_SET_VALID: 'PROJECT_NAME_SET_VALID',
   PROJECT_ENROLL: 'PROJECT_ENROLL',
   PROJECT_ENROLL_GROUP: 'PROJECT_ENROLL_GROUP',
+  BULK_UPDATE_BENEFICIARY_TIME_ENTRIES: 'BULK_UPDATE_BENEFICIARY_TIME_ENTRIES',
+  BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES: 'BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES',
 };
 
 function reducer(
@@ -277,12 +279,25 @@ function reducer(
       };
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
-      const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => ({
-        ...beneficiary,
-        project: { id: beneficiary?.project?.id ? decodeId(beneficiary.project.id) : null },
-        jsonExt: typeof beneficiary.jsonExt === 'string' ? JSON.parse(beneficiary.jsonExt) : beneficiary.jsonExt,
-        id: decodeId(beneficiary.id),
-      }));
+      const parsedBeneficiaries = parseData(action.payload.data.beneficiary)?.map((beneficiary) => {
+        const projectTimeEntriesDict = {};
+        const enrollment = beneficiary.projectEnrollments?.[0];
+        const timeEntries = enrollment?.timeEntries || [];
+        timeEntries.forEach((entry) => {
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = {
+            ...entry,
+            id: entry.id ? decodeId(entry.id) : null,
+          };
+        });
+        return {
+          ...beneficiary,
+          enrollmentId: enrollment?.id ? decodeId(enrollment.id) : null,
+          project: { id: enrollment?.project?.id ? decodeId(enrollment.project.id) : null },
+          jsonExt: typeof beneficiary.jsonExt === 'string' ? JSON.parse(beneficiary.jsonExt) : beneficiary.jsonExt,
+          id: decodeId(beneficiary.id),
+          projectTimeEntriesDict,
+        };
+      });
       return {
         ...state,
         fetchingProjectBeneficiaries: false,
@@ -386,13 +401,24 @@ function reducer(
     case SUCCESS(ACTION_TYPE.SEARCH_PROJECT_GROUP_BENEFICIARIES):
       /* eslint-disable no-case-declarations */
       const parsedGroupBeneficiaries = parseData(action.payload.data.groupBeneficiary)?.map((groupBeneficiary) => {
+        const projectTimeEntriesDict = {};
+        const groupEnrollment = groupBeneficiary.projectEnrollments?.[0];
+        const groupTimeEntries = groupEnrollment?.timeEntries || [];
+        groupTimeEntries.forEach((entry) => {
+          projectTimeEntriesDict[`day${entry.dayNumber}`] = {
+            ...entry,
+            id: entry.id ? decodeId(entry.id) : null,
+          };
+        });
         const response = ({
           ...groupBeneficiary,
-          project: { id: groupBeneficiary?.project?.id ? decodeId(groupBeneficiary.project.id) : null },
+          enrollmentId: groupEnrollment?.id ? decodeId(groupEnrollment.id) : null,
+          project: { id: groupEnrollment?.project?.id ? decodeId(groupEnrollment.project.id) : null },
           jsonExt: typeof groupBeneficiary.jsonExt === 'string'
             ? JSON.parse(groupBeneficiary.jsonExt)
             : groupBeneficiary.jsonExt,
           id: decodeId(groupBeneficiary.id),
+          projectTimeEntriesDict,
         });
         if (response?.group?.id) {
           response.group = ({
@@ -991,6 +1017,10 @@ function reducer(
       return dispatchMutationResp(state, 'enrollProject', action);
     case SUCCESS(ACTION_TYPE.PROJECT_ENROLL_GROUP):
       return dispatchMutationResp(state, 'enrollGroupProject', action);
+    case SUCCESS(ACTION_TYPE.BULK_UPDATE_BENEFICIARY_TIME_ENTRIES):
+      return dispatchMutationResp(state, 'bulkUpdateBeneficiaryTimeEntries', action);
+    case SUCCESS(ACTION_TYPE.BULK_UPDATE_GROUP_BENEFICIARY_TIME_ENTRIES):
+      return dispatchMutationResp(state, 'bulkUpdateGroupBeneficiaryTimeEntries', action);
     case SUCCESS(ACTION_TYPE.RESOLVE_TASK):
       return dispatchMutationResp(state, 'resolveTask', action);
     case REQUEST(ACTION_TYPE.TASK_MUTATION):
