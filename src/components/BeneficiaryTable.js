@@ -410,7 +410,10 @@ function BeneficiaryTable({
       width: typeof c.field === 'string' && c.field.includes('email') ? '200px' : '140px',
       tableData: { filterValue: initialFiltersRef.current[c.title] || '' },
     }));
-  }, [isGroup, nameDoBFieldPrefix, locationFieldPrefix, translate, dynamicColumns, workingDays, onTimeEntryChange, maxWorkingDays]);
+  }, [
+    isGroup, nameDoBFieldPrefix, locationFieldPrefix, translate,
+    dynamicColumns, workingDays, onTimeEntryChange, maxWorkingDays,
+  ]);
 
   const isSelectable = !!onSelectionChange;
 
