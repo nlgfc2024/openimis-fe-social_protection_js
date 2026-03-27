@@ -54,4 +54,4 @@ None
 * `state.core.user`, to access user info (rights,...)
 
 ## Configurations Options
-None
+* `maxWorkingDays`: Maximum number of working days allowed for a project. This limits both the input validation on the project form and the number of day columns rendered in the beneficiaries table. Default: `1000`
