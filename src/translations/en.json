@@ -188,6 +188,10 @@
   "socialProtection.project.statusPicker.COMPLETED": "Completed",
   "socialProtection.project.benefitPlan": "Program",
   "project": {
+    "picker": {
+      "label": "Projects",
+      "placeholder": "Select projects..."
+    },
     "activityPicker": {
       "label": "Activity",
       "null": ""
@@ -220,8 +224,9 @@
     "searcherResultsTitleHistory": "{projectsHistoryTotalCount} Historical Records Found",
     "version": "Version",
     "dateUpdated": "Date Updated",
-    "userUpdated": "User Updated"
-  },
+    "userUpdated": "User Updated",
+    "day": "Work Day"
+    },
   "projectChangelog": {
     "label": "Changelog"
   },
@@ -233,7 +238,17 @@
     "save": "Save",
     "filterPlaceholder": "Filter...",
     "activeSelected": "{n} active beneficiaries selected",
-    "enrolled": "{n} Beneficiaries Assigned"
+    "enrolled": "{n} Beneficiaries Assigned",
+    "enterTime": "Enter time",
+    "saveTime": "Save",
+    "cancelEdit": "Cancel",
+    "timeEntry": {
+      "validation": {
+        "title": "Invalid Time Entry",
+        "message": "Percentage values must be between 0 and 100. Please correct the highlighted fields before saving."
+      },
+      "mutationLabel": "Saved {n} time entries for project {name}"
+    }
   },
   "common": {
     "true": "Yes",
