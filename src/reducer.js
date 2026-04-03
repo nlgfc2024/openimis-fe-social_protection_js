@@ -383,6 +383,7 @@ function reducer(
         groupBeneficiaries: parseData(action.payload.data.groupBeneficiary)?.map((groupBeneficiary) => {
           const response = ({
             ...groupBeneficiary,
+            benefitPlan: { id: groupBeneficiary?.benefitPlan?.id ? decodeId(groupBeneficiary.benefitPlan.id) : null },
             id: decodeId(groupBeneficiary.id),
           });
           if (response?.group?.id) {
