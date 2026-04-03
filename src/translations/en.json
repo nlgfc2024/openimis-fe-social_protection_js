@@ -113,7 +113,7 @@
   "socialProtection.benefitPlan.stopButtonTooltip": "Suspend",
   "socialProtection.deleteButtonTooltip": "Delete",
   "socialProtection.stopButtonTooltip": "Suspend",
-  "socialProtection.undoButtonTooltip": "Restore",
+  "socialProtection.undoButtonTooltip": "Undo Delete",
   "socialProtection.benefitPackage.benefitPackageBenefitsTab.label": "Benefits",
   "socialProtection.benefitPlan.benefitPlanBeneficiaries.uploadHistoryTable.user": "User Uploaded",
   "socialProtection.resolveAllRemainingTasks": "Bulk Task Resolve",
