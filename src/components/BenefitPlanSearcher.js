@@ -81,7 +81,7 @@ function BenefitPlanSearcher({
       deleteBenefitPlan(
         benefitPlanToDelete,
         formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.delete.mutationLabel', {
-          id: benefitPlanToDelete?.id,
+          name: benefitPlanToDelete?.name,
         }),
       );
       setDeletedBenefitPlanUuids([...deletedBenefitPlanUuids, benefitPlanToDelete.id]);

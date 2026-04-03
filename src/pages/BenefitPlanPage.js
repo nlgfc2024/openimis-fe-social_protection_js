@@ -141,12 +141,12 @@ function BenefitPlanPage({
     if (benefitPlan?.id) {
       updateBenefitPlan(
         editedBenefitPlan,
-        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.update.mutationLabel', titleParams(benefitPlan)),
+        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.update.mutationLabel', titleParams(editedBenefitPlan)),
       );
     } else {
       createBenefitPlan(
         editedBenefitPlan,
-        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.create.mutationLabel', titleParams(benefitPlan)),
+        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.create.mutationLabel', titleParams(editedBenefitPlan)),
       );
     }
   };
@@ -154,14 +154,14 @@ function BenefitPlanPage({
   const deleteBenefitPlanCallback = () => deleteBenefitPlan(
     benefitPlan,
     formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.delete.mutationLabel', {
-      id: benefitPlan?.id,
+      name: benefitPlan?.name,
     }),
   );
 
   const stopBenefitPlanCallback = () => closeBenefitPlan(
     benefitPlan,
     formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.delete.mutationLabel', {
-      id: benefitPlan?.id,
+      name: benefitPlan?.name,
     }),
   );
 
