@@ -138,15 +138,16 @@ function BenefitPlanPage({
   const canSave = () => !isMandatoryFieldsEmpty() && isValid() && doesBenefitPlanChange();
 
   const handleSave = () => {
+    const params = titleParams(editedBenefitPlan);
     if (benefitPlan?.id) {
       updateBenefitPlan(
         editedBenefitPlan,
-        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.update.mutationLabel', titleParams(editedBenefitPlan)),
+        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.update.mutationLabel', params),
       );
     } else {
       createBenefitPlan(
         editedBenefitPlan,
-        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.create.mutationLabel', titleParams(editedBenefitPlan)),
+        formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.create.mutationLabel', params),
       );
     }
   };
