@@ -13,8 +13,8 @@ import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from '@material-ui/core/styles';
 import ProjectStatusPicker from '../pickers/ProjectStatusPicker';
 import ProjectSectorPicker from '../pickers/ProjectSectorPicker';
-import ProjectAllowsMultiEnrollmentPicker from '../pickers/ProjectAllowsMultiEnrollmentPicker';
 import MicroCatchmentPicker from '../pickers/MicroCatchmentPicker';
+import HotspotPicker from '../pickers/HotspotPicker';
 import { generatedProjectName } from '../util/project';
 
 const styles = (theme) => ({
@@ -25,10 +25,12 @@ class ProjectHeadPanel extends FormPanel {
   onDistrictChange = (district) => {
     this.updateAttribute('district', district);
     this.updateAttribute('microCatchment', null);
+    this.updateAttribute('hotspot', null);
   };
 
   onMicroCatchmentChange = (microCatchment) => {
     this.updateAttribute('microCatchment', microCatchment);
+    this.updateAttribute('hotspot', null);
   }
 
   render() {
@@ -65,6 +67,16 @@ class ProjectHeadPanel extends FormPanel {
             value={project?.microCatchment}
             district={project?.district}
             onChange={(v) => this.onMicroCatchmentChange(v)}
+          />
+        </Grid>
+
+        <Grid item xs={4} className={classes.item}>
+          <HotspotPicker
+            required
+            readOnly={readOnly}
+            value={project?.hotspot}
+            microCatchment={project?.microCatchment}
+            onChange={(v) => this.updateAttribute('hotspot', v)}
           />
         </Grid>
 
@@ -108,16 +120,6 @@ class ProjectHeadPanel extends FormPanel {
             max={200}
             value={project?.targetHouseholds}
             onChange={(v) => this.updateAttribute('targetHouseholds', v)}
-          />
-        </Grid>
-
-        <Grid item xs={4} className={classes.item}>
-          <ProjectAllowsMultiEnrollmentPicker
-            label="project.allowsMultipleEnrollments"
-            value={project?.allowsMultipleEnrollments ?? false}
-            onChange={(v) => this.updateAttribute('allowsMultipleEnrollments', v)}
-            readOnly={readOnly}
-            required={false}
           />
         </Grid>
 

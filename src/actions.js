@@ -12,6 +12,7 @@ import { ACTION_TYPE } from './reducer';
 import {
   CLEAR, ERROR, REQUEST, SUCCESS,
 } from './util/action-type';
+import { generatedProjectName } from './util/project';
 
 const BENEFIT_PLAN_FULL_PROJECTION = () => [
   'uuid',
@@ -86,7 +87,8 @@ const PROJECT_FULL_PROJECTION = (modulesManager) => [
   'name',
   'status',
   'district {id, uuid, code, name}',
-  'microCatchment {id, uuid, code, name}',
+  'microCatchment {id, uuid, code, name, district {id, uuid, code, name}}',
+  'hotspot {id, name}',
   'sector {id, name}',
   'knownPlace',
   'targetHouseholds',
@@ -360,12 +362,16 @@ function formatBeneficiaryGQL(beneficiary) {
 function formatProjectGQL(project) {
   return `
     ${project?.id ? `id: "${project.id}"` : ''}
-    ${project?.district?.uuid ? `districtId: "${project.district.uuid}"` : ''}
+    name: "${formatGQLString(project?.name || generatedProjectName(project))}"
+    ${project?.district?.uuid ? `locationId: "${project.district.uuid}"` : ''}
     ${project?.microCatchment?.uuid ? `microCatchmentId: "${project.microCatchment.uuid}"` : ''}
-    ${project?.sector?.id ? `sectorId: "${project.sector.id}"` : ''}
+    ${project?.hotspot?.id ? `hotspotId: "${formatGQLString(project.hotspot.id)}"` : ''}
+    ${project?.hotspot?.name ? `hotspotName: "${formatGQLString(project.hotspot.name)}"` : ''}
+    ${project?.sector?.id ? `activityId: "${project.sector.id}"` : ''}
     ${project?.knownPlace ? `knownPlace: "${formatGQLString(project.knownPlace)}"` : ''}
-    ${project?.targetHouseholds ? `targetHouseholds: ${project.targetHouseholds}` : ''}
+    ${project?.targetHouseholds ? `targetBeneficiaries: ${project.targetHouseholds}` : ''}
     ${project?.workingDays ? `workingDays: ${project.workingDays}` : ''}
+    ${project?.allowsMultipleEnrollments !== undefined ? `allowsMultipleEnrollments: ${!!project.allowsMultipleEnrollments}` : ''}
     ${project?.benefitPlan?.id ? `benefitPlanId: "${project.benefitPlan.id}"` : ''}`;
 }
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Tooltip } from '@material-ui/core';
 import {
   Autocomplete,
+  decodeId,
   useGraphqlQuery,
   useModulesManager,
   useTranslations,
@@ -25,16 +26,25 @@ function MicroCatchmentPicker({
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations('socialProtection', modulesManager);
   const [filters, setFilters] = useState({});
+  const selectedDistrict = district || value?.district;
+  const districtUuid = selectedDistrict?.uuid
+    || (/^[0-9a-f-]{36}$/i.test(selectedDistrict?.id) ? selectedDistrict.id : null);
 
   const queryFilters = {
     ...filters,
-    districtUuid: district?.uuid,
+    first: 100,
+    showHistory: true,
   };
 
   const { isLoading, data, error } = useGraphqlQuery(
     `
-    query MicroCatchmentPicker($search: String, $first: Int, $districtUuid: String) {
-      projectMicroCatchments(name_Icontains: $search, first: $first, district_Uuid: $districtUuid, orderBy: "name") {
+    query MicroCatchmentPicker($search: String, $first: Int, $showHistory: Boolean) {
+      microCatchments(
+        name_Icontains: $search,
+        first: $first,
+        showHistory: $showHistory,
+        orderBy: "name"
+      ) {
         edges {
           node {
             id
@@ -53,16 +63,21 @@ function MicroCatchmentPicker({
     }
     `,
     queryFilters,
-    { skip: !district?.uuid },
+    { skip: !districtUuid },
   );
 
-  const microCatchments = data?.projectMicroCatchments?.edges?.map((edge) => edge.node) ?? [];
+  const microCatchments = data?.microCatchments?.edges
+    ?.map((edge) => ({
+      ...edge.node,
+      id: decodeId(edge.node.id),
+    }))
+    ?.filter((microCatchment) => microCatchment?.district?.uuid === districtUuid) ?? [];
 
   return (
     <Autocomplete
       multiple={multiple}
       error={error}
-      readOnly={readOnly || !district}
+      readOnly={readOnly || !districtUuid}
       options={microCatchments}
       isLoading={isLoading}
       value={value ?? null}

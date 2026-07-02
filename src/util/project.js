@@ -4,10 +4,10 @@ export const projectLookupLabel = (option) => {
 };
 
 export const generatedProjectName = (project = {}) => {
-  const microCatchment = projectLookupLabel(project.microCatchment);
+  const catchmentArea = projectLookupLabel(project.hotspot) || projectLookupLabel(project.microCatchment);
   const sector = projectLookupLabel(project.sector || project.activity);
   const knownPlace = project.knownPlace || '';
 
-  const prefix = [microCatchment, sector].filter(Boolean).join('-');
+  const prefix = [catchmentArea, sector].filter(Boolean).join('-');
   return [prefix, knownPlace].filter(Boolean).join(' - ');
 };
