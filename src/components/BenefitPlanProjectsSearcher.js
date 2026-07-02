@@ -35,10 +35,7 @@ import {
   undoDeleteProject,
 } from '../actions';
 import ProjectFilter from './BenefitPlanProjectsFilter';
-import {
-  LOC_LEVELS,
-  locationFormatter,
-} from '../util/searcher-utils';
+import { projectLookupLabel, phaseLabel } from '../util/project';
 
 function BenefitPlanProjectsSearcher({
   intl,
@@ -137,12 +134,14 @@ function BenefitPlanProjectsSearcher({
   const headers = () => {
     const baseHeaders = [
       'project.name',
+      'project.district',
+      'project.microCatchment',
+      'project.hotspot',
+      'project.sector',
+      'project.phase',
+      'project.targetHouseholds',
       'project.status',
-      'project.activity',
-      'project.targetBeneficiaries',
-      'project.workingDays',
     ];
-    baseHeaders.push(...Array.from({ length: LOC_LEVELS }, (_, i) => `location.locationType.${i}`));
 
     if (rights.includes(RIGHT_PROJECT_UPDATE)) {
       baseHeaders.push('emptyLabel');
@@ -157,16 +156,16 @@ function BenefitPlanProjectsSearcher({
   const itemFormatters = () => {
     const baseFormatters = [
       (project) => project.name,
+      (project) => projectLookupLabel(project.district || project.location?.parent),
+      (project) => projectLookupLabel(project.microCatchment),
+      (project) => projectLookupLabel(project.hotspot),
+      (project) => projectLookupLabel(project.sector || project.activity),
+      (project) => phaseLabel(project.phase),
+      (project) => project.targetHouseholds ?? project.targetBeneficiaries,
       (project) => formatMessage(intl, MODULE_NAME, `project.statusPicker.${project.status}`),
-      (project) => project.activity?.name ?? '',
-      (project) => project.targetBeneficiaries,
-      (project) => project.workingDays,
     ];
 
-    const formatters = [
-      ...baseFormatters,
-      ...Array.from({ length: LOC_LEVELS }, (_, i) => (project) => locationFormatter(project?.location)[i]),
-    ];
+    const formatters = [...baseFormatters];
 
     if (rights.includes(RIGHT_PROJECT_UPDATE)) {
       formatters.push((project) => (
@@ -209,10 +208,13 @@ function BenefitPlanProjectsSearcher({
 
   const sorts = () => [
     ['name', true],
+    ['district', true],
+    ['microCatchment', true],
+    ['hotspot', true],
+    ['sector', true],
+    ['phase', true],
+    ['targetHouseholds', true],
     ['status', true],
-    ['activity', true],
-    ['targetBeneficiaries', true],
-    ['workingDays', true],
   ];
 
   const defaultFilters = () => ({

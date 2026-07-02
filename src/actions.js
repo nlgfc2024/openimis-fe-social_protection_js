@@ -85,6 +85,13 @@ const PROJECT_FULL_PROJECTION = (modulesManager) => [
   'benefitPlan {id, name, type}',
   'name',
   'status',
+  'district {id, uuid, code, name}',
+  'microCatchment {id, uuid, code, name}',
+  'hotspot {id, name}',
+  'sector {id, name}',
+  'phase {id, name, code, phaseNumber, isActive}',
+  'knownPlace',
+  'targetHouseholds',
   'targetBeneficiaries',
   'workingDays',
   'activity {id, name}',
@@ -355,14 +362,14 @@ function formatBeneficiaryGQL(beneficiary) {
 function formatProjectGQL(project) {
   return `
     ${project?.id ? `id: "${project.id}"` : ''}
-    ${project?.name ? `name: "${formatGQLString(project.name)}"` : ''}
-    ${project?.targetBeneficiaries ? `targetBeneficiaries: ${project.targetBeneficiaries}` : ''}
+    ${project?.district?.uuid ? `districtId: "${project.district.uuid}"` : ''}
+    ${project?.microCatchment?.uuid ? `microCatchmentId: "${project.microCatchment.uuid}"` : ''}
+    ${project?.hotspot?.id ? `hotspotId: "${project.hotspot.id}"` : ''}
+    ${project?.sector?.id ? `sectorId: "${project.sector.id}"` : ''}
+    ${project?.phase?.id ? `phaseId: "${project.phase.id}"` : ''}
+    ${project?.knownPlace ? `knownPlace: "${formatGQLString(project.knownPlace)}"` : ''}
+    ${project?.targetHouseholds ? `targetHouseholds: ${project.targetHouseholds}` : ''}
     ${project?.workingDays ? `workingDays: ${project.workingDays}` : ''}
-    ${(project?.allowsMultipleEnrollments !== undefined && project.allowsMultipleEnrollments !== null)
-    ? `allowsMultipleEnrollments: ${project.allowsMultipleEnrollments}` : ''}
-    ${project?.status ? `status: "${project.status}"` : ''}
-    ${project?.activity?.id ? `activityId: "${project.activity.id}"` : ''}
-    ${project?.location?.uuid ? `locationId: "${project.location.uuid}"` : ''}
     ${project?.benefitPlan?.id ? `benefitPlanId: "${project.benefitPlan.id}"` : ''}`;
 }
 

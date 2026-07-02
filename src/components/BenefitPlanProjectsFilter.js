@@ -2,7 +2,7 @@ import React from 'react';
 import { Filter } from '@openimis/fe-core';
 import { CONTAINS_LOOKUP, MODULE_NAME } from '../constants';
 import ProjectStatusPicker from '../pickers/ProjectStatusPicker';
-import ActivityPicker from '../pickers/ActivityPicker';
+import ProjectSectorPicker from '../pickers/ProjectSectorPicker';
 
 function ProjectFilter({
   filters, onChangeFilters,
@@ -13,7 +13,7 @@ function ProjectFilter({
 
   const pickerFields = [
     { name: 'status', component: ProjectStatusPicker, props: { nullLabel: 'any', withNull: true } },
-    { name: 'activity', component: ActivityPicker },
+    { name: 'sector', component: ProjectSectorPicker },
   ];
 
   const checkboxFields = [
@@ -28,7 +28,6 @@ function ProjectFilter({
       filterFields={filterFields}
       pickerFields={pickerFields}
       checkboxFields={checkboxFields}
-      withLocationFilter
     />
   );
 }

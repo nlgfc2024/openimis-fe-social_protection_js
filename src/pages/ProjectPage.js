@@ -33,6 +33,7 @@ import {
   RIGHT_BENEFIT_PLAN_UPDATE,
   PROJECT_BENEFICIARIES_TAB_VALUE,
 } from '../constants';
+import { generatedProjectName } from '../util/project';
 
 const styles = (theme) => ({
   page: theme.page,
@@ -60,12 +61,11 @@ function ProjectPage({
   clearConfirm,
   confirmed,
   journalize,
-  isProjectNameValid,
 }) {
   const history = useHistory();
   const locationState = history.location?.state;
 
-  const benefitPlanIdFromState = locationState?.benefitPlanid;
+  const benefitPlanIdFromState = locationState?.benefitPlanId || locationState?.benefitPlanid;
   const benefitPlanNameFromState = locationState?.benefitPlanName;
 
   const pathMatch = history.location?.pathname?.match(/benefitPlan\/([^/]+)/);
@@ -159,21 +159,27 @@ function ProjectPage({
   useEffect(() => () => clearProject(), []);
 
   const isMandatoryFieldsEmpty = () => (
-    !editedProject?.name
-    || !editedProject?.activity
-    || !editedProject?.location
-    || !editedProject?.targetBeneficiaries
-    || !editedProject?.workingDays
+    !editedProject?.district
+    || !editedProject?.microCatchment
+    || !editedProject?.hotspot
+    || !(editedProject?.sector || editedProject?.activity)
+    || !editedProject?.phase
+    || !editedProject?.knownPlace
+    || !editedProject?.targetHouseholds
   );
 
   const isValid = () => (editedProject?.name ? isProjectNameValid : true);
+
+  const isTargetHouseholdsValid = () => (
+    editedProject?.targetHouseholds >= 1 && editedProject?.targetHouseholds <= 200
+  );
 
   const doesProjectChange = () => {
     if (_.isEqual(project, editedProject)) return false;
     return true;
   };
 
-  const canSave = () => !isMandatoryFieldsEmpty() && isValid() && doesProjectChange();
+  const canSave = () => !isMandatoryFieldsEmpty() && isTargetHouseholdsValid() && doesProjectChange();
 
   const handleSave = () => {
     const mutationLabelKey = projectUuid
@@ -188,7 +194,7 @@ function ProjectPage({
         intl,
         'socialProtection',
         mutationLabelKey,
-        editedProject,
+        { ...editedProject, name: editedProject?.name || generatedProjectName(editedProject) },
       ),
     );
   };
@@ -279,7 +285,6 @@ const mapStateToProps = (state, props) => ({
   confirmed: state.core.confirmed,
   submittingMutation: state.socialProtection.submittingMutation,
   mutation: state.socialProtection.mutation,
-  isProjectNameValid: state.socialProtection.validationFields?.projectName?.isValid,
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators(
