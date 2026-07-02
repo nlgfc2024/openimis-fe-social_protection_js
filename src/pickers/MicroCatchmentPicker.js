@@ -34,7 +34,7 @@ function MicroCatchmentPicker({
   const { isLoading, data, error } = useGraphqlQuery(
     `
     query MicroCatchmentPicker($search: String, $first: Int, $districtUuid: String) {
-      microCatchments(name_Icontains: $search, first: $first, district_Uuid: $districtUuid, orderBy: "name") {
+      projectMicroCatchments(name_Icontains: $search, first: $first, district_Uuid: $districtUuid, orderBy: "name") {
         edges {
           node {
             id
@@ -56,7 +56,7 @@ function MicroCatchmentPicker({
     { skip: !district?.uuid },
   );
 
-  const microCatchments = data?.microCatchments?.edges?.map((edge) => edge.node) ?? [];
+  const microCatchments = data?.projectMicroCatchments?.edges?.map((edge) => edge.node) ?? [];
 
   return (
     <Autocomplete

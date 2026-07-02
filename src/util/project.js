@@ -9,11 +9,11 @@ export const phaseLabel = (phase) => {
 };
 
 export const generatedProjectName = (project = {}) => {
-  const hotspot = projectLookupLabel(project.hotspot);
+  const microCatchment = projectLookupLabel(project.microCatchment);
   const sector = projectLookupLabel(project.sector || project.activity);
   const phase = phaseLabel(project.phase);
   const knownPlace = project.knownPlace || '';
 
-  const prefix = [hotspot, sector, phase].filter(Boolean).join('-');
+  const prefix = [microCatchment, sector, phase].filter(Boolean).join('-');
   return [prefix, knownPlace].filter(Boolean).join(' - ');
 };

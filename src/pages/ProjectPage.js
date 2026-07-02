@@ -161,7 +161,6 @@ function ProjectPage({
   const isMandatoryFieldsEmpty = () => (
     !editedProject?.district
     || !editedProject?.microCatchment
-    || !editedProject?.hotspot
     || !(editedProject?.sector || editedProject?.activity)
     || !editedProject?.phase
     || !editedProject?.knownPlace

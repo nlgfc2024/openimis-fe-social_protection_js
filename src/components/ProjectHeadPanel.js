@@ -14,8 +14,8 @@ import { withTheme, withStyles } from '@material-ui/core/styles';
 import ProjectStatusPicker from '../pickers/ProjectStatusPicker';
 import ProjectSectorPicker from '../pickers/ProjectSectorPicker';
 import ProjectPhasePicker from '../pickers/ProjectPhasePicker';
+import ProjectAllowsMultiEnrollmentPicker from '../pickers/ProjectAllowsMultiEnrollmentPicker';
 import MicroCatchmentPicker from '../pickers/MicroCatchmentPicker';
-import ProjectHotspotPicker from '../pickers/ProjectHotspotPicker';
 import { generatedProjectName } from '../util/project';
 
 const styles = (theme) => ({
@@ -26,12 +26,10 @@ class ProjectHeadPanel extends FormPanel {
   onDistrictChange = (district) => {
     this.updateAttribute('district', district);
     this.updateAttribute('microCatchment', null);
-    this.updateAttribute('hotspot', null);
   };
 
   onMicroCatchmentChange = (microCatchment) => {
     this.updateAttribute('microCatchment', microCatchment);
-    this.updateAttribute('hotspot', null);
   }
 
   render() {
@@ -68,18 +66,6 @@ class ProjectHeadPanel extends FormPanel {
             value={project?.microCatchment}
             district={project?.district}
             onChange={(v) => this.onMicroCatchmentChange(v)}
-          />
-        </Grid>
-
-        <Grid item xs={4} className={classes.item}>
-          <ProjectHotspotPicker
-            required
-            withNull={false}
-            readOnly={readOnly}
-            value={project?.hotspot}
-            district={project?.district}
-            microCatchment={project?.microCatchment}
-            onChange={(v) => this.updateAttribute('hotspot', v)}
           />
         </Grid>
 
