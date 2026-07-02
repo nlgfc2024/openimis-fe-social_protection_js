@@ -13,7 +13,6 @@ import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from '@material-ui/core/styles';
 import ProjectStatusPicker from '../pickers/ProjectStatusPicker';
 import ProjectSectorPicker from '../pickers/ProjectSectorPicker';
-import ProjectPhasePicker from '../pickers/ProjectPhasePicker';
 import ProjectAllowsMultiEnrollmentPicker from '../pickers/ProjectAllowsMultiEnrollmentPicker';
 import MicroCatchmentPicker from '../pickers/MicroCatchmentPicker';
 import { generatedProjectName } from '../util/project';
@@ -76,16 +75,6 @@ class ProjectHeadPanel extends FormPanel {
             readOnly={readOnly}
             value={project?.sector || project?.activity}
             onChange={(v) => this.updateAttribute('sector', v)}
-          />
-        </Grid>
-
-        <Grid item xs={4} className={classes.item}>
-          <ProjectPhasePicker
-            required
-            withNull={false}
-            readOnly={readOnly}
-            value={project?.phase}
-            onChange={(v) => this.updateAttribute('phase', v)}
           />
         </Grid>
 

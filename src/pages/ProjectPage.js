@@ -162,7 +162,6 @@ function ProjectPage({
     !editedProject?.district
     || !editedProject?.microCatchment
     || !(editedProject?.sector || editedProject?.activity)
-    || !editedProject?.phase
     || !editedProject?.knownPlace
     || !editedProject?.targetHouseholds
   );

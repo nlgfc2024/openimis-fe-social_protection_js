@@ -35,7 +35,7 @@ import {
   undoDeleteProject,
 } from '../actions';
 import ProjectFilter from './BenefitPlanProjectsFilter';
-import { projectLookupLabel, phaseLabel } from '../util/project';
+import { projectLookupLabel } from '../util/project';
 
 function BenefitPlanProjectsSearcher({
   intl,
@@ -137,7 +137,6 @@ function BenefitPlanProjectsSearcher({
       'project.district',
       'project.microCatchment',
       'project.sector',
-      'project.phase',
       'project.targetHouseholds',
       'project.status',
     ];
@@ -158,7 +157,6 @@ function BenefitPlanProjectsSearcher({
       (project) => projectLookupLabel(project.district || project.location?.parent),
       (project) => projectLookupLabel(project.microCatchment),
       (project) => projectLookupLabel(project.sector || project.activity),
-      (project) => phaseLabel(project.phase),
       (project) => project.targetHouseholds ?? project.targetBeneficiaries,
       (project) => formatMessage(intl, MODULE_NAME, `project.statusPicker.${project.status}`),
     ];
@@ -209,7 +207,6 @@ function BenefitPlanProjectsSearcher({
     ['district', true],
     ['microCatchment', true],
     ['sector', true],
-    ['phase', true],
     ['targetHouseholds', true],
     ['status', true],
   ];

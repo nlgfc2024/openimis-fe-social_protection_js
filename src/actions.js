@@ -88,7 +88,6 @@ const PROJECT_FULL_PROJECTION = (modulesManager) => [
   'district {id, uuid, code, name}',
   'microCatchment {id, uuid, code, name}',
   'sector {id, name}',
-  'phase {id, name, code, phaseNumber, isActive}',
   'knownPlace',
   'targetHouseholds',
   'targetBeneficiaries',
@@ -364,7 +363,6 @@ function formatProjectGQL(project) {
     ${project?.district?.uuid ? `districtId: "${project.district.uuid}"` : ''}
     ${project?.microCatchment?.uuid ? `microCatchmentId: "${project.microCatchment.uuid}"` : ''}
     ${project?.sector?.id ? `sectorId: "${project.sector.id}"` : ''}
-    ${project?.phase?.id ? `phaseId: "${project.phase.id}"` : ''}
     ${project?.knownPlace ? `knownPlace: "${formatGQLString(project.knownPlace)}"` : ''}
     ${project?.targetHouseholds ? `targetHouseholds: ${project.targetHouseholds}` : ''}
     ${project?.workingDays ? `workingDays: ${project.workingDays}` : ''}
