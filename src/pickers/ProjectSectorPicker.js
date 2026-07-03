@@ -29,7 +29,7 @@ function ProjectSectorPicker({
   const { isLoading, data, error } = useGraphqlQuery(
     `
     query ProjectSectorPicker($search: String, $first: Int) {
-      projectSector(name_Icontains: $search, first: $first, orderBy: "name") {
+      activity(name_Icontains: $search, first: $first, orderBy: "name") {
         edges {
           node {
             id
@@ -43,7 +43,7 @@ function ProjectSectorPicker({
     { skip: false },
   );
 
-  const sectors = data?.projectSector?.edges?.map((edge) => ({
+  const sectors = data?.activity?.edges?.map((edge) => ({
     ...edge.node,
     id: decodeId(edge.node.id),
   })) ?? [];

@@ -1,17 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TextField, Tooltip } from '@material-ui/core';
 import {
   Autocomplete,
+  useGraphqlQuery,
   useModulesManager,
   useTranslations,
 } from '@openimis/fe-core';
 import { projectLookupLabel } from '../util/project';
-
-const SAMPLE_HOTSPOTS = [
-  { id: 'sample-hotspot-1', name: 'Sample Hotspot 1' },
-  { id: 'sample-hotspot-2', name: 'Sample Hotspot 2' },
-  { id: 'sample-hotspot-3', name: 'Sample Hotspot 3' },
-];
 
 function HotspotPicker({
   required,
@@ -26,14 +21,48 @@ function HotspotPicker({
 }) {
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations('socialProtection', modulesManager);
+  const [filters, setFilters] = useState({});
+
+  const { isLoading, data, error } = useGraphqlQuery(
+    `
+    query HotspotPicker($search: String, $first: Int) {
+      hotspots(name_Icontains: $search, first: $first, orderBy: "name") {
+        edges {
+          node {
+            id
+            name
+            microCatchment {
+              uuid
+            }
+          }
+        }
+      }
+    }
+    `,
+    { ...filters, first: 100 },
+    { skip: !microCatchment },
+  );
+
+  const allHotspots = data?.hotspots?.edges?.map((edge) => ({
+    ...edge.node,
+    id: edge.node.id,
+  })) ?? [];
+
+  // Filter hotspots by selected microCatchment on the frontend
+  const hotspots = microCatchment
+    ? allHotspots.filter((h) => h.microCatchment?.uuid === microCatchment.uuid)
+    : [];
 
   return (
     <Autocomplete
       readOnly={readOnly || !microCatchment}
-      options={microCatchment ? SAMPLE_HOTSPOTS : []}
+      options={hotspots}
+      isLoading={isLoading}
+      error={error}
       value={value ?? null}
       getOptionLabel={projectLookupLabel}
       onChange={(v) => onChange(v, projectLookupLabel(v))}
+      onInputChange={(search) => setFilters({ search })}
       renderInput={(inputProps) => (
         <Tooltip title="">
           <TextField

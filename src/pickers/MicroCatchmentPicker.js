@@ -29,6 +29,7 @@ function MicroCatchmentPicker({
   const selectedDistrict = district || value?.district;
   const districtUuid = selectedDistrict?.uuid
     || (/^[0-9a-f-]{36}$/i.test(selectedDistrict?.id) ? selectedDistrict.id : null);
+  const hasDistrict = !!selectedDistrict;
 
   const queryFilters = {
     ...filters,
@@ -63,21 +64,22 @@ function MicroCatchmentPicker({
     }
     `,
     queryFilters,
-    { skip: !districtUuid },
+    { skip: !hasDistrict },
   );
 
+  // Only use real data - NO DUMMY DATA
   const microCatchments = data?.microCatchments?.edges
     ?.map((edge) => ({
       ...edge.node,
       id: decodeId(edge.node.id),
     }))
-    ?.filter((microCatchment) => microCatchment?.district?.uuid === districtUuid) ?? [];
+    ?.filter((microCatchment) => districtUuid && microCatchment?.district?.uuid === districtUuid) ?? [];
 
   return (
     <Autocomplete
       multiple={multiple}
       error={error}
-      readOnly={readOnly || !districtUuid}
+      readOnly={readOnly}
       options={microCatchments}
       isLoading={isLoading}
       value={value ?? null}
