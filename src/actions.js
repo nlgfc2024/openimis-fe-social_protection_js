@@ -47,7 +47,6 @@ const UPLOAD_HISTORY_FULL_PROJECTION = () => [
 const BENEFICIARY_FULL_PROJECTION = (modulesManager) => [
   'id',
   'benefitPlan {id}',
-  'project {id}',
   'individual {firstName, lastName, dob, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
   'status',
   'isEligible',
@@ -57,7 +56,6 @@ const BENEFICIARY_FULL_PROJECTION = (modulesManager) => [
 const GROUP_BENEFICIARY_FULL_PROJECTION = (modulesManager) => [
   'id',
   'benefitPlan {id}',
-  'project {id}',
   'group {id, code, head {uuid, firstName, lastName, dob}, location' + modulesManager.getProjection('location.Location.FlatProjection') + '}',
   'status',
   'isEligible',

@@ -147,7 +147,6 @@
   "socialProtection.benefitPlan.searcherResultsTitleHistory": "{benefitPlansHistoryTotalCount} Historical Records Found",
   "socialProtection.benefitPlan.benefitPlanSchema.label": "Program Schema",
   "socialProtection.benefitPlan.schema.showSchema": "Show Schema",
-  "socialProtection.benefitPlan.BenefitPlanProjects.label": "Projects",
   "socialProtection.benefitPlanTasks.label": "Tasks",
   "socialProtection.group.code": "Code",
   "socialProtection.groupBeneficiary.code": "Code",
@@ -167,25 +166,8 @@
   "social_protection.gql_activity_search_perms": "Social Protection | Activity Search",
   "social_protection.gql_project_search_perms": "Social Protection | Project Search",
   "social_protection.gql_project_create_perms": "Social Protection | Project Create",
-  "socialProtection.projects.label": "Projects",
-  "socialProtection.projects.searcherResultsTitle": "{projectsTotalCount} Projects",
-  "socialProtection.projects.searcherAddAction": "Create Project",
-  "socialProtection.project.name": "Name",
-  "socialProtection.project.name.alreadyTaken": "The name is already taken",
-  "socialProtection.project.status": "Status",
-  "socialProtection.project.activity": "Activity",
-  "socialProtection.project.targetBeneficiaries": "Target Beneficiaries",
-  "socialProtection.project.workingDays": "Working Days",
-  "socialProtection.project.pageTitle": "Project details",
-  "socialProtection.project.saveButton.tooltip": "Save",
-  "socialProtection.project.location": "Location",
-  "socialProtection.project.statusPicker": "Status",
-  "socialProtection.project.statusPicker.PREPARATION": "Preparation",
-  "socialProtection.project.statusPicker.IN_PROGRESS": "In Progress",
-  "socialProtection.project.statusPicker.COMPLETED": "Completed",
-  "socialProtection.project.benefitPlan": "Program",
   "project": {
-    "activityPicker" : {
+    "activityPicker": {
       "label": "Activity",
       "null": ""
     },
@@ -217,7 +199,7 @@
     "version": "Version",
     "dateUpdated": "Date Updated",
     "userUpdated": "User Updated"
-    },
+  },
   "projectChangelog": {
     "label": "Changelog"
   },
