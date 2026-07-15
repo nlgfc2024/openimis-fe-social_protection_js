@@ -11,7 +11,6 @@ import BenefitPlanMainMenu from './menus/BenefitPlanMainMenu';
 import BenefitPlansPage from './pages/BenefitPlansPage';
 import BenefitPlanPage from './pages/BenefitPlanPage';
 import BenefitPackagePage from './pages/BenefitPackagePage';
-import ProjectPage from './pages/ProjectPage';
 import BeneficiaryStatusPicker from './pickers/BeneficiaryStatusPicker';
 import {
   BenefitPlanBeneficiariesTabPanel,
@@ -50,7 +49,6 @@ import BenefitPlanSearcherForEntities from './components/BenefitPlanSearcherForE
 import { BenefitPackageMembersTabLabel, BenefitPackageMembersTabPanel } from './components/BenefitPackageMembersTab';
 import BenefitPlanTaskPreviewTable from './components/BenefitPlanTaskPreviewTable';
 import BenefitPlanPicker from './pickers/BenefitPlanPicker';
-import ProjectPicker from './pickers/ProjectPicker';
 import { BenefitPlansListTabLabel, BenefitPlansListTabPanel } from './components/BenefitPlansListTab';
 import {
   BenefitPlanTaskItemFormatters,
@@ -68,30 +66,14 @@ import {
 } from './components/tasks/BeneficiaryUploadApprovalTask';
 import { fetchBenefitPlanSchemaFields } from './actions';
 import BenefitPlanHistorySearcher from './components/BenefitPlanHistorySearcher';
-import ProjectHistorySearcher from './components/ProjectHistorySearcher';
-import {
-  BenefitPlanProjectsTabLabel,
-  BenefitPlanProjectsTabPanel,
-} from './components/BenefitPlanProjectsTab';
 import { BenefitPlanChangelogTabLabel, BenefitPlanChangelogTabPanel } from './components/BenefitPlanChangelogTab';
 import { BenefitPlanTaskTabLabel, BenefitPlanTaskTabPanel } from './components/BenefitPlanTaskTab';
 import { BENEFIT_PLAN_LABEL, RIGHT_BENEFIT_PLAN_SEARCH } from './constants';
 import BeneficiaryPicker from './pickers/BeneficiaryPicker';
-import BenefitPlanProjectsSearcher from './components/BenefitPlanProjectsSearcher';
-import {
-  ProjectBeneficiariesTabPanel,
-  ProjectBeneficiariesTabLabel,
-} from './components/ProjectBeneficiariesTab';
-import {
-  ProjectChangelogTabLabel,
-  ProjectChangelogTabPanel,
-} from './components/ProjectChangelogTab';
-import projectBeneficiariesMiddleware from './middlewares';
 
 const ROUTE_BENEFIT_PLANS = 'benefitPlans';
 const ROUTE_BENEFIT_PLAN = 'benefitPlans/benefitPlan';
 const ROUTE_BENEFIT_PACKAGE = 'benefitPackage';
-const ROUTE_PROJECT = 'project';
 
 const DEFAULT_CONFIG = {
   translations: [{ key: 'en', messages: flatten(messages_en) }],
@@ -108,38 +90,28 @@ const DEFAULT_CONFIG = {
       path: `${ROUTE_BENEFIT_PLAN}/:benefit_plan_uuid?/${ROUTE_BENEFIT_PACKAGE}/group/:group_beneficiaries_uuid?`,
       component: BenefitPackagePage,
     },
-    {
-      path: `${ROUTE_BENEFIT_PLAN}/:benefit_plan_uuid?/${ROUTE_PROJECT}/:project_uuid?`,
-      component: ProjectPage,
-    },
   ],
   refs: [
     { key: 'socialProtection.route.benefitPlan', ref: ROUTE_BENEFIT_PLAN },
     { key: 'socialProtection.route.benefitPackage', ref: ROUTE_BENEFIT_PACKAGE },
-    { key: 'socialProtection.route.project', ref: ROUTE_PROJECT },
     { key: 'socialProtection.BeneficiaryStatusPicker', ref: BeneficiaryStatusPicker },
     { key: 'socialProtection.BenefitPlanSearcher', ref: BenefitPlanSearcher },
     { key: 'socialProtection.BenefitPlanSearcherForEntities', ref: BenefitPlanSearcherForEntities },
     { key: 'socialProtection.BenefitPlanTaskPreviewTable', ref: BenefitPlanTaskPreviewTable },
     { key: 'socialProtection.BenefitPlanPicker', ref: BenefitPlanPicker },
-    { key: 'socialProtection.ProjectPicker', ref: ProjectPicker },
     { key: 'socialProtection.BenefitPlansListTabLabel', ref: BenefitPlansListTabLabel },
     { key: 'socialProtection.BenefitPlansListTabPanel', ref: BenefitPlansListTabPanel },
     { key: 'socialProtection.fetchBenefitPlanSchemaFields', ref: fetchBenefitPlanSchemaFields },
     { key: 'socialProtection.BenefitPlanHistorySearcher', ref: BenefitPlanHistorySearcher },
-    { key: 'socialProtection.ProjectHistorySearcher', ref: ProjectHistorySearcher },
     { key: 'socialProtection.BeneficiaryPicker', ref: BeneficiaryPicker },
-    { key: 'socialProtection.BenefitPlanProjectsSearcher', ref: BenefitPlanProjectsSearcher },
   ],
   'benefitPlan.TabPanel.label': [
     BenefitPlanBeneficiariesTabLabel,
-    BenefitPlanProjectsTabLabel,
     BenefitPlanChangelogTabLabel,
     BenefitPlanTaskTabLabel,
   ],
   'benefitPlan.TabPanel.panel': [
     BenefitPlanBeneficiariesTabPanel,
-    BenefitPlanProjectsTabPanel,
     BenefitPlanChangelogTabPanel,
     BenefitPlanTaskTabPanel,
   ],
@@ -166,14 +138,6 @@ const DEFAULT_CONFIG = {
     BenefitPackageMembersTabPanel,
     BenefitPackageBenefitsTabPanel,
     BenefitPackageGrievancesTabPanel,
-  ],
-  'project.TabPanel.label': [
-    ProjectBeneficiariesTabLabel,
-    ProjectChangelogTabLabel,
-  ],
-  'project.TabPanel.panel': [
-    ProjectBeneficiariesTabPanel,
-    ProjectChangelogTabPanel,
   ],
   'tasksManagement.tasks': [{
     text: <FormattedMessage module="socialProtection" id="benefitPlan.tasks.update.title" />,
@@ -211,7 +175,6 @@ const DEFAULT_CONFIG = {
       id: 'socialProtection.benefitPlans',
     },
   ],
-  middlewares: [projectBeneficiariesMiddleware],
 };
 
 export const SocialProtectionModule = (cfg) => ({ ...DEFAULT_CONFIG, ...cfg });

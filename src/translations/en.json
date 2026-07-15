@@ -158,7 +158,6 @@
   "socialProtection.benefitPlan.benefitPlanBeneficiaries.upload.alert.message.invalid_format": "Please upload a valid CSV or Excel file!",
   "socialProtection.benefitPlan.beneficiaries.tabGroup.label": "Beneficiaries",
   "socialProtection.benefitPlan.benefitPlanBeneficiariesWrapper.label": "Beneficiaries",
-  "socialProtection.benefitPlan.BenefitPlanProjects.label": "Projects",
   "social_protection.gql_benefit_plan_search_perms": "Social Protection | Program Search",
   "social_protection.gql_benefit_plan_create_perms": "Social Protection | Program Create",
   "social_protection.gql_benefit_plan_update_perms": "Social Protection | Program Update",
@@ -172,89 +171,6 @@
   "social_protection.gql_schema_create_perms": "Social Protection | Schema Create",
   "social_protection.gql_schema_update_perms": "Social Protection | Schema Update",
   "social_protection.gql_schema_delete_perms": "Social Protection | Schema Delete",
-  "social_protection.gql_activity_search_perms": "Social Protection | Activity Search",
-  "social_protection.gql_project_search_perms": "Social Protection | Project Search",
-  "social_protection.gql_project_create_perms": "Social Protection | Project Create",
-  "socialProtection.projects.label": "Projects",
-  "socialProtection.projects.searcherResultsTitle": "{projectsTotalCount} Projects",
-  "socialProtection.projects.searcherAddAction": "Create Project",
-  "socialProtection.project.name": "Name",
-  "socialProtection.project.name.alreadyTaken": "The name is already taken",
-  "socialProtection.project.status": "Status",
-  "socialProtection.project.activity": "Activity",
-  "socialProtection.project.targetBeneficiaries": "Target Beneficiaries",
-  "socialProtection.project.workingDays": "Working Days",
-  "socialProtection.project.pageTitle": "Project details",
-  "socialProtection.project.saveButton.tooltip": "Save",
-  "socialProtection.project.location": "Location",
-  "socialProtection.project.statusPicker": "Status",
-  "socialProtection.project.statusPicker.PREPARATION": "Preparation",
-  "socialProtection.project.statusPicker.IN_PROGRESS": "In Progress",
-  "socialProtection.project.statusPicker.COMPLETED": "Completed",
-  "socialProtection.project.benefitPlan": "Program",
-  "project": {
-    "picker": {
-      "label": "Projects",
-      "placeholder": "Select projects..."
-    },
-    "activityPicker": {
-      "label": "Activity",
-      "null": ""
-    },
-    "create": {
-      "mutationLabel": "Create project {name}"
-    },
-    "update": {
-      "mutationLabel": "Update project {name}"
-    },
-    "delete": {
-      "confirm": {
-        "title": "Delete project {name}?",
-        "message": "Deleting a project does not mean erasing it from OpenIMIS database. The project will only be deactivated and hidden in the default list view."
-      },
-      "mutationLabel": "Delete project {name}"
-    },
-    "undo": {
-      "confirm": {
-        "title": "Restore project {name}?",
-        "message": "This will undo the deletion and make the project active again. Do you want to continue?"
-      },
-      "mutationLabel": "Restore project {name}"
-    },
-    "enroll": {
-      "mutationLabel": "Enrolled {n} beneficiaries in project {name}"
-    },
-    "isDeleted": "Show Deleted",
-    "allowsMultipleEnrollments": "Allow beneficiaries to enroll in multiple projects",
-    "searcherResultsTitleHistory": "{projectsHistoryTotalCount} Historical Records Found",
-    "version": "Version",
-    "dateUpdated": "Date Updated",
-    "userUpdated": "User Updated",
-    "day": "Work Day"
-    },
-  "projectChangelog": {
-    "label": "Changelog"
-  },
-  "projectBeneficiaries": {
-    "label": "Beneficiaries",
-    "enroll": "Assign Beneficiaries",
-    "dialogTitle": "Assign Active Beneficiaries",
-    "dialogSubtitle": "Select active beneficiaries to assign to the project",
-    "save": "Save",
-    "filterPlaceholder": "Filter...",
-    "activeSelected": "{n} active beneficiaries selected",
-    "enrolled": "{n} Beneficiaries Assigned",
-    "enterTime": "Enter time",
-    "saveTime": "Save",
-    "cancelEdit": "Cancel",
-    "timeEntry": {
-      "validation": {
-        "title": "Invalid Time Entry",
-        "message": "Percentage values must be between 0 and 100. Please correct the highlighted fields before saving."
-      },
-      "mutationLabel": "Saved {n} time entries for project {name}"
-    }
-  },
   "common": {
     "true": "Yes",
     "false": "No",
