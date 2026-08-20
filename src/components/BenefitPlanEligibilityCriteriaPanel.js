@@ -11,9 +11,13 @@ import {
 import {
   CLEARED_STATE_FILTER,
   BENEFICIARY_STATUS,
-  DEFAULT_BENEFICIARY_STATUS,
+  RIGHT_BENEFIT_PLAN_CRITERIA_UPDATE,
 } from '../constants';
-import { isBase64Encoded } from '../util/advanced-criteria-utils';
+import {
+  isBase64Encoded,
+  normalizeAdvancedCriteria,
+  safeParseJsonObject,
+} from '../util/advanced-criteria-utils';
 
 const useStyles = makeStyles((theme) => ({
   paper: theme.paper.paper,
@@ -28,6 +32,7 @@ function BenefitPlanEligibilityCriteriaPanel({
   benefitPlan,
   onEditedChanged,
   activeTab,
+  rights,
 }) {
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -39,6 +44,7 @@ function BenefitPlanEligibilityCriteriaPanel({
   const { formatMessage, formatMessageWithValues } = useTranslations('socialProtection', modulesManager);
   const customFilters = useSelector((state) => state.core.customFilters);
   const [filters, setFilters] = useState([]);
+  const canUpdateCriteria = rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_UPDATE) && !confirmed;
 
   const status = Object.values(BENEFICIARY_STATUS).find((value) => (
     activeTab.toUpperCase().includes(value)
@@ -46,18 +52,13 @@ function BenefitPlanEligibilityCriteriaPanel({
   const show = status !== undefined;
 
   const getAdvancedCriteria = useCallback((status) => {
-    const jsonExt = benefitPlan?.jsonExt || '{}';
-    const jsonData = JSON.parse(jsonExt);
-
-    // Note: advanced_criteria is migrated from [filters] to {status: filters}
-    // For backward compatibility POTENTIAL status take on the old filters
-    let criteria = jsonData?.advanced_criteria || {};
-    if (Array.isArray(criteria)) {
-      criteria = { [DEFAULT_BENEFICIARY_STATUS]: criteria };
-    }
+    const jsonData = safeParseJsonObject(benefitPlan?.jsonExt);
+    const criteria = normalizeAdvancedCriteria(
+      benefitPlan?.advancedCriteria ?? jsonData?.advanced_criteria,
+    );
 
     return criteria[status] || [];
-  }, [benefitPlan?.jsonExt]);
+  }, [benefitPlan?.advancedCriteria, benefitPlan?.jsonExt]);
 
   const handleRemoveFilter = () => {
     setFilters([]);
@@ -103,14 +104,12 @@ function BenefitPlanEligibilityCriteriaPanel({
   }, [editedBenefitPlan?.id, status]);
 
   useEffect(() => {
-    if (editedBenefitPlan?.id) {
+    if (editedBenefitPlan?.id && canUpdateCriteria) {
       const { jsonExt } = editedBenefitPlan;
-      const jsonData = JSON.parse(jsonExt);
-      let advancedCriteria = jsonData?.advanced_criteria || {};
-      // migrate old advanced_criteria
-      if (Array.isArray(advancedCriteria)) {
-        advancedCriteria = { [DEFAULT_BENEFICIARY_STATUS]: jsonData?.advanced_criteria };
-      }
+      const jsonData = safeParseJsonObject(jsonExt);
+      const advancedCriteria = normalizeAdvancedCriteria(
+        jsonData?.advanced_criteria ?? benefitPlan?.advancedCriteria,
+      );
       const editedAdvancedCriteria = { ...advancedCriteria, [status]: filters };
       const json = { ...jsonData, advanced_criteria: editedAdvancedCriteria };
 
@@ -124,7 +123,7 @@ function BenefitPlanEligibilityCriteriaPanel({
 
       onEditedChanged({ ...editedBenefitPlan, jsonExt: appendedJsonExt });
     }
-  }, [filters, status]);
+  }, [filters, status, canUpdateCriteria]);
 
   const beneficiaryStatus = formatMessage(`benefitPlan.${activeTab.replace('Tab', '')}.label`);
 
@@ -153,8 +152,10 @@ function BenefitPlanEligibilityCriteriaPanel({
               setCurrentFilter={() => {}}
               filters={filters}
               setFilters={setFilters}
+              readOnly={!canUpdateCriteria}
             />
           ))}
+          {canUpdateCriteria && (
           <div style={{ backgroundColor: '#DFEDEF', paddingLeft: '10px', paddingBottom: '10px' }}>
             <AddCircle
               style={{
@@ -164,7 +165,7 @@ function BenefitPlanEligibilityCriteriaPanel({
                 height: '16px',
               }}
               onClick={handleAddFilter}
-              disabled={confirmed}
+              disabled={!canUpdateCriteria}
             />
             <Button
               onClick={handleAddFilter}
@@ -174,11 +175,13 @@ function BenefitPlanEligibilityCriteriaPanel({
                 marginBottom: '6px',
                 fontSize: '0.8rem',
               }}
-              disabled={confirmed}
+              disabled={!canUpdateCriteria}
             >
               {formatMessage('individual.enrollment.addFilters')}
             </Button>
           </div>
+          )}
+          {canUpdateCriteria && (
           <div style={{ float: 'left' }}>
             <Button
               onClick={handleRemoveFilter}
@@ -186,11 +189,12 @@ function BenefitPlanEligibilityCriteriaPanel({
               style={{
                 border: '0px',
               }}
-              disabled={confirmed}
+              disabled={!canUpdateCriteria}
             >
               {formatMessage('individual.enrollment.clearAllFilters')}
             </Button>
           </div>
+          )}
         </Grid>
       </Grid>
     </Paper>

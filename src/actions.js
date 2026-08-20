@@ -31,6 +31,7 @@ const BENEFIT_PLAN_FULL_PROJECTION = () => [
   'ceilingPerBeneficiary',
   'beneficiaryDataSchema',
   'jsonExt',
+  'advancedCriteria',
   'institution',
   'version',
   'userUpdated {username}',

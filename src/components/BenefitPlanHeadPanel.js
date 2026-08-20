@@ -14,7 +14,7 @@ import {
 import { injectIntl } from 'react-intl';
 import { withTheme, withStyles } from '@material-ui/core/styles';
 import {
-  DESCRIPTION_MAX_LENGTH, MAX_CODE_LENGTH, RIGHT_SCHEMA_UPDATE,
+  DESCRIPTION_MAX_LENGTH, MAX_CODE_LENGTH, RIGHT_SCHEMA_CREATE, RIGHT_SCHEMA_UPDATE,
 } from '../constants';
 import {
   benefitPlanCodeSetValid,
@@ -61,6 +61,9 @@ class BenefitPlanHeadPanel extends FormPanel {
       rights,
     } = this.props;
     const benefitPlan = { ...edited };
+    const canEditSchema = benefitPlan?.id
+      ? rights.includes(RIGHT_SCHEMA_UPDATE)
+      : rights.includes(RIGHT_SCHEMA_CREATE);
 
     return (
       <Grid container className={classes.item}>
@@ -167,7 +170,7 @@ class BenefitPlanHeadPanel extends FormPanel {
             onChange={(v) => this.updateAttribute('description', v)}
           />
         </Grid>
-        {rights.includes(RIGHT_SCHEMA_UPDATE) && (
+        {canEditSchema && (
         <Grid item xs={3} className={classes.item}>
           <ValidatedTextAreaInput
             module="socialProtection"

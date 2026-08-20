@@ -163,6 +163,8 @@
   "social_protection.gql_benefit_plan_update_perms": "Social Protection | Program Update",
   "social_protection.gql_benefit_plan_delete_perms": "Social Protection | Program Delete",
   "social_protection.gql_benefit_plan_close_perms": "Social Protection | Program Close",
+  "social_protection.gql_benefit_plan_criteria_search_perms": "Social Protection | Program Eligibility Criteria Search",
+  "social_protection.gql_benefit_plan_criteria_update_perms": "Social Protection | Program Eligibility Criteria Update",
   "social_protection.gql_beneficiary_search_perms": "Social Protection | Beneficiary Search",
   "social_protection.gql_beneficiary_create_perms": "Social Protection | Beneficiary Create",
   "social_protection.gql_beneficiary_update_perms": "Social Protection | Beneficiary Update",

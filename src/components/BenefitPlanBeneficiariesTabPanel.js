@@ -18,7 +18,7 @@ import {
   DEDUPLICATION_SELECT_FIELD_DIALOG_CONTRIBUTION_KEY,
   PAYROLL_CREATE_RIGHTS_PUB_REF,
   PAYROLL_PAYROLL_ROUTE,
-  RIGHT_BENEFIT_PLAN_UPDATE,
+  RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH,
 } from '../constants';
 import BenefitPlanEligibilityCriteriaPanel from './BenefitPlanEligibilityCriteriaPanel';
 import BenefitPlanBeneficiariesUploadDialog from '../dialogs/BenefitPlanBeneficiariesUploadDialog';
@@ -120,13 +120,14 @@ function BenefitPlanBeneficiariesTabPanel({
         </div>
       </Grid>
       <Grid item xs={12}>
-        {rights.includes(RIGHT_BENEFIT_PLAN_UPDATE) && benefitPlan?.id && (
+        {rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH) && benefitPlan?.id && (
           <BenefitPlanEligibilityCriteriaPanel
             confirmed={confirmed}
             edited={edited}
             benefitPlan={benefitPlan}
             onEditedChanged={onEditedChanged}
             activeTab={activeTab}
+            rights={rights}
           />
         )}
         <Contributions
