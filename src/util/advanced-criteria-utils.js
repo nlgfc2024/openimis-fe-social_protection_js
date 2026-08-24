@@ -28,3 +28,9 @@ export function normalizeAdvancedCriteria(value) {
   if (Array.isArray(criteria)) return { POTENTIAL: criteria };
   return criteria && typeof criteria === 'object' ? criteria : {};
 }
+
+export function resolveEnrollmentRanking(jsonExt, status) {
+  const rankings = safeParseJsonObject(jsonExt).enrolment_ranking;
+  if (!rankings || typeof rankings !== 'object' || Array.isArray(rankings)) return null;
+  return rankings[status] || rankings['*'] || null;
+}

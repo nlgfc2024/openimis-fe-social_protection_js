@@ -16,6 +16,7 @@ import {
 import {
   isBase64Encoded,
   normalizeAdvancedCriteria,
+  resolveEnrollmentRanking,
   safeParseJsonObject,
 } from '../util/advanced-criteria-utils';
 
@@ -59,9 +60,7 @@ function BenefitPlanEligibilityCriteriaPanel({
 
     return criteria[status] || [];
   }, [benefitPlan?.advancedCriteria, benefitPlan?.jsonExt]);
-  const phaseJsonExt = safeParseJsonObject(benefitPlan?.jsonExt);
-  const ranking = phaseJsonExt?.enrolment_ranking?.[status]
-    ?? phaseJsonExt?.enrolment_ranking?.['*'];
+  const ranking = resolveEnrollmentRanking(benefitPlan?.jsonExt, status);
   const rankingOrder = (ranking?.order_by || []).map((entry) => (
     typeof entry === 'string'
       ? entry
