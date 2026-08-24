@@ -59,6 +59,14 @@ function BenefitPlanEligibilityCriteriaPanel({
 
     return criteria[status] || [];
   }, [benefitPlan?.advancedCriteria, benefitPlan?.jsonExt]);
+  const phaseJsonExt = safeParseJsonObject(benefitPlan?.jsonExt);
+  const ranking = phaseJsonExt?.enrolment_ranking?.[status]
+    ?? phaseJsonExt?.enrolment_ranking?.['*'];
+  const rankingOrder = (ranking?.order_by || []).map((entry) => (
+    typeof entry === 'string'
+      ? entry
+      : `${entry.field} ${entry.direction || 'asc'}${entry.cast ? ` (${entry.cast})` : ''}`
+  )).join(', ');
 
   const handleRemoveFilter = () => {
     setFilters([]);
@@ -142,6 +150,30 @@ function BenefitPlanEligibilityCriteriaPanel({
           <Divider />
         </Grid>
         <Grid container className={classes.item}>
+          {ranking && (
+          <Grid item xs={12} style={{ marginBottom: '16px' }}>
+            <Paper elevation={1} style={{ padding: '16px' }}>
+              <Typography variant="subtitle1">
+                {formatMessage('benefitPlan.enrolmentRanking.title')}
+              </Typography>
+              <Typography variant="body2">
+                {formatMessage('benefitPlan.enrolmentRanking.order')}
+                {': '}
+                {rankingOrder || ranking.tie_breaker || 'id'}
+              </Typography>
+              <Typography variant="body2">
+                {formatMessage('benefitPlan.enrolmentRanking.limit')}
+                {': '}
+                {ranking.limit?.percentage
+                  ? `${ranking.limit.percentage}%`
+                  : formatMessage('benefitPlan.enrolmentRanking.allEligible')}
+              </Typography>
+              <Typography variant="caption">
+                {formatMessage('benefitPlan.enrolmentRanking.readOnly')}
+              </Typography>
+            </Paper>
+          </Grid>
+          )}
           {filters.map((filter, index) => (
             // eslint-disable-next-line react/react-in-jsx-scope
             <PublishedComponent
