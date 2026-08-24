@@ -22,6 +22,7 @@ import {
   DEFAULT_PAGE_SIZE,
   RIGHT_BENEFIT_PLAN_DELETE,
   RIGHT_BENEFIT_PLAN_UPDATE,
+  RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH,
   ROWS_PER_PAGE_OPTIONS,
 } from '../constants';
 import { deleteBenefitPlan, undoDeleteBenefitPlan, fetchBenefitPlans } from '../actions';
@@ -139,7 +140,10 @@ function BenefitPlanSearcher({
         + `/${benefitPlan?.id}`);
   }
 
-  const onDoubleClick = (benefitPlan, newTab = false) => rights.includes(RIGHT_BENEFIT_PLAN_UPDATE)
+  const onDoubleClick = (benefitPlan, newTab = false) => (
+    rights.includes(RIGHT_BENEFIT_PLAN_UPDATE)
+      || rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH)
+  )
       && !deletedBenefitPlanUuids.includes(benefitPlan.id)
       && historyPush(modulesManager, history, 'socialProtection.route.benefitPlan', [benefitPlan?.id], newTab);
 

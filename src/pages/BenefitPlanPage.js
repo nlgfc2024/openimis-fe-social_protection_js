@@ -20,6 +20,7 @@ import UndoIcon from '@material-ui/icons/Undo';
 import {
   BENEFIT_PLAN_BENEFICIARIES_LIST_TAB_VALUE,
   RIGHT_BENEFICIARY_SEARCH,
+  RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH,
   RIGHT_BENEFIT_PLAN_UPDATE,
 } from '../constants';
 import {
@@ -64,6 +65,8 @@ function BenefitPlanPage({
   const [confirmedAction, setConfirmedAction] = useState(() => null);
   const [reset, setReset] = useState(() => false);
   const prevSubmittingMutationRef = useRef();
+  const canUpdateBenefitPlan = rights.includes(RIGHT_BENEFIT_PLAN_UPDATE);
+  const canViewBenefitPlanCriteria = rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH);
 
   useEffect(() => {
     if (benefitPlanUuid) {
@@ -216,7 +219,7 @@ function BenefitPlanPage({
     return panels;
   };
 
-  const actions = [
+  const actions = canUpdateBenefitPlan ? [
     !!benefitPlan && (
       benefitPlan.isDeleted ? {
         doIt: openUndoBenefitPlanConfirmDialog,
@@ -232,10 +235,10 @@ function BenefitPlanPage({
       icon: <PauseIcon />,
       tooltip: formatMessage(intl, 'socialProtection', 'stopButtonTooltip'),
     },
-  ];
+  ] : [];
 
   return (
-    rights.includes(RIGHT_BENEFIT_PLAN_UPDATE) && (
+    (canUpdateBenefitPlan || canViewBenefitPlanCriteria) && (
     <div className={classes.page}>
       <Form
         module="socialProtection"
@@ -249,7 +252,7 @@ function BenefitPlanPage({
         back={back}
         reset={reset}
         mandatoryFieldsEmpty={isMandatoryFieldsEmpty}
-        canSave={canSave}
+        canSave={() => canUpdateBenefitPlan && canSave()}
         save={handleSave}
         HeadPanel={BenefitPlanHeadPanel}
         Panels={getBenefitPlanPanels()}
@@ -258,7 +261,7 @@ function BenefitPlanPage({
         rights={rights}
         actions={actions}
         setConfirmedAction={setConfirmedAction}
-        readOnly={!!benefitPlanUuid || editedBenefitPlan?.isDeleted}
+        readOnly={!canUpdateBenefitPlan || !!benefitPlanUuid || editedBenefitPlan?.isDeleted}
         saveTooltip={formatMessage(
           intl,
           'socialProtection',
