@@ -60,7 +60,11 @@ function BenefitPlanEligibilityCriteriaPanel({
 
     return criteria[status] || [];
   }, [benefitPlan?.advancedCriteria, benefitPlan?.jsonExt]);
-  const ranking = resolveEnrollmentRanking(benefitPlan?.jsonExt, status);
+  const ranking = resolveEnrollmentRanking(
+    benefitPlan?.enrolmentRanking,
+    benefitPlan?.jsonExt,
+    status,
+  );
   const rankingOrder = (ranking?.order_by || []).map((entry) => (
     typeof entry === 'string'
       ? entry

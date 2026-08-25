@@ -35,7 +35,18 @@ test('resolves status ranking before wildcard fallback', () => {
       ACTIVE: { order_by: ['-id'], limit: { percentage: 10 } },
     },
   });
-  assert.deepEqual(resolveEnrollmentRanking(jsonExt, 'ACTIVE').order_by, ['-id']);
-  assert.equal(resolveEnrollmentRanking(jsonExt, 'POTENTIAL').limit.percentage, 20);
-  assert.equal(resolveEnrollmentRanking('{invalid', 'ACTIVE'), null);
+  assert.deepEqual(resolveEnrollmentRanking(null, jsonExt, 'ACTIVE').order_by, ['-id']);
+  assert.equal(resolveEnrollmentRanking(null, jsonExt, 'POTENTIAL').limit.percentage, 20);
+  assert.equal(resolveEnrollmentRanking(null, '{invalid', 'ACTIVE'), null);
+});
+
+test('prefers the dedicated criteria-gated ranking field over jsonExt', () => {
+  const dedicated = JSON.stringify({ ACTIVE: { order_by: ['-dob'] } });
+  const jsonExt = JSON.stringify({
+    enrolment_ranking: { ACTIVE: { order_by: ['id'] } },
+  });
+  assert.deepEqual(
+    resolveEnrollmentRanking(dedicated, jsonExt, 'ACTIVE').order_by,
+    ['-dob'],
+  );
 });
