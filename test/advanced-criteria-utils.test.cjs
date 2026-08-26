@@ -6,6 +6,7 @@ const loadEsModule = require('./load-es-module.cjs');
 const {
   normalizeAdvancedCriteria,
   safeParseJsonObject,
+  resolveEnrollmentRanking,
 } = loadEsModule(path.join(__dirname, '../src/util/advanced-criteria-utils.js'));
 
 test('normalizes the legacy criteria list as POTENTIAL criteria', () => {
@@ -25,4 +26,27 @@ test('parses JSON objects without allowing malformed JSON to crash the page', ()
   assert.deepEqual(safeParseJsonObject('{"preserved":true}'), { preserved: true });
   assert.deepEqual(safeParseJsonObject('{invalid'), {});
   assert.deepEqual(safeParseJsonObject([]), {});
+});
+
+test('resolves status ranking before wildcard fallback', () => {
+  const jsonExt = JSON.stringify({
+    enrolment_ranking: {
+      '*': { order_by: ['id'], limit: { percentage: 20 } },
+      ACTIVE: { order_by: ['-id'], limit: { percentage: 10 } },
+    },
+  });
+  assert.deepEqual(resolveEnrollmentRanking(null, jsonExt, 'ACTIVE').order_by, ['-id']);
+  assert.equal(resolveEnrollmentRanking(null, jsonExt, 'POTENTIAL').limit.percentage, 20);
+  assert.equal(resolveEnrollmentRanking(null, '{invalid', 'ACTIVE'), null);
+});
+
+test('prefers the dedicated criteria-gated ranking field over jsonExt', () => {
+  const dedicated = JSON.stringify({ ACTIVE: { order_by: ['-dob'] } });
+  const jsonExt = JSON.stringify({
+    enrolment_ranking: { ACTIVE: { order_by: ['id'] } },
+  });
+  assert.deepEqual(
+    resolveEnrollmentRanking(dedicated, jsonExt, 'ACTIVE').order_by,
+    ['-dob'],
+  );
 });
