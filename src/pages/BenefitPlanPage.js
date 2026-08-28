@@ -4,6 +4,7 @@ import {
   withHistory,
   formatMessage,
   formatMessageWithValues,
+  coreAlert,
   coreConfirm,
   clearConfirm,
   journalize,
@@ -48,6 +49,7 @@ function BenefitPlanPage({
   undoDeleteBenefitPlan,
   closeBenefitPlan,
   updateBenefitPlan,
+  coreAlert,
   coreConfirm,
   clearConfirm,
   confirmed,
@@ -84,6 +86,26 @@ function BenefitPlanPage({
   useEffect(() => {
     if (prevSubmittingMutationRef.current && !submittingMutation) {
       journalize(mutation);
+      if (
+        mutation?.id
+        && [
+          ACTION_TYPE.CREATE_BENEFIT_PLAN,
+          ACTION_TYPE.UPDATE_BENEFIT_PLAN,
+        ].includes(mutation?.actionType)
+      ) {
+        coreAlert(
+          formatMessage(intl, 'socialProtection', 'benefitPlan.alert.success'),
+          formatMessage(
+            intl,
+            'socialProtection',
+            mutation.actionType === ACTION_TYPE.CREATE_BENEFIT_PLAN
+              ? 'benefitPlan.create.success'
+              : 'benefitPlan.update.success',
+          ),
+        );
+        history.push('/benefitPlans');
+        return;
+      }
       if ([
         ACTION_TYPE.DELETE_BENEFIT_PLAN,
         ACTION_TYPE.UNDO_DELETE_BENEFIT_PLAN,
@@ -261,7 +283,7 @@ function BenefitPlanPage({
         rights={rights}
         actions={actions}
         setConfirmedAction={setConfirmedAction}
-        readOnly={!canUpdateBenefitPlan || !!benefitPlanUuid || editedBenefitPlan?.isDeleted}
+        readOnly={!canUpdateBenefitPlan || editedBenefitPlan?.isDeleted}
         saveTooltip={formatMessage(
           intl,
           'socialProtection',
@@ -296,6 +318,7 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({
   undoDeleteBenefitPlan,
   closeBenefitPlan,
   updateBenefitPlan,
+  coreAlert,
   coreConfirm,
   clearConfirm,
   journalize,
