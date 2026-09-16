@@ -32,7 +32,7 @@ export const BENEFIT_PLAN_TASKS_SEARCH = 191001;
 export const BENEFIT_PLAN_TASKS_CREATE = 191002;
 export const BENEFIT_PLAN_TASKS_UPDATE = 191003;
 export const BENEFIT_PLAN_TASKS_DELETE = 191004;
-export const MAX_CODE_LENGTH = 8;
+export const MAX_CODE_LENGTH = 9;
 export const DESCRIPTION_MAX_LENGTH = 1024;
 
 export const BENEFIT_PLANS_LIST_TAB_VALUE = 'BenefitPlansListTab';
