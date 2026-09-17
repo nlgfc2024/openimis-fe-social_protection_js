@@ -25,6 +25,7 @@ import {
 import PreviewIcon from '@material-ui/icons/ListAlt';
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckCircleIcon from '@material-ui/icons/CheckCircleOutline';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import {
   fetchBeneficiaries, downloadBeneficiaries, updateBeneficiary, clearBeneficiaryExport,
 } from '../actions';
@@ -41,6 +42,7 @@ import {
   LOC_LEVELS,
   locationFormatter,
 } from '../util/searcher-utils';
+import EnrolmentExportDialog from '../dialogs/EnrolmentExportDialog';
 
 function BenefitPlanBeneficiariesSearcher({
   rights,
@@ -64,6 +66,7 @@ function BenefitPlanBeneficiariesSearcher({
   const modulesManager = useModulesManager();
   const history = useHistory();
   const [updatedBeneficiaries, setUpdatedBeneficiaries] = useState([]);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const fetch = (params) => fetchBeneficiaries(modulesManager, params);
 
   const headers = () => {
@@ -218,7 +221,7 @@ function BenefitPlanBeneficiariesSearcher({
     if (beneficiaryExport) {
       downloadExport(
         beneficiaryExport,
-        `${formatMessage(intl, 'socialProtection', 'export.filename.beneficiaries')}.csv`,
+        `${formatMessage(intl, 'socialProtection', 'export.filename.beneficiaries')}.xlsx`,
       )();
       clearBeneficiaryExport();
     }
@@ -258,22 +261,14 @@ function BenefitPlanBeneficiariesSearcher({
         tableTitle={formatMessageWithValues(intl, 'socialProtection', 'beneficiaries.searcherResultsTitle', {
           beneficiariesTotalCount,
         })}
-        exportable
-        exportFetch={downloadBeneficiaries}
-        exportFields={[
-          'id',
-          'individual.first_name',
-          'individual.last_name',
-          'individual.dob',
-          'json_ext', // Unfolded by backend and removed from csv
-        ]}
-        exportFieldsColumns={{
-          id: 'ID',
-          individual__first_name: formatMessage(intl, 'socialProtection', 'export.firstName'),
-          individual__last_name: formatMessage(intl, 'socialProtection', 'export.lastName'),
-          individual__dob: formatMessage(intl, 'socialProtection', 'export.dob'),
-        }}
-        exportFieldLabel={formatMessage(intl, 'socialProtection', 'export.label')}
+        enableActionButtons
+        searcherActions={[{
+          label: formatMessage(intl, 'socialProtection', 'export.label'),
+          icon: <GetAppIcon />,
+          authorized: true,
+          onClick: () => setExportDialogOpen(true),
+        }]}
+        searcherActionsPosition="header-right"
         headers={headers}
         itemFormatters={itemFormatters}
         sorts={sorts}
@@ -295,6 +290,14 @@ function BenefitPlanBeneficiariesSearcher({
         applyNumberCircle={applyNumberCircle}
         rowDisabled={isRowDisabled}
         rowLocked={isRowDisabled}
+      />
+      <EnrolmentExportDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        onExport={downloadBeneficiaries}
+        intl={intl}
+        benefitPlan={benefitPlan}
+        status={status}
       />
       {failedExport && (
         <Dialog open={failedExport} fullWidth maxWidth="sm">
