@@ -24,6 +24,7 @@ import {
 import PreviewIcon from '@material-ui/icons/ListAlt';
 import ErrorIcon from '@material-ui/icons/Error';
 import CheckCircleIcon from '@material-ui/icons/CheckCircleOutline';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import {
   fetchGroupBeneficiaries, downloadGroupBeneficiaries, clearGroupBeneficiaryExport, updateGroupBeneficiary,
 } from '../actions';
@@ -41,6 +42,7 @@ import {
   LOC_LEVELS,
   locationFormatter,
 } from '../util/searcher-utils';
+import EnrolmentExportDialog from '../dialogs/EnrolmentExportDialog';
 
 function BenefitPlanGroupBeneficiariesSearcher({
   rights,
@@ -64,6 +66,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
   const modulesManager = useModulesManager();
   const history = useHistory();
   const [updatedGroupBeneficiaries, setUpdatedGroupBeneficiaries] = useState([]);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const fetch = (params) => fetchGroupBeneficiaries(modulesManager, params);
 
@@ -209,7 +212,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
     if (groupBeneficiaryExport) {
       downloadExport(
         groupBeneficiaryExport,
-        `${formatMessage(intl, 'socialProtection', 'export.filename.groupBeneficiaries')}.csv`,
+        `${formatMessage(intl, 'socialProtection', 'export.filename.groupBeneficiaries')}.xlsx`,
       )();
       clearGroupBeneficiaryExport();
     }
@@ -249,18 +252,14 @@ function BenefitPlanGroupBeneficiariesSearcher({
         tableTitle={formatMessageWithValues(intl, 'socialProtection', 'groupBeneficiaries.searcherResultsTitle', {
           groupBeneficiariesTotalCount,
         })}
-        exportable
-        exportFetch={downloadGroupBeneficiaries}
-        exportFields={[
-          'id',
-          'group.id',
-          'json_ext', // Unfolded by backend and removed from csv
-        ]}
-        exportFieldsColumns={{
-          id: 'ID',
-          group__id: formatMessage(intl, 'socialProtection', 'export.group.id'),
-        }}
-        exportFieldLabel={formatMessage(intl, 'socialProtection', 'export.label')}
+        enableActionButtons
+        searcherActions={[{
+          label: formatMessage(intl, 'socialProtection', 'export.label'),
+          icon: <GetAppIcon />,
+          authorized: true,
+          onClick: () => setExportDialogOpen(true),
+        }]}
+        searcherActionsPosition="header-right"
         headers={headers}
         itemFormatters={itemFormatters}
         sorts={sorts}
@@ -282,6 +281,14 @@ function BenefitPlanGroupBeneficiariesSearcher({
         applyNumberCircle={applyNumberCircle}
         rowDisabled={isRowDisabled}
         rowLocked={isRowDisabled}
+      />
+      <EnrolmentExportDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        onExport={downloadGroupBeneficiaries}
+        intl={intl}
+        benefitPlan={benefitPlan}
+        status={status}
       />
       {failedExport && (
         <Dialog open={failedExport} fullWidth maxWidth="sm">
