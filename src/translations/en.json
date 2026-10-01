@@ -74,6 +74,7 @@
   "socialProtection.mainMenuSocialProtection": "Social Protection",
   "socialProtection.advancedFilters": "Advanced Filters",
   "socialProtection.createButton.tooltip": "Create",
+  "socialProtection.benefitPlan.createButton.label": "Create Phase",
   "socialProtection.download": "Download",
   "socialProtection.export.firstName": "first_name",
   "socialProtection.export.lastName": "last_name",
