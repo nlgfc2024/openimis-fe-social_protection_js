@@ -261,14 +261,13 @@ function BenefitPlanBeneficiariesSearcher({
         tableTitle={formatMessageWithValues(intl, 'socialProtection', 'beneficiaries.searcherResultsTitle', {
           beneficiariesTotalCount,
         })}
-        enableActionButtons
+        enableHeaderActionButtons
         searcherActions={[{
           label: formatMessage(intl, 'socialProtection', 'export.label'),
           icon: <GetAppIcon />,
           authorized: true,
           onClick: () => setExportDialogOpen(true),
         }]}
-        searcherActionsPosition="header-right"
         headers={headers}
         itemFormatters={itemFormatters}
         sorts={sorts}

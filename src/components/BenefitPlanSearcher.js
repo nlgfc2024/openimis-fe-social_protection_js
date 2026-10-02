@@ -297,8 +297,7 @@ function BenefitPlanSearcher({
       rowDisabled={isRowDisabled}
       rowLocked={isRowDisabled}
       onFiltersApplied={onFiltersApplied}
-      enableActionButtons
-      searcherActionsPosition="header-right"
+      enableHeaderActionButtons
       searcherActions={searcherActions()}
     />
   );
