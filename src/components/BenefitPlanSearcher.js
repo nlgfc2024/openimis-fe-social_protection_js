@@ -15,11 +15,13 @@ import {
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { IconButton, Tooltip } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import UndoIcon from '@material-ui/icons/Undo';
 import {
   DEFAULT_PAGE_SIZE,
+  RIGHT_BENEFIT_PLAN_CREATE,
   RIGHT_BENEFIT_PLAN_DELETE,
   RIGHT_BENEFIT_PLAN_UPDATE,
   RIGHT_BENEFIT_PLAN_CRITERIA_SEARCH,
@@ -43,6 +45,7 @@ function BenefitPlanSearcher({
   deleteBenefitPlan,
   undoDeleteBenefitPlan,
   fetchingBenefitPlans,
+  fetchedBenefitPlans,
   errorBenefitPlans,
   benefitPlans,
   benefitPlansPageInfo,
@@ -116,6 +119,19 @@ function BenefitPlanSearcher({
   });
 
   const fetch = (params) => fetchBenefitPlans(params);
+  const onAdd = () => historyPush(
+    modulesManager,
+    history,
+    'socialProtection.route.benefitPlan',
+  );
+
+  const searcherActions = () => [{
+    label: formatMessage(intl, 'socialProtection', 'benefitPlan.createButton.label'),
+    icon: <AddIcon />,
+    authorized: rights.includes(RIGHT_BENEFIT_PLAN_CREATE),
+    onClick: onAdd,
+    variant: 'contained',
+  }];
 
   const headers = () => {
     const headers = [
@@ -263,7 +279,8 @@ function BenefitPlanSearcher({
       fetch={fetch}
       items={items}
       itemsPageInfo={benefitPlansPageInfo}
-      fetchedItems={fetchingBenefitPlans}
+      fetchedItems={fetchedBenefitPlans}
+      fetchingItems={fetchingBenefitPlans}
       errorItems={errorBenefitPlans}
       tableTitle={formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.searcherResultsTitle', {
         benefitPlansTotalCount,
@@ -280,12 +297,15 @@ function BenefitPlanSearcher({
       rowDisabled={isRowDisabled}
       rowLocked={isRowDisabled}
       onFiltersApplied={onFiltersApplied}
+      enableHeaderActionButtons
+      searcherActions={searcherActions()}
     />
   );
 }
 
 const mapStateToProps = (state) => ({
   fetchingBenefitPlans: state.socialProtection.fetchingBenefitPlans,
+  fetchedBenefitPlans: state.socialProtection.fetchedBenefitPlans,
   errorBenefitPlans: state.socialProtection.errorBenefitPlans,
   benefitPlans: state.socialProtection.benefitPlans,
   benefitPlansPageInfo: state.socialProtection.benefitPlansPageInfo,
