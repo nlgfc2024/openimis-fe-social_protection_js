@@ -199,6 +199,8 @@ function BenefitPlanPage({
         name: benefitPlan?.name,
       }),
       formatMessage(intl, 'socialProtection', 'benefitPlan.delete.confirm.message'),
+      null,
+      'warning',
     );
   };
 

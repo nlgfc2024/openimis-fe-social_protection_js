@@ -75,6 +75,8 @@ function BenefitPlanSearcherForEntities({
       name: benefitPlanToDelete.name,
     }),
     formatMessage(intl, 'socialProtection', 'benefitPlan.delete.confirm.message'),
+    null,
+    'warning',
   );
 
   useEffect(() => benefitPlanToDelete && openDeleteBenefitPlanConfirmDialog(), [benefitPlanToDelete]);

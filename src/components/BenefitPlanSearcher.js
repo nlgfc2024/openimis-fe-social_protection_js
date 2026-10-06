@@ -67,6 +67,8 @@ function BenefitPlanSearcher({
       name: benefitPlanToDelete.name,
     }),
     formatMessage(intl, 'socialProtection', 'benefitPlan.delete.confirm.message'),
+    null,
+    'warning',
   );
 
   const openUndoBenefitPlanConfirmDialog = () => coreConfirm(
