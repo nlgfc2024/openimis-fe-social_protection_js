@@ -27,6 +27,41 @@ import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
 
+const LOCATION_FIELDS = ['district', 'traditional_authority', 'gvh', 'catchment'];
+const PRIMARY_FIELDS = ['last_name', 'first_name', 'dob'];
+const HIDDEN_FIELDS = ['uuid', 'ID', 'Unnamed: 0', 'ubr_id', 'location_code', 'location_name'];
+const FIELD_LABELS = {
+  district: 'approvalTable.district',
+  traditional_authority: 'approvalTable.traditionalAuthority',
+  gvh: 'approvalTable.gvh',
+  catchment: 'approvalTable.catchment',
+  last_name: 'approvalTable.lastName',
+  first_name: 'approvalTable.firstName',
+  dob: 'approvalTable.dateOfBirth',
+  form_number: 'approvalTable.formNumber',
+  national_id: 'approvalTable.nationalId',
+  fit_for_work: 'approvalTable.fitForWork',
+  validation_status: 'approvalTable.validationStatus',
+};
+
+const humanizeFieldName = (fieldName) => fieldName
+  .replace(/_/g, ' ')
+  .replace(/\b\w/g, (character) => character.toUpperCase());
+
+const locationColumns = (location) => {
+  const catchment = location;
+  const gvh = catchment?.parent;
+  const traditionalAuthority = gvh?.parent;
+  const district = traditionalAuthority?.parent;
+
+  return {
+    district: district?.name || '',
+    traditional_authority: traditionalAuthority?.name || '',
+    gvh: gvh?.name || '',
+    catchment: catchment?.name || '',
+  };
+};
+
 const useStyles = makeStyles((theme) => ({
   paper: theme.paper.paper,
   title: theme.paper.title,
@@ -104,7 +139,7 @@ function BeneficiaryUploadTaskDisplay({
   }, [state]);
 
   const organizeData = (data) => {
-    const uniqueKeys = ['last_name', 'first_name', 'dob'];
+    const uniqueKeys = [...LOCATION_FIELDS, ...PRIMARY_FIELDS];
 
     data.forEach((i) => Object.keys(i).forEach((k) => {
       if (!uniqueKeys.includes(k)) {
@@ -115,14 +150,18 @@ function BeneficiaryUploadTaskDisplay({
     // Remove internal identifiers
     // Unnamed 0 is ordinal often found in the uploaded CSVs, it shoun't appear in new
     // version but is added for backward compatibility s
-    return uniqueKeys.filter((k) => !['uuid', 'ID', 'Unnamed: 0'].includes(k));
+    return uniqueKeys.filter((k) => !HIDDEN_FIELDS.includes(k));
   };
 
   const [storedIndividuals, setStoredIndividuals] = useState({});
 
   useEffect(() => {
     // eslint-disable-next-line max-len
-    setPending(pendingBeneficiaries.map((x) => (x.jsonExt ? { ...JSON.parse(x.jsonExt), uuid: x.uuid } : { uuid: x.uuid })));
+    setPending(pendingBeneficiaries.map((x) => ({
+      ...(x.jsonExt ? JSON.parse(x.jsonExt) : {}),
+      ...locationColumns(x.individual?.location),
+      uuid: x.uuid,
+    })));
     const withIndividuals = {};
     pendingBeneficiaries.map((x) => withIndividuals[x.id] = x.individual?.id);
     setStoredIndividuals(withIndividuals);
@@ -147,7 +186,9 @@ function BeneficiaryUploadTaskDisplay({
   const headers = () => [
     task?.status === TASK_STATUS.ACCEPTED
       ? formatMessage(intl, 'socialProtection', 'selectForEvaluation') : formatMessage(intl, 'socialProtection', 'evaluated'),
-    ...keys] || [];
+    ...keys.map((key) => (FIELD_LABELS[key]
+      ? formatMessage(intl, 'socialProtection', FIELD_LABELS[key])
+      : humanizeFieldName(key)))] || [];
 
   const changeCheckboxState = (pending) => {
     setSelectedRecords(selectedRecords.includes(pending.uuid)
