@@ -27,9 +27,21 @@ import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
 
-const LOCATION_FIELDS = ['district', 'traditional_authority', 'village'];
+const LOCATION_FIELDS = ['district', 'traditional_authority', 'gvh', 'village'];
 const PRIMARY_FIELDS = ['first_name', 'last_name', 'dob'];
-const LAST_FIELDS = ['business_period', 'type_of_business', 'validation_notes'];
+const PREFERRED_FIELDS = [
+  ...LOCATION_FIELDS,
+  ...PRIMARY_FIELDS,
+  'gender',
+  'form_number',
+  'national_id',
+  'fit_for_work',
+  'validation_status',
+  'household_mobile_number',
+  'household_wealth_quintile',
+  'household_pmt_score',
+];
+const LAST_FIELDS = ['business_period', 'type_of_business', 'validation_notes', 'business_experience'];
 const HIDDEN_FIELDS = [
   'uuid', 'ID', 'Unnamed: 0', 'ubr_id', 'location_code', 'location_name',
   'traditional_authority_code', 'traditional_authority_name',
@@ -38,6 +50,7 @@ const HIDDEN_FIELDS = [
 const FIELD_LABELS = {
   district: 'approvalTable.district',
   traditional_authority: 'approvalTable.traditionalAuthority',
+  gvh: 'approvalTable.gvh',
   village: 'approvalTable.village',
   last_name: 'approvalTable.lastName',
   first_name: 'approvalTable.firstName',
@@ -46,6 +59,13 @@ const FIELD_LABELS = {
   national_id: 'approvalTable.nationalId',
   fit_for_work: 'approvalTable.fitForWork',
   validation_status: 'approvalTable.validationStatus',
+  household_mobile_number: 'approvalTable.householdMobileNumber',
+  household_wealth_quintile: 'approvalTable.householdWealthQuintile',
+  household_pmt_score: 'approvalTable.householdPmtScore',
+  business_period: 'approvalTable.businessPeriod',
+  type_of_business: 'approvalTable.typeOfBusiness',
+  validation_notes: 'approvalTable.validationNotes',
+  business_experience: 'approvalTable.businessExperience',
 };
 
 const humanizeFieldName = (fieldName) => fieldName
@@ -61,8 +81,16 @@ const locationColumns = (location) => {
   return {
     district: district?.name || '',
     traditional_authority: traditionalAuthority?.name || '',
+    gvh: gvh?.name || '',
     village: village?.name || '',
   };
+};
+
+const formatCellValue = (key, value) => {
+  if (key !== 'fit_for_work') return value;
+  if ([1, '1', true, 'true', 'yes', 'YES'].includes(value)) return 'Yes';
+  if ([0, '0', false, 'false', 'no', 'NO'].includes(value)) return 'No';
+  return value;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -142,7 +170,7 @@ function BeneficiaryUploadTaskDisplay({
   }, [state]);
 
   const organizeData = (data) => {
-    const uniqueKeys = [...LOCATION_FIELDS, ...PRIMARY_FIELDS];
+    const uniqueKeys = [...PREFERRED_FIELDS];
 
     data.forEach((i) => Object.keys(i).forEach((k) => {
       if (!uniqueKeys.includes(k)) {
@@ -154,8 +182,10 @@ function BeneficiaryUploadTaskDisplay({
     // Unnamed 0 is ordinal often found in the uploaded CSVs, it shoun't appear in new
     // version but is added for backward compatibility s
     const visibleKeys = uniqueKeys.filter((key) => !HIDDEN_FIELDS.includes(key));
+    const orderedKeys = PREFERRED_FIELDS.filter((key) => visibleKeys.includes(key));
+    const remainingKeys = visibleKeys.filter((key) => !PREFERRED_FIELDS.includes(key) && !LAST_FIELDS.includes(key));
     const trailingKeys = LAST_FIELDS.filter((key) => visibleKeys.includes(key));
-    return [...visibleKeys.filter((key) => !LAST_FIELDS.includes(key)), ...trailingKeys];
+    return [...orderedKeys, ...remainingKeys, ...trailingKeys];
   };
 
   const [storedIndividuals, setStoredIndividuals] = useState({});
@@ -224,7 +254,9 @@ function BeneficiaryUploadTaskDisplay({
       ),
     ];
 
-    keys.map((key) => items.push((pending) => (pending.hasOwnProperty(key) ? pending[key] : '-')));
+    keys.map((key) => items.push((pending) => (
+      pending.hasOwnProperty(key) ? formatCellValue(key, pending[key]) : '-'
+    )));
     return items;
   };
 
