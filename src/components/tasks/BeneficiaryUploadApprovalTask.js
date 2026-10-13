@@ -27,14 +27,18 @@ import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
 
-const LOCATION_FIELDS = ['district', 'traditional_authority', 'gvh', 'catchment'];
-const PRIMARY_FIELDS = ['last_name', 'first_name', 'dob'];
-const HIDDEN_FIELDS = ['uuid', 'ID', 'Unnamed: 0', 'ubr_id', 'location_code', 'location_name'];
+const LOCATION_FIELDS = ['district', 'traditional_authority', 'village'];
+const PRIMARY_FIELDS = ['first_name', 'last_name', 'dob'];
+const LAST_FIELDS = ['business_period', 'type_of_business', 'validation_notes'];
+const HIDDEN_FIELDS = [
+  'uuid', 'ID', 'Unnamed: 0', 'ubr_id', 'location_code', 'location_name',
+  'traditional_authority_code', 'traditional_authority_name',
+  'group_village_head_code', 'group_village_head_name',
+];
 const FIELD_LABELS = {
   district: 'approvalTable.district',
   traditional_authority: 'approvalTable.traditionalAuthority',
-  gvh: 'approvalTable.gvh',
-  catchment: 'approvalTable.catchment',
+  village: 'approvalTable.village',
   last_name: 'approvalTable.lastName',
   first_name: 'approvalTable.firstName',
   dob: 'approvalTable.dateOfBirth',
@@ -49,16 +53,15 @@ const humanizeFieldName = (fieldName) => fieldName
   .replace(/\b\w/g, (character) => character.toUpperCase());
 
 const locationColumns = (location) => {
-  const catchment = location;
-  const gvh = catchment?.parent;
+  const village = location;
+  const gvh = village?.parent;
   const traditionalAuthority = gvh?.parent;
   const district = traditionalAuthority?.parent;
 
   return {
     district: district?.name || '',
-    traditional_authority: traditionalAuthority?.name || '',
-    gvh: gvh?.name || '',
-    catchment: catchment?.name || '',
+    traditional_authority: [traditionalAuthority?.code, traditionalAuthority?.name].filter(Boolean).join(' - '),
+    village: village?.name || '',
   };
 };
 
@@ -150,7 +153,9 @@ function BeneficiaryUploadTaskDisplay({
     // Remove internal identifiers
     // Unnamed 0 is ordinal often found in the uploaded CSVs, it shoun't appear in new
     // version but is added for backward compatibility s
-    return uniqueKeys.filter((k) => !HIDDEN_FIELDS.includes(k));
+    const visibleKeys = uniqueKeys.filter((key) => !HIDDEN_FIELDS.includes(key));
+    const trailingKeys = LAST_FIELDS.filter((key) => visibleKeys.includes(key));
+    return [...visibleKeys.filter((key) => !LAST_FIELDS.includes(key)), ...trailingKeys];
   };
 
   const [storedIndividuals, setStoredIndividuals] = useState({});
