@@ -60,7 +60,7 @@ const locationColumns = (location) => {
 
   return {
     district: district?.name || '',
-    traditional_authority: [traditionalAuthority?.code, traditionalAuthority?.name].filter(Boolean).join(' - '),
+    traditional_authority: traditionalAuthority?.name || '',
     village: village?.name || '',
   };
 };
