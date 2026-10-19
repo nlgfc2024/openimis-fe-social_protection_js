@@ -265,12 +265,12 @@ export function fetchPendingBeneficiaryUploads(variables) {
               individual {
                 id, lastName,
                 location {
-                  name, code,
+                  name, code, type,
                   parent {
-                    name, code,
+                    name, code, type,
                     parent {
-                      name, code,
-                      parent { name, code }
+                      name, code, type,
+                      parent { name, code, type }
                     }
                   }
                 }

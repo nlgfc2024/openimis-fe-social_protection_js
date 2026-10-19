@@ -19,6 +19,7 @@ import {
   TextInput,
   formatMessage,
   formatMessageWithValues,
+  useModulesManager,
 } from '@openimis/fe-core';
 import ClearIcon from '@material-ui/icons/Clear';
 import CheckIcon from '@material-ui/icons/Check';
@@ -27,70 +28,39 @@ import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
 
-const LOCATION_FIELDS = ['district', 'traditional_authority', 'gvh', 'village'];
-const PRIMARY_FIELDS = ['first_name', 'last_name', 'dob'];
-const PREFERRED_FIELDS = [
-  ...LOCATION_FIELDS,
-  ...PRIMARY_FIELDS,
-  'gender',
-  'form_number',
-  'national_id',
-  'fit_for_work',
-  'validation_status',
-  'household_mobile_number',
-  'household_wealth_quintile',
-  'household_pmt_score',
-];
-const LAST_FIELDS = ['business_period', 'type_of_business', 'validation_notes', 'business_experience'];
-const HIDDEN_FIELDS = [
-  'uuid', 'ID', 'Unnamed: 0', 'ubr_id', 'location_code', 'location_name',
-  'traditional_authority_code', 'traditional_authority_name',
-  'group_village_head_code', 'group_village_head_name',
-];
-const FIELD_LABELS = {
-  district: 'approvalTable.district',
-  traditional_authority: 'approvalTable.traditionalAuthority',
-  gvh: 'approvalTable.gvh',
-  village: 'approvalTable.village',
-  last_name: 'approvalTable.lastName',
-  first_name: 'approvalTable.firstName',
-  dob: 'approvalTable.dateOfBirth',
-  form_number: 'approvalTable.formNumber',
-  national_id: 'approvalTable.nationalId',
-  fit_for_work: 'approvalTable.fitForWork',
-  validation_status: 'approvalTable.validationStatus',
-  household_mobile_number: 'approvalTable.householdMobileNumber',
-  household_wealth_quintile: 'approvalTable.householdWealthQuintile',
-  household_pmt_score: 'approvalTable.householdPmtScore',
-  business_period: 'approvalTable.businessPeriod',
-  type_of_business: 'approvalTable.typeOfBusiness',
-  validation_notes: 'approvalTable.validationNotes',
-  business_experience: 'approvalTable.businessExperience',
+const DEFAULT_APPROVAL_TABLE_CONFIG = {
+  leadingFields: ['last_name', 'first_name', 'dob'],
+  trailingFields: [],
+  hiddenFields: ['uuid', 'ID', 'Unnamed: 0'],
 };
+const LOCATION_TYPE_FIELDS = { R: 'district', D: 'traditional_authority', W: 'gvh', V: 'village' };
 
 const humanizeFieldName = (fieldName) => fieldName
   .replace(/_/g, ' ')
   .replace(/\b\w/g, (character) => character.toUpperCase());
 
 const locationColumns = (location) => {
-  const village = location;
-  const gvh = village?.parent;
-  const traditionalAuthority = gvh?.parent;
-  const district = traditionalAuthority?.parent;
-
-  return {
-    district: district?.name || '',
-    traditional_authority: traditionalAuthority?.name || '',
-    gvh: gvh?.name || '',
-    village: village?.name || '',
-  };
+  const columns = {};
+  let current = location;
+  while (current) {
+    if (LOCATION_TYPE_FIELDS[current.type]) columns[LOCATION_TYPE_FIELDS[current.type]] = current.name || '';
+    current = current.parent;
+  }
+  return columns;
 };
 
-const formatCellValue = (key, value) => {
+const formatCellValue = (key, value, intl) => {
   if (key !== 'fit_for_work') return value;
-  if ([1, '1', true, 'true', 'yes', 'YES'].includes(value)) return 'Yes';
-  if ([0, '0', false, 'false', 'no', 'NO'].includes(value)) return 'No';
+  if ([1, '1', true, 'true', 'yes', 'YES'].includes(value)) return formatMessage(intl, 'common', 'true');
+  if ([0, '0', false, 'false', 'no', 'NO'].includes(value)) return formatMessage(intl, 'common', 'false');
   return value;
+};
+
+const approvalTableHeader = (intl, fieldName) => {
+  const messageId = `socialProtection.approvalTable.${fieldName}`;
+  return intl.messages[messageId]
+    ? intl.formatMessage({ id: messageId })
+    : humanizeFieldName(fieldName);
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -124,6 +94,11 @@ function BeneficiaryUploadTaskDisplay({
     pendingBeneficiariesPageInfo,
   } = useSelector((state) => state.socialProtection);
   const intl = useIntl();
+  const modulesManager = useModulesManager();
+  const approvalTableConfig = {
+    ...DEFAULT_APPROVAL_TABLE_CONFIG,
+    ...modulesManager.getConf('fe-social_protection', 'approvalTable', {}),
+  };
   const [pending, setPending] = useState([]);
   const [keys, setKeys] = useState([]);
   const [state, setState] = useState({
@@ -170,7 +145,8 @@ function BeneficiaryUploadTaskDisplay({
   }, [state]);
 
   const organizeData = (data) => {
-    const uniqueKeys = [...PREFERRED_FIELDS];
+    const { leadingFields, trailingFields, hiddenFields } = approvalTableConfig;
+    const uniqueKeys = [...leadingFields];
 
     data.forEach((i) => Object.keys(i).forEach((k) => {
       if (!uniqueKeys.includes(k)) {
@@ -181,10 +157,10 @@ function BeneficiaryUploadTaskDisplay({
     // Remove internal identifiers
     // Unnamed 0 is ordinal often found in the uploaded CSVs, it shoun't appear in new
     // version but is added for backward compatibility s
-    const visibleKeys = uniqueKeys.filter((key) => !HIDDEN_FIELDS.includes(key));
-    const orderedKeys = PREFERRED_FIELDS.filter((key) => visibleKeys.includes(key));
-    const remainingKeys = visibleKeys.filter((key) => !PREFERRED_FIELDS.includes(key) && !LAST_FIELDS.includes(key));
-    const trailingKeys = LAST_FIELDS.filter((key) => visibleKeys.includes(key));
+    const visibleKeys = uniqueKeys.filter((key) => !hiddenFields.includes(key));
+    const orderedKeys = leadingFields.filter((key) => visibleKeys.includes(key));
+    const remainingKeys = visibleKeys.filter((key) => !leadingFields.includes(key) && !trailingFields.includes(key));
+    const trailingKeys = trailingFields.filter((key) => visibleKeys.includes(key));
     return [...orderedKeys, ...remainingKeys, ...trailingKeys];
   };
 
@@ -221,9 +197,7 @@ function BeneficiaryUploadTaskDisplay({
   const headers = () => [
     task?.status === TASK_STATUS.ACCEPTED
       ? formatMessage(intl, 'socialProtection', 'selectForEvaluation') : formatMessage(intl, 'socialProtection', 'evaluated'),
-    ...keys.map((key) => (FIELD_LABELS[key]
-      ? formatMessage(intl, 'socialProtection', FIELD_LABELS[key])
-      : humanizeFieldName(key)))] || [];
+    ...keys.map((key) => approvalTableHeader(intl, key))] || [];
 
   const changeCheckboxState = (pending) => {
     setSelectedRecords(selectedRecords.includes(pending.uuid)
@@ -255,7 +229,7 @@ function BeneficiaryUploadTaskDisplay({
     ];
 
     keys.map((key) => items.push((pending) => (
-      pending.hasOwnProperty(key) ? formatCellValue(key, pending[key]) : '-'
+      pending.hasOwnProperty(key) ? formatCellValue(key, pending[key], intl) : '-'
     )));
     return items;
   };
