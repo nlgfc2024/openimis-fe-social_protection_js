@@ -67,6 +67,9 @@ class BenefitPlanHeadPanel extends FormPanel {
           : { value: institution.value, label: institution.label || institution.value }
       )).filter((institution) => institution.value)
       : [];
+    if (benefitPlan.institution && !institutionOptions.some((institution) => institution.value === benefitPlan.institution)) {
+      institutionOptions.push({ value: benefitPlan.institution, label: benefitPlan.institution });
+    }
     const canEditSchema = benefitPlan?.id
       ? rights.includes(RIGHT_SCHEMA_UPDATE)
       : rights.includes(RIGHT_SCHEMA_CREATE);
