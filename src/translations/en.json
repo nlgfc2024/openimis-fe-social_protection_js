@@ -80,7 +80,7 @@
   "socialProtection.export.lastName": "last_name",
   "socialProtection.export.dob": "dob",
   "socialProtection.export.dateCreated": "date_created",
-  "socialProtection.export.label": "Export to Excel",
+  "socialProtection.export.label": "DOWNLOAD",
   "socialProtection.export.filename.beneficiaries": "beneficiaries_export",
   "socialProtection.export.filename.groupBeneficiaries": "group_beneficiaries_export",
   "socialProtection.export.group.id": "Group_ID",
