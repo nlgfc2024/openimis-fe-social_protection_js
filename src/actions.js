@@ -33,6 +33,7 @@ const BENEFIT_PLAN_FULL_PROJECTION = () => [
   'jsonExt',
   'advancedCriteria',
   'enrolmentRanking',
+  'updatesRequireApproval',
   'institution',
   'version',
   'userUpdated {username}',

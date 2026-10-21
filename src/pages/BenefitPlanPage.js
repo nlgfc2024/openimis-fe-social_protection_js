@@ -101,7 +101,9 @@ function BenefitPlanPage({
             'socialProtection',
             mutation.actionType === ACTION_TYPE.CREATE_BENEFIT_PLAN
               ? 'benefitPlan.create.success'
-              : 'benefitPlan.update.success',
+              : (benefitPlan?.updatesRequireApproval !== false
+                ? 'benefitPlan.update.submittedForApproval'
+                : 'benefitPlan.update.success'),
           ),
         );
         history.push('/benefitPlans');
