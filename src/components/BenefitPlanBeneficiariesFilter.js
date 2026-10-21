@@ -116,6 +116,7 @@ function BenefitPlanBeneficiariesFilter({
           filters={filters}
           onChangeFilters={onChangeFilters}
           anchor="parentLocation"
+          pickersForAllLevels
         />
       </Grid>
     </Grid>

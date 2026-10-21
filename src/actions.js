@@ -262,7 +262,20 @@ export function fetchPendingBeneficiaryUploads(variables) {
           {
             node
             {
-              id, uuid, jsonExt, individual { id, lastName }
+              id, uuid, jsonExt,
+              individual {
+                id, lastName,
+                location {
+                  name, code, type,
+                  parent {
+                    name, code, type,
+                    parent {
+                      name, code, type,
+                      parent { name, code, type }
+                    }
+                  }
+                }
+              }
               
             }
           }
