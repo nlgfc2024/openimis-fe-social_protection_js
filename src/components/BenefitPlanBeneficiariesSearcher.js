@@ -262,6 +262,7 @@ function BenefitPlanBeneficiariesSearcher({
           beneficiariesTotalCount,
         })}
         enableHeaderActionButtons
+        compactLayout
         searcherActions={[{
           label: formatMessage(intl, 'socialProtection', 'export.label'),
           icon: <GetAppIcon />,
