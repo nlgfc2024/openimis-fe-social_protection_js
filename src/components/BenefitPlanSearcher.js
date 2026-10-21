@@ -288,6 +288,16 @@ function BenefitPlanSearcher({
         benefitPlansTotalCount,
       })}
       headers={headers}
+      columnWidths={[
+        '20%',
+        '20%',
+        '10%',
+        '12%',
+        '12%',
+        undefined,
+        ...(rights.includes(RIGHT_BENEFIT_PLAN_UPDATE) ? ['48px'] : []),
+        ...(rights.includes(RIGHT_BENEFIT_PLAN_DELETE) ? ['48px'] : []),
+      ]}
       itemFormatters={itemFormatters}
       sorts={sorts}
       rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
