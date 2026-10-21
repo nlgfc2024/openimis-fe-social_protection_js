@@ -147,6 +147,8 @@
   "socialProtection.benefitPlan.enrolmentRanking.limit": "Percentage limit",
   "socialProtection.benefitPlan.enrolmentRanking.allEligible": "All eligible records",
   "socialProtection.benefitPlan.enrolmentRanking.readOnly": "This rule is supplied by module configuration and is read only.",
+  "socialProtection.benefitPlan.enrolmentRanking.editorLabel": "Enrollment ranking JSON",
+  "socialProtection.benefitPlan.enrolmentRanking.editorHelp": "Configure the ranking for this enrollment phase as a JSON object. Clear the field to remove the phase rule.",
   "socialProtection.benefitPlan.benefitPlanBeneficiaries.uploadHistoryTable.downloadUploadFile": "Download Upload File",
   "socialProtection.benefitPlan.benefitPlanBeneficiaries.uploadHistoryTable.downloadInvalidItems": "Download Invalid Items",
   "socialProtection.benefitPlan.benefitPlanBeneficiaries.uploadHistoryTable.validationErrors": "Validation Errors",
