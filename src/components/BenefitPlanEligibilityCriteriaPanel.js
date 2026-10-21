@@ -180,7 +180,7 @@ function BenefitPlanEligibilityCriteriaPanel({
           {filters.map((filter, index) => (
             // eslint-disable-next-line react/react-in-jsx-scope
             <PublishedComponent
-              pubRef="individual.AdvancedCriteriaRowValue"
+              pubRef="enrolment.AdvancedCriteriaRowValue"
               customFilters={customFilters}
               currentFilter={filter}
               index={index}
