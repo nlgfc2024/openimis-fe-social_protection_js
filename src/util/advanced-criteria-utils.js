@@ -16,6 +16,7 @@ export function safeParseJsonObject(value) {
   }
 }
 
+
 export function normalizeAdvancedCriteria(value) {
   let criteria = value;
   if (typeof criteria === 'string') {
@@ -35,4 +36,24 @@ export function resolveEnrollmentRanking(enrolmentRanking, jsonExt, status) {
     : safeParseJsonObject(enrolmentRanking);
   if (!rankings || typeof rankings !== 'object' || Array.isArray(rankings)) return null;
   return rankings[status] || rankings['*'] || null;
+}
+
+export function updateEnrollmentRanking(jsonExt, enrolmentRanking, status, ranking) {
+  const json = safeParseJsonObject(jsonExt);
+  const rankings = json.enrolment_ranking == null
+    ? safeParseJsonObject(enrolmentRanking)
+    : safeParseJsonObject(json.enrolment_ranking);
+  const updatedRankings = { ...rankings };
+
+  if (ranking == null) {
+    delete updatedRankings[status];
+  } else {
+    updatedRankings[status] = ranking;
+  }
+
+  return JSON.stringify({
+    ...json,
+    // Keep an empty object so the mutation can explicitly clear the last rule.
+    enrolment_ranking: updatedRankings,
+  });
 }

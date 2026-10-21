@@ -5,7 +5,8 @@ import React from 'react';
 import { injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
 import { Tune } from '@material-ui/icons';
-import { formatMessage, MainMenuContribution, withModulesManager } from '@openimis/fe-core';
+import { formatMessage, withModulesManager } from '@openimis/fe-core';
+import SocialProtectionMenu from './SocialProtectionMenu';
 import {
   RIGHT_BENEFIT_PLAN_SEARCH,
   SOCIAL_PROTECTION_MAIN_MENU_CONTRIBUTION_KEY,
@@ -28,7 +29,7 @@ function BenefitPlanMainMenu(props) {
   );
 
   return (
-    <MainMenuContribution
+    <SocialProtectionMenu
       {...props}
       header={formatMessage(props.intl, 'socialProtection', 'mainMenuSocialProtection')}
       entries={entries}

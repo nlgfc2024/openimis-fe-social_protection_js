@@ -31,6 +31,7 @@ import {
 import BenefitPlanHeadPanel from '../components/BenefitPlanHeadPanel';
 import BenefitPlanTabPanel from '../components/BenefitPlanTabPanel';
 import { ACTION_TYPE } from '../reducer';
+import { areBenefitPlanFieldsValid } from '../util/benefit-plan-validation';
 
 const styles = (theme) => ({
   page: theme.page,
@@ -100,7 +101,9 @@ function BenefitPlanPage({
             'socialProtection',
             mutation.actionType === ACTION_TYPE.CREATE_BENEFIT_PLAN
               ? 'benefitPlan.create.success'
-              : 'benefitPlan.update.success',
+              : (benefitPlan?.updatesRequireApproval !== false
+                ? 'benefitPlan.update.submittedForApproval'
+                : 'benefitPlan.update.success'),
           ),
         );
         history.push('/benefitPlans');
@@ -150,10 +153,11 @@ function BenefitPlanPage({
     }
     return true;
   };
-  const isValid = () => (
-    (editedBenefitPlan?.code ? isBenefitPlanCodeValid : true)
-    && (editedBenefitPlan?.name ? isBenefitPlanNameValid : true)
-    && (editedBenefitPlan?.beneficiaryDataSchema ? isBenefitPlanSchemaValid : true));
+  const isValid = () => areBenefitPlanFieldsValid(benefitPlan, editedBenefitPlan, {
+    code: isBenefitPlanCodeValid,
+    name: isBenefitPlanNameValid,
+    beneficiaryDataSchema: isBenefitPlanSchemaValid,
+  });
 
   const doesBenefitPlanChange = () => {
     if (_.isEqual(benefitPlan, editedBenefitPlan)) return false;
