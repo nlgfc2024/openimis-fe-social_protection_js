@@ -5,9 +5,13 @@ const loadEsModule = require('./load-es-module.cjs');
 
 const {
   normalizeAdvancedCriteria,
+  parseEnrollmentRankingText,
+  rankingEditorContextKey,
+  rankingTextForStatus,
   safeParseJsonObject,
   resolveEnrollmentRanking,
   updateEnrollmentRanking,
+  validateEnrollmentRanking,
 } = loadEsModule(path.join(__dirname, '../src/util/advanced-criteria-utils.js'));
 
 
@@ -86,3 +90,46 @@ test('keeps an explicit empty ranking object when the final phase rule is remove
 
   assert.deepEqual(updated.enrolment_ranking, {});
 });
+
+test('ranking editor context remains stable while typing and changes for saved plans or statuses', () => {
+  const saved = { id: 'plan-1', version: 4, dateUpdated: '2026-10-28' };
+  const key = rankingEditorContextKey(saved, 'ACTIVE');
+  assert.equal(rankingEditorContextKey({ ...saved, jsonExt: '{partial' }, 'ACTIVE'), key);
+  assert.notEqual(rankingEditorContextKey({ ...saved, version: 5 }, 'ACTIVE'), key);
+  assert.notEqual(rankingEditorContextKey(saved, 'POTENTIAL'), key);
+});
+
+test('ranking text reloads the selected status and preserves edited status configurations', () => {
+  const saved = { enrolmentRanking: JSON.stringify({ ACTIVE: { order_by: ['id'] } }) };
+  const edited = { jsonExt: JSON.stringify({ enrolment_ranking: {
+    ACTIVE: { order_by: ['-dob'] }, POTENTIAL: { limit: { percentage: 25 } },
+  } }) };
+  assert.deepEqual(JSON.parse(rankingTextForStatus(edited, saved, 'ACTIVE')).order_by, ['-dob']);
+  assert.equal(JSON.parse(rankingTextForStatus(edited, saved, 'POTENTIAL')).limit.percentage, 25);
+  assert.equal(rankingTextForStatus(null, saved, 'ACTIVE').includes('"id"'), true);
+});
+
+test('ranking validation gives specific feedback for known keys and values', () => {
+  assert.equal(validateEnrollmentRanking({ order_by: ['id'], limit: { percentage: 50 } }), null);
+  assert.equal(validateEnrollmentRanking([]), 'Ranking configuration must be a JSON object.');
+  assert.equal(validateEnrollmentRanking({ unknown: true }), 'Unsupported ranking keys: unknown.');
+  assert.equal(
+    validateEnrollmentRanking({ order_by: [{ field: 'age', direction: 'sideways' }] }),
+    'Ranking order_by[0].direction must be asc or desc.',
+  );
+  assert.equal(
+    validateEnrollmentRanking({ limit: { percentage: 101 } }),
+    'Ranking limit percentage must be between 1 and 100.',
+  );
+});
+
+test('ranking parser accepts valid JSON and retains invalid text as an editor error', () => {
+  assert.deepEqual(parseEnrollmentRankingText('{"order_by":["id"]}'), {
+    ranking: { order_by: ['id'] }, error: null,
+  });
+  const partial = parseEnrollmentRankingText('{"order_by": [');
+  assert.equal(partial.ranking, null);
+  assert.equal(typeof partial.error, 'string');
+  assert.equal(partial.error.length > 0, true);
+});
+

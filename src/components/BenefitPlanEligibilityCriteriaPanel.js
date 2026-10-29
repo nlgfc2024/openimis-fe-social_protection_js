@@ -18,6 +18,9 @@ import {
 import {
   isBase64Encoded,
   normalizeAdvancedCriteria,
+  parseEnrollmentRankingText,
+  rankingEditorContextKey,
+  rankingTextForStatus,
   resolveEnrollmentRanking,
   safeParseJsonObject,
   updateEnrollmentRanking,
@@ -51,6 +54,7 @@ function BenefitPlanEligibilityCriteriaPanel({
   const [rankingText, setRankingText] = useState('');
   const [rankingError, setRankingError] = useState('');
   const editedBenefitPlanRef = useRef(editedBenefitPlan);
+  const savedPlanContextRef = useRef(null);
   const canUpdateCriteria = rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_UPDATE) && !confirmed;
 
   useEffect(() => {
@@ -84,7 +88,8 @@ function BenefitPlanEligibilityCriteriaPanel({
   const ranking = hasEditedRanking
     ? resolveEnrollmentRanking(editedJsonData.enrolment_ranking, null, status)
     : resolveEnrollmentRanking(benefitPlan?.enrolmentRanking, benefitPlan?.jsonExt, status);
-  const rankingSignature = JSON.stringify(ranking || null);
+  const rankingContextKey = rankingEditorContextKey(benefitPlan, status);
+  const savedPlanContextKey = rankingEditorContextKey(benefitPlan, null);
   const rankingOrder = (ranking?.order_by || []).map((entry) => (
     typeof entry === 'string'
       ? entry
@@ -92,14 +97,20 @@ function BenefitPlanEligibilityCriteriaPanel({
   )).join(', ');
 
   useEffect(() => {
-    setRankingText(ranking ? JSON.stringify(ranking, null, 2) : '');
+    const savedPlanChanged = savedPlanContextRef.current !== savedPlanContextKey;
+    setRankingText(rankingTextForStatus(
+      savedPlanChanged ? null : editedBenefitPlanRef.current,
+      benefitPlan,
+      status,
+    ));
+    savedPlanContextRef.current = savedPlanContextKey;
     setRankingError('');
-    if (editedBenefitPlan?.enrolmentRankingInvalid) {
+    if (editedBenefitPlanRef.current?.enrolmentRankingInvalid) {
       updateEditedBenefitPlan({
         enrolmentRankingInvalid: false,
       });
     }
-  }, [status, rankingSignature]);
+  }, [rankingContextKey]);
 
   const handleRankingChange = (event) => {
     const { value } = event.target;
@@ -120,11 +131,8 @@ function BenefitPlanEligibilityCriteriaPanel({
       return;
     }
 
-    try {
-      const parsed = JSON.parse(value);
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error('Ranking configuration must be a JSON object.');
-      }
+    const { ranking: parsed, error } = parseEnrollmentRankingText(value);
+    if (!error) {
       setRankingError('');
       const currentBenefitPlan = editedBenefitPlanRef.current || {};
       updateEditedBenefitPlan({
@@ -136,8 +144,8 @@ function BenefitPlanEligibilityCriteriaPanel({
         ),
         enrolmentRankingInvalid: false,
       });
-    } catch (error) {
-      setRankingError(error.message);
+    } else {
+      setRankingError(error);
       updateEditedBenefitPlan({
         enrolmentRankingInvalid: true,
       });
