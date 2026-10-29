@@ -17,6 +17,7 @@ import {
 } from '../constants';
 import {
   isBase64Encoded,
+  mandatoryEligibilityRuleKeys,
   normalizeAdvancedCriteria,
   parseEnrollmentRankingText,
   rankingEditorContextKey,
@@ -221,6 +222,7 @@ function BenefitPlanEligibilityCriteriaPanel({
   }, [filters, status, canUpdateCriteria]);
 
   const beneficiaryStatus = formatMessage(`benefitPlan.${activeTab.replace('Tab', '')}.label`);
+  const mandatoryRules = mandatoryEligibilityRuleKeys(benefitPlan?.type);
 
   return (
     show && (
@@ -237,6 +239,27 @@ function BenefitPlanEligibilityCriteriaPanel({
           <Divider />
         </Grid>
         <Grid container className={classes.item}>
+          <Grid item xs={12} style={{ marginBottom: '16px' }}>
+            <Paper elevation={1} style={{ padding: '16px' }}>
+              <Typography variant="subtitle1">
+                {formatMessage('benefitPlan.eligibilityRules.mandatoryTitle')}
+              </Typography>
+              <Typography variant="caption" display="block">
+                {formatMessage('benefitPlan.eligibilityRules.mandatoryHelp')}
+              </Typography>
+              {mandatoryRules.map((key) => (
+                <Typography variant="body2" key={key}>{formatMessage(key)}</Typography>
+              ))}
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1">
+              {formatMessage('benefitPlan.eligibilityRules.programCriteriaTitle')}
+            </Typography>
+            <Typography variant="caption" display="block">
+              {formatMessage('benefitPlan.eligibilityRules.programCriteriaHelp')}
+            </Typography>
+          </Grid>
           {(ranking || canUpdateCriteria) && (
           <Grid item xs={12} style={{ marginBottom: '16px' }}>
             <Paper elevation={1} style={{ padding: '16px' }}>
@@ -312,7 +335,7 @@ function BenefitPlanEligibilityCriteriaPanel({
               }}
               disabled={!canUpdateCriteria}
             >
-              {formatMessage('individual.enrollment.addFilters')}
+              {formatMessage('benefitPlan.eligibilityRules.addCriteria')}
             </Button>
           </div>
           )}
@@ -326,10 +349,18 @@ function BenefitPlanEligibilityCriteriaPanel({
               }}
               disabled={!canUpdateCriteria}
             >
-              {formatMessage('individual.enrollment.clearAllFilters')}
+              {formatMessage('benefitPlan.eligibilityRules.clearCriteria')}
             </Button>
           </div>
           )}
+          <Grid item xs={12} style={{ marginTop: '16px' }}>
+            <Typography variant="subtitle1">
+              {formatMessage('benefitPlan.eligibilityRules.additionalFiltersTitle')}
+            </Typography>
+            <Typography variant="caption">
+              {formatMessage('benefitPlan.eligibilityRules.additionalFiltersHelp')}
+            </Typography>
+          </Grid>
         </Grid>
       </Grid>
     </Paper>

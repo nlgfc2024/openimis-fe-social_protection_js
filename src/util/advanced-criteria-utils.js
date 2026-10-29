@@ -158,3 +158,12 @@ export function rankingTextForStatus(editedBenefitPlan, benefitPlan, status) {
   return ranking ? JSON.stringify(ranking, null, 2) : '';
 }
 
+export function mandatoryEligibilityRuleKeys(benefitPlanType) {
+  if (benefitPlanType === 'GROUP') {
+    return ['benefitPlan.eligibilityRules.groupVerifiedAuthoritativePrimaryWorker'];
+  }
+  if (benefitPlanType === 'INDIVIDUAL') {
+    return ['benefitPlan.eligibilityRules.individualWithoutActiveHousehold'];
+  }
+  return [];
+}

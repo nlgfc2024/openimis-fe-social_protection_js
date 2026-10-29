@@ -5,6 +5,7 @@ const loadEsModule = require('./load-es-module.cjs');
 
 const {
   normalizeAdvancedCriteria,
+  mandatoryEligibilityRuleKeys,
   parseEnrollmentRankingText,
   rankingEditorContextKey,
   rankingTextForStatus,
@@ -133,3 +134,11 @@ test('ranking parser accepts valid JSON and retains invalid text as an editor er
   assert.equal(partial.error.length > 0, true);
 });
 
+test('fixed backend eligibility rules distinguish group and individual programs', () => {
+  assert.deepEqual(mandatoryEligibilityRuleKeys('GROUP'), [
+    'benefitPlan.eligibilityRules.groupVerifiedAuthoritativePrimaryWorker',
+  ]);
+  assert.deepEqual(mandatoryEligibilityRuleKeys('INDIVIDUAL'), [
+    'benefitPlan.eligibilityRules.individualWithoutActiveHousehold',
+  ]);
+});
