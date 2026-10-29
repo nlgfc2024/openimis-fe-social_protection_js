@@ -150,6 +150,11 @@ function BenefitPlanPage({
     }
     return true;
   };
+  const isMaxBeneficiariesValid = () => {
+    const value = editedBenefitPlan?.maxBeneficiaries;
+    return value === null || value === undefined || value === ''
+      || (Number.isInteger(value) && value >= 0);
+  };
   const isValid = () => (
     (!editedBenefitPlan?.code
       || editedBenefitPlan.code === benefitPlan?.code
@@ -166,7 +171,12 @@ function BenefitPlanPage({
     return true;
   };
 
-  const canSave = () => !isMandatoryFieldsEmpty() && isValid() && doesBenefitPlanChange();
+  const canSave = () => (
+    !isMandatoryFieldsEmpty()
+    && isMaxBeneficiariesValid()
+    && isValid()
+    && doesBenefitPlanChange()
+  );
 
   const handleSave = () => {
     const params = titleParams(editedBenefitPlan);

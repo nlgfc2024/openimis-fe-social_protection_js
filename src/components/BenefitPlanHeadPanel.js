@@ -77,6 +77,11 @@ class BenefitPlanHeadPanel extends FormPanel {
     const canEditSchema = benefitPlan?.id
       ? rights.includes(RIGHT_SCHEMA_UPDATE)
       : rights.includes(RIGHT_SCHEMA_CREATE);
+    const maxBeneficiaries = benefitPlan?.maxBeneficiaries;
+    const invalidMaxBeneficiaries = maxBeneficiaries !== null
+      && maxBeneficiaries !== undefined
+      && maxBeneficiaries !== ''
+      && (!Number.isInteger(maxBeneficiaries) || maxBeneficiaries < 0);
 
     return (
       <Grid container className={classes.item}>
@@ -149,6 +154,8 @@ class BenefitPlanHeadPanel extends FormPanel {
               this.updateAttribute('maxBeneficiaries', v === '' ? null : Number(v));
             }}
             value={benefitPlan?.maxBeneficiaries ?? ''}
+            error={invalidMaxBeneficiaries
+              ? formatMessage(intl, 'socialProtection', 'benefitPlan.maxBeneficiaries.invalid') : null}
             readOnly={readOnly}
           />
         </Grid>
