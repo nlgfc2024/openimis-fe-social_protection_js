@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import {
   withModulesManager,
   FormPanel,
-  NumberInput,
   ValidatedTextInput,
   ValidatedTextAreaInput,
   TextAreaInput,
@@ -141,15 +140,16 @@ class BenefitPlanHeadPanel extends FormPanel {
           />
         </Grid>
         <Grid item xs={3} className={classes.item}>
-          <NumberInput
-            min={0}
-            displayZero
+          <TextInput
+            type="number"
+            inputProps={{ min: 0, step: 1 }}
             module="socialProtection"
             label="benefitPlan.maxBeneficiaries"
             onChange={(v) => {
-              this.updateAttribute('maxBeneficiaries', v === '' ? null : v);
+              this.updateAttribute('maxBeneficiaries', v === '' ? null : Number(v));
             }}
             value={benefitPlan?.maxBeneficiaries ?? ''}
+            readOnly={readOnly}
           />
         </Grid>
         <Grid item xs={3} className={classes.item}>
