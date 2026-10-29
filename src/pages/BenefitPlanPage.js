@@ -151,9 +151,15 @@ function BenefitPlanPage({
     return true;
   };
   const isValid = () => (
-    (editedBenefitPlan?.code ? isBenefitPlanCodeValid : true)
-    && (editedBenefitPlan?.name ? isBenefitPlanNameValid : true)
-    && (editedBenefitPlan?.beneficiaryDataSchema ? isBenefitPlanSchemaValid : true));
+    (!editedBenefitPlan?.code
+      || editedBenefitPlan.code === benefitPlan?.code
+      || isBenefitPlanCodeValid)
+    && (!editedBenefitPlan?.name
+      || editedBenefitPlan.name === benefitPlan?.name
+      || isBenefitPlanNameValid)
+    && (!editedBenefitPlan?.beneficiaryDataSchema
+      || _.isEqual(editedBenefitPlan.beneficiaryDataSchema, benefitPlan?.beneficiaryDataSchema)
+      || isBenefitPlanSchemaValid));
 
   const doesBenefitPlanChange = () => {
     if (_.isEqual(benefitPlan, editedBenefitPlan)) return false;
