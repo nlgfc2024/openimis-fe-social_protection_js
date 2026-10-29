@@ -32,6 +32,7 @@ import BenefitPlanHeadPanel from '../components/BenefitPlanHeadPanel';
 import BenefitPlanTabPanel from '../components/BenefitPlanTabPanel';
 import { ACTION_TYPE } from '../reducer';
 import { areBenefitPlanFieldsValid } from '../util/benefit-plan-validation';
+import benefitPlanUpdateSuccessMessageKey from '../util/benefit-plan-messages';
 
 const styles = (theme) => ({
   page: theme.page,
@@ -101,9 +102,7 @@ function BenefitPlanPage({
             'socialProtection',
             mutation.actionType === ACTION_TYPE.CREATE_BENEFIT_PLAN
               ? 'benefitPlan.create.success'
-              : (benefitPlan?.updatesRequireApproval !== false
-                ? 'benefitPlan.update.submittedForApproval'
-                : 'benefitPlan.update.success'),
+              : benefitPlanUpdateSuccessMessageKey(benefitPlan?.updatesRequireApproval),
           ),
         );
         history.push('/benefitPlans');
