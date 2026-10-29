@@ -4,7 +4,13 @@ import {
   Collapse, Divider, List, ListItem, ListItemIcon, ListItemText,
   MenuItem, MenuList, Paper, Popper, Typography,
 } from '@material-ui/core';
-import * as Icons from '@material-ui/icons';
+import AssignmentInd from '@material-ui/icons/AssignmentInd';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import People from '@material-ui/icons/People';
+import Person from '@material-ui/icons/Person';
+import Tune from '@material-ui/icons/Tune';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from '@openimis/fe-core';
 import { resolveMenuEntries } from './menu-entries';
@@ -17,10 +23,10 @@ const useStyles = makeStyles((theme) => ({
     textTransform: 'none',
   },
   popper: { zIndex: theme.zIndex.modal + 1 },
-  paper: { minWidth: 260 },
-  flyout: { minWidth: 260, marginLeft: 2 },
-  item: { color: theme.palette.primary.main, minHeight: 44 },
-  icon: { color: 'inherit', minWidth: 40 },
+  paper: { minWidth: theme.spacing(32.5) },
+  flyout: { minWidth: theme.spacing(32.5), marginLeft: theme.spacing(0.25) },
+  item: { color: theme.palette.primary.main, minHeight: theme.spacing(5.5) },
+  icon: { color: 'inherit', minWidth: theme.spacing(5) },
   child: { paddingLeft: theme.spacing(4) },
   drawer: { width: '100%', display: 'block', padding: 0 },
   drawerHeading: {
@@ -28,6 +34,10 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.secondary.main,
   },
 }));
+
+const MENU_ICONS = {
+  AssignmentInd, People, Person, Tune,
+};
 
 export default function SocialProtectionMenu({
   modulesManager, entries, rights, header, menuId, menuVariant,
@@ -43,8 +53,11 @@ export default function SocialProtectionMenu({
   const [parent, setParent] = useState(null);
   const [anchor, setAnchor] = useState(null);
   const visibleEntries = resolveMenuEntries(
-    entries, modulesManager.getConf('fe-core', 'menus', []), menuId,
-    rights, modulesManager.getMenuEntries(),
+    entries,
+    modulesManager.getConf('fe-core', 'menus', []),
+    menuId,
+    rights,
+    modulesManager.getMenuEntries(),
   );
   useEffect(() => () => clearTimeout(closeTimer.current), []);
   const keepFlyoutOpen = () => clearTimeout(closeTimer.current);
@@ -70,14 +83,19 @@ export default function SocialProtectionMenu({
     closeTimer.current = setTimeout(() => { setParent(null); setAnchor(null); }, 180);
   };
   const iconFor = (entry) => {
-    const ConfigIcon = entry.menuIcon && Icons[entry.menuIcon];
+    const ConfigIcon = entry.menuIcon && MENU_ICONS[entry.menuIcon];
     return ConfigIcon ? <ConfigIcon /> : entry.icon;
   };
   const renderLink = (entry, drawer = false) => (
-    <MenuItem key={entry.id} component="a" role="menuitem" className={classes.item}
+    <MenuItem
+      key={entry.id}
+      component="a"
+      role="menuitem"
+      className={classes.item}
       href={`${process.env.PUBLIC_URL || ''}${entry.route}`}
       onClick={(event) => navigate(event, entry.route)}
-      onMouseEnter={drawer ? undefined : () => { setParent(null); setAnchor(null); }}>
+      onMouseEnter={drawer ? undefined : () => { setParent(null); setAnchor(null); }}
+    >
       <ListItemIcon className={classes.icon}>{iconFor(entry)}</ListItemIcon>
       <ListItemText primary={entry.text} />
     </MenuItem>
@@ -86,24 +104,29 @@ export default function SocialProtectionMenu({
   if (menuVariant !== 'AppBar') {
     return (
       <Accordion expanded={drawerOpen} onChange={(_, value) => setDrawerOpen(value)}>
-        <AccordionSummary expandIcon={<Icons.ExpandMore />} className={classes.drawerHeading}>
-          {icon}<Typography>{header}</Typography>
+        <AccordionSummary expandIcon={<ExpandMore />} className={classes.drawerHeading}>
+          {icon}
+          <Typography>{header}</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.drawer}>
           <List>
-            {visibleEntries.map((entry) => entry.children ? (
+            {visibleEntries.map((entry) => (entry.children ? (
               <React.Fragment key={entry.id}>
-                <ListItem button className={classes.item} aria-expanded={parent?.id === entry.id}
-                  onClick={() => setParent(parent?.id === entry.id ? null : entry)}>
+                <ListItem
+                  button
+                  className={classes.item}
+                  aria-expanded={parent?.id === entry.id}
+                  onClick={() => setParent(parent?.id === entry.id ? null : entry)}
+                >
                   <ListItemIcon className={classes.icon}>{iconFor(entry)}</ListItemIcon>
                   <ListItemText primary={entry.text} />
-                  {parent?.id === entry.id ? <Icons.ExpandLess /> : <Icons.ExpandMore />}
+                  {parent?.id === entry.id ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
                 <Collapse in={parent?.id === entry.id} unmountOnExit>
                   <List className={classes.child}>{entry.children.map((child) => renderLink(child, true))}</List>
                 </Collapse>
               </React.Fragment>
-            ) : renderLink(entry, true))}
+            ) : renderLink(entry, true)))}
           </List>
         </AccordionDetails>
       </Accordion>
@@ -112,57 +135,91 @@ export default function SocialProtectionMenu({
 
   return (
     <>
-      <Button ref={headingRef} className={classes.heading} aria-haspopup="menu"
-        aria-expanded={open} onClick={() => { if (open) close(); else setOpen(true); }}>
-        {header}<Icons.ExpandMore />
+      <Button
+        ref={headingRef}
+        className={classes.heading}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => { if (open) close(); else setOpen(true); }}
+      >
+        {header}
+        <ExpandMore />
       </Button>
       <Popper open={open} anchorEl={headingRef.current} placement="bottom-start" className={classes.popper}>
         <ClickAwayListener onClickAway={close}>
-          <div onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              if (parent) { anchor?.focus(); setParent(null); setAnchor(null); }
-              else { close(); headingRef.current?.focus(); }
-            }
-            if (event.key === 'Tab') close();
-          }}>
+          <div
+            role="presentation"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                if (parent) {
+                  anchor?.focus(); setParent(null); setAnchor(null);
+                } else {
+                  close(); headingRef.current?.focus();
+                }
+              }
+              if (event.key === 'Tab') close();
+            }}
+          >
             <Paper className={classes.paper}>
               <MenuList aria-label={header} autoFocusItem={open}>
-                {visibleEntries.flatMap((entry) => entry.children ? (
-                  <MenuItem key={entry.id} id={`${menuId}-${entry.id}`} className={classes.item} aria-haspopup="menu"
+                {visibleEntries.flatMap((entry) => (entry.children ? (
+                  <MenuItem
+                    key={entry.id}
+                    id={`${menuId}-${entry.id}`}
+                    className={classes.item}
+                    aria-haspopup="menu"
                     aria-expanded={parent?.id === entry.id}
                     aria-controls={parent?.id === entry.id ? `${menuId}-flyout` : undefined}
-                    onMouseEnter={(event) => showFlyout(event, entry)} onMouseLeave={deferClose}
+                    onMouseEnter={(event) => showFlyout(event, entry)}
+                    onMouseLeave={deferClose}
                     onClick={(event) => showFlyout(event, entry)}
                     onKeyDown={(event) => {
                       if (event.key === 'ArrowRight') {
                         event.preventDefault(); event.stopPropagation(); showFlyout(event, entry);
                         setTimeout(() => childListRef.current?.querySelector('[role="menuitem"]')?.focus(), 0);
                       }
-                    }}>
+                    }}
+                  >
                     <ListItemIcon className={classes.icon}>{iconFor(entry)}</ListItemIcon>
-                    <ListItemText primary={entry.text} /><Icons.ChevronRight />
+                    <ListItemText primary={entry.text} />
+                    <ChevronRight />
                   </MenuItem>
                 ) : [
                   renderLink(entry),
                   entry.withDivider ? <Divider key={`${entry.id}-divider`} /> : null,
-                ])}
+                ]))}
               </MenuList>
             </Paper>
-            <Popper open={Boolean(parent && anchor)} anchorEl={anchor} placement="right-start"
-              disablePortal className={classes.popper} modifiers={{ flip: { enabled: true }, preventOverflow: { boundariesElement: 'viewport' } }}>
+            <Popper
+              open={Boolean(parent && anchor)}
+              anchorEl={anchor}
+              placement="right-start"
+              disablePortal
+              className={classes.popper}
+              modifiers={{ flip: { enabled: true }, preventOverflow: { boundariesElement: 'viewport' } }}
+            >
               <Paper className={classes.flyout} onMouseEnter={keepFlyoutOpen} onMouseLeave={deferClose}>
-                <MenuList ref={childListRef} id={`${menuId}-flyout`}
+                <MenuList
+                  ref={childListRef}
+                  id={`${menuId}-flyout`}
                   aria-labelledby={parent ? `${menuId}-${parent.id}` : undefined}
                   onKeyDown={(event) => {
                     if (event.key === 'ArrowLeft') {
-                      event.preventDefault(); event.stopPropagation(); anchor?.focus(); setParent(null); setAnchor(null);
+                      event.preventDefault(); event.stopPropagation();
+                      anchor?.focus(); setParent(null); setAnchor(null);
                     }
-                  }}>
+                  }}
+                >
                   {parent?.children.map((entry) => (
-                    <MenuItem key={entry.id} component="a" role="menuitem" className={classes.item}
+                    <MenuItem
+                      key={entry.id}
+                      component="a"
+                      role="menuitem"
+                      className={classes.item}
                       href={`${process.env.PUBLIC_URL || ''}${entry.route}`}
-                      onClick={(event) => navigate(event, entry.route)}>
-                      <ListItemIcon className={classes.icon}>{entry.icon}</ListItemIcon>
+                      onClick={(event) => navigate(event, entry.route)}
+                    >
+                      <ListItemIcon className={classes.icon}>{iconFor(entry)}</ListItemIcon>
                       <ListItemText primary={entry.text} />
                     </MenuItem>
                   ))}
