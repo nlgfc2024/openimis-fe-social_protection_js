@@ -349,7 +349,10 @@ function formatBenefitPlanGQL(benefitPlan) {
     ${benefitPlan?.id ? `id: "${benefitPlan.id}"` : ''}
     ${benefitPlan?.name ? `name: "${formatGQLString(benefitPlan.name)}"` : ''}
     ${benefitPlan?.code ? `code: "${formatGQLString(benefitPlan.code)}"` : ''}
-    ${benefitPlan?.maxBeneficiaries ? `maxBeneficiaries: ${benefitPlan.maxBeneficiaries}` : ''}
+    ${benefitPlan?.maxBeneficiaries !== null
+      && benefitPlan?.maxBeneficiaries !== undefined
+      && benefitPlan?.maxBeneficiaries !== ''
+    ? `maxBeneficiaries: ${benefitPlan.maxBeneficiaries}` : ''}
     ${benefitPlan?.ceilingPerBeneficiary ? `ceilingPerBeneficiary: "${benefitPlan.ceilingPerBeneficiary}"` : ''}
     ${benefitPlan?.institution ? `institution: "${formatGQLString(benefitPlan.institution)}"` : 'institution: ""'}
     ${benefitPlan?.type ? `type: ${benefitPlan.type}` : ''}

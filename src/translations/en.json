@@ -38,6 +38,7 @@
   "socialProtection.benefitPlan.code.hint.generatedOnSave": "Generated on save",
   "socialProtection.benefitPlan.institution": "Institution",
   "socialProtection.benefitPlan.maxBeneficiaries": "Max Beneficiaries",
+  "socialProtection.benefitPlan.maxBeneficiaries.invalid": "Enter a whole number greater than or equal to zero.",
   "socialProtection.benefitPlan.jsonExt": "json_ext",
   "socialProtection.benefitPlan.schema": "Schema",
   "socialProtection.benefitPlan.description": "Description",

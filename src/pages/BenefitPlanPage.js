@@ -152,18 +152,33 @@ function BenefitPlanPage({
     }
     return true;
   };
-  const isValid = () => areBenefitPlanFieldsValid(benefitPlan, editedBenefitPlan, {
-    code: isBenefitPlanCodeValid,
-    name: isBenefitPlanNameValid,
-    beneficiaryDataSchema: isBenefitPlanSchemaValid,
-  });
+  const isMaxBeneficiariesValid = () => {
+    const value = editedBenefitPlan?.maxBeneficiaries;
+    return value === null || value === undefined || value === ''
+      || (Number.isInteger(value) && value >= 0);
+  };
+  const isValid = () => (
+    (!editedBenefitPlan?.code
+      || editedBenefitPlan.code === benefitPlan?.code
+      || isBenefitPlanCodeValid)
+    && (!editedBenefitPlan?.name
+      || editedBenefitPlan.name === benefitPlan?.name
+      || isBenefitPlanNameValid)
+    && (!editedBenefitPlan?.beneficiaryDataSchema
+      || _.isEqual(editedBenefitPlan.beneficiaryDataSchema, benefitPlan?.beneficiaryDataSchema)
+      || isBenefitPlanSchemaValid));
 
   const doesBenefitPlanChange = () => {
     if (_.isEqual(benefitPlan, editedBenefitPlan)) return false;
     return true;
   };
 
-  const canSave = () => !isMandatoryFieldsEmpty() && isValid() && doesBenefitPlanChange();
+  const canSave = () => (
+    !isMandatoryFieldsEmpty()
+    && isMaxBeneficiariesValid()
+    && isValid()
+    && doesBenefitPlanChange()
+  );
 
   const handleSave = () => {
     const params = titleParams(editedBenefitPlan);
