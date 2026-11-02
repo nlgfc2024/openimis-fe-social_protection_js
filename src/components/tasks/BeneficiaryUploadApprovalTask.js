@@ -400,20 +400,6 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
   const currentUser = useSelector((state) => state.core.user);
   const [disabled, setDisable] = useState(defaultDisabled);
 
-  const [openModal, setOpenModal] = useState(null);
-  const [approveOrFail, setApproveOrFail] = useState('');
-  const [confirmed, setConfirmed] = useState('');
-
-  const onConfirm = () => {
-    setOpenModal(false);
-    setConfirmed(true);
-  };
-
-  const onClose = () => {
-    setOpenModal(false);
-    setConfirmed(false);
-  };
-
   const isCurrentUserInTaskGroup = () => {
     const taskExecutors = task?.taskGroup?.taskexecutorSet?.edges.map((edge) => decodeId(edge.node.user.id)) ?? [];
     return taskExecutors && taskExecutors.includes(currentUser?.id);
@@ -421,50 +407,17 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
 
   const isRowDisabled = (_) => !isCurrentUserInTaskGroup() || task?.status !== TASK_STATUS.ACCEPTED;
 
-  const clear = () => {
-    setOpenModal(null);
-    setApproveOrFail('');
-    setConfirmed('');
-  };
-
   const handleButtonClick = (choiceString) => {
-    // () => defaultAction(APPROVED)
-    if (task?.id && currentUser?.id) {
-      setApproveOrFail(choiceString);
-      setOpenModal(true);
+    if (task?.id && currentUser?.id && !isRowDisabled()) {
+      setDisable(true);
+      // Delegate to TaskApprovementPanel. Besides resolving the task, it waits
+      // for the mutation result and returns the user to the appropriate task list.
+      defaultAction(choiceString);
     }
   };
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (task?.id && currentUser?.id) {
-      if (confirmed) {
-        setDisable(true);
-        dispatch(resolveTask(
-          task,
-          formatMessage(intl, 'tasksManagement', 'task.resolve.mutationLabel'),
-          currentUser,
-          approveOrFail,
-
-        ));
-      }
-    }
-    return () => confirmed && clear();
-  }, [confirmed]);
 
   return (
     <>
-      <SelectDialog
-        confirmState={openModal}
-        onConfirm={onConfirm}
-        onClose={onClose}
-        module="socialProtection"
-        confirmTitle="taskConfirmation.title"
-        confirmMessage={formatMessage(intl, 'socialProtection', 'bulkApprove')}
-        confirmationButton="dialogActions.continue"
-        rejectionButton="dialogActions.goBack"
-      />
       <Paper className={classes.paper}>
         <div className={classes.fabHeaderContainer}>
           {formatMessage(intl, 'socialProtection', 'resolveAllRemainingTasks')}
