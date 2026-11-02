@@ -31,6 +31,8 @@ import {
 import BenefitPlanHeadPanel from '../components/BenefitPlanHeadPanel';
 import BenefitPlanTabPanel from '../components/BenefitPlanTabPanel';
 import { ACTION_TYPE } from '../reducer';
+import { areBenefitPlanFieldsValid } from '../util/benefit-plan-validation';
+import benefitPlanUpdateSuccessMessageKey from '../util/benefit-plan-messages';
 
 const styles = (theme) => ({
   page: theme.page,
@@ -100,7 +102,7 @@ function BenefitPlanPage({
             'socialProtection',
             mutation.actionType === ACTION_TYPE.CREATE_BENEFIT_PLAN
               ? 'benefitPlan.create.success'
-              : 'benefitPlan.update.success',
+              : benefitPlanUpdateSuccessMessageKey(benefitPlan?.updatesRequireApproval),
           ),
         );
         history.push('/benefitPlans');
@@ -150,17 +152,33 @@ function BenefitPlanPage({
     }
     return true;
   };
+  const isMaxBeneficiariesValid = () => {
+    const value = editedBenefitPlan?.maxBeneficiaries;
+    return value === null || value === undefined || value === ''
+      || (Number.isInteger(value) && value >= 0);
+  };
   const isValid = () => (
-    (editedBenefitPlan?.code ? isBenefitPlanCodeValid : true)
-    && (editedBenefitPlan?.name ? isBenefitPlanNameValid : true)
-    && (editedBenefitPlan?.beneficiaryDataSchema ? isBenefitPlanSchemaValid : true));
+    (!editedBenefitPlan?.code
+      || editedBenefitPlan.code === benefitPlan?.code
+      || isBenefitPlanCodeValid)
+    && (!editedBenefitPlan?.name
+      || editedBenefitPlan.name === benefitPlan?.name
+      || isBenefitPlanNameValid)
+    && (!editedBenefitPlan?.beneficiaryDataSchema
+      || _.isEqual(editedBenefitPlan.beneficiaryDataSchema, benefitPlan?.beneficiaryDataSchema)
+      || isBenefitPlanSchemaValid));
 
   const doesBenefitPlanChange = () => {
     if (_.isEqual(benefitPlan, editedBenefitPlan)) return false;
     return true;
   };
 
-  const canSave = () => !isMandatoryFieldsEmpty() && isValid() && doesBenefitPlanChange();
+  const canSave = () => (
+    !isMandatoryFieldsEmpty()
+    && isMaxBeneficiariesValid()
+    && isValid()
+    && doesBenefitPlanChange()
+  );
 
   const handleSave = () => {
     const params = titleParams(editedBenefitPlan);

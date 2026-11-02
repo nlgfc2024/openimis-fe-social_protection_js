@@ -7,6 +7,19 @@ Please refer to [openimis-fe_js](https://github.com/openimis/openimis-fe_js) to 
 The module is built with [rollup](https://rollupjs.org/).
 In development mode, you can use `npm link` and `npm start` to continuously scan for changes and automatically update your development server.
 
+## Enrolment integration dependencies
+
+The Social Protection enrolment criteria and nested enrolment navigation require the dedicated
+Enrolment frontend integration from `nlgfc2024/openimis-fe-enrolment_js#1`. The frontend hub must
+register the published component `enrolment.AdvancedCriteriaRowValue`.
+
+Deploy this together with `nlgfc2024/openimis-fe-individual_js#22`, which removes the legacy
+Individual-owned enrolment routes and translations. This module intentionally does not fall back
+to the old `individual.AdvancedCriteriaRowValue` reference.
+
+Malawi installations should override the neutral “Program” strings with “Phase” in the coremis
+language pack, including the update-success/approval messages and enrolment-ranking editor help.
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/openimis/openimis-fe-social_protection_js.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/openimis/openimis-fe-social_protection_js/alerts/)
 
