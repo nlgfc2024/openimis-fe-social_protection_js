@@ -94,7 +94,8 @@ function BenefitPlanEligibilityCriteriaPanel({
   const rankingOrder = (ranking?.order_by || []).map((entry) => (
     typeof entry === 'string'
       ? entry
-      : `${entry.field} ${entry.direction || 'asc'}${entry.cast ? ` (${entry.cast})` : ''}`
+      : `${entry.subject && entry.subject !== 'self' ? `${entry.subject}: ` : ''}`
+        + `${entry.field} ${entry.direction || 'asc'}${entry.cast ? ` (${entry.cast})` : ''}`
   )).join(', ');
 
   useEffect(() => {
