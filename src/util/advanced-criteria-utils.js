@@ -66,7 +66,7 @@ const ORDER_BY_SUBJECTS = ['self', 'head', 'primary_worker'];
 const LIMIT_KEYS = new Set(['percentage', 'respect_max_beneficiaries']);
 const SELECTION_STRATEGY_KEYS = new Set([
   'source', 'female_percentage', 'youth_percentage', 'female_value', 'youth_min_age', 'youth_max_age',
-  'quotas', 'fill_remaining',
+  'quotas',
 ]);
 
 function unsupportedKeys(value, allowed) {
@@ -139,9 +139,6 @@ export function validateEnrollmentRanking(ranking) {
       || !strategy.quotas.length
       || strategy.quotas.some((quota) => !quota || typeof quota !== 'object' || Array.isArray(quota))
     )) return 'Ranking selection_strategy.quotas must be a non-empty list of objects.';
-    if (strategy.fill_remaining !== undefined && typeof strategy.fill_remaining !== 'boolean') {
-      return 'Ranking selection_strategy.fill_remaining must be true or false.';
-    }
   }
   return null;
 }
