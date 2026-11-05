@@ -60,10 +60,13 @@ export function updateEnrollmentRanking(jsonExt, enrolmentRanking, status, ranki
 const RANKING_KEYS = new Set([
   'order_by', 'tie_breaker', 'limit', 'score_source', 'weighted_score', 'selection_strategy',
 ]);
-const ORDER_BY_KEYS = new Set(['field', 'direction', 'cast', 'nulls']);
+const ORDER_BY_KEYS = new Set(['field', 'direction', 'cast', 'nulls', 'subject']);
+// The backend checks that the subject suits the Phase type when it is saved.
+const ORDER_BY_SUBJECTS = ['self', 'head', 'primary_worker'];
 const LIMIT_KEYS = new Set(['percentage', 'respect_max_beneficiaries']);
 const SELECTION_STRATEGY_KEYS = new Set([
   'source', 'female_percentage', 'youth_percentage', 'female_value', 'youth_min_age', 'youth_max_age',
+  'quotas',
 ]);
 
 function unsupportedKeys(value, allowed) {
@@ -99,6 +102,9 @@ export function validateEnrollmentRanking(ranking) {
         if (item.nulls && !['first', 'last'].includes(item.nulls)) {
           return `Ranking order_by[${index}].nulls must be first or last.`;
         }
+        if (item.subject !== undefined && !ORDER_BY_SUBJECTS.includes(item.subject)) {
+          return `Ranking order_by[${index}].subject must be self, head or primary_worker.`;
+        }
       }
     }
   }
@@ -127,6 +133,12 @@ export function validateEnrollmentRanking(ranking) {
     if (invalidStrategyKeys.length) {
       return `Unsupported ranking selection_strategy keys: ${invalidStrategyKeys.join(', ')}.`;
     }
+    // Bucket contents are validated by the backend when the Phase is saved.
+    if (strategy.quotas !== undefined && (
+      !Array.isArray(strategy.quotas)
+      || !strategy.quotas.length
+      || strategy.quotas.some((quota) => !quota || typeof quota !== 'object' || Array.isArray(quota))
+    )) return 'Ranking selection_strategy.quotas must be a non-empty list of objects.';
   }
   return null;
 }
