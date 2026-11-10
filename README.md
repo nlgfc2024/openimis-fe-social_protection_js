@@ -18,7 +18,7 @@ Individual-owned enrolment routes and translations. This module intentionally do
 to the old `individual.AdvancedCriteriaRowValue` reference.
 
 Malawi installations should override the neutral “Program” strings with “Phase” in the coremis
-language pack, including the update-success/approval messages and enrolment-ranking editor help.
+language pack, including the update-success/approval messages.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/openimis/openimis-fe-social_protection_js.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/openimis/openimis-fe-social_protection_js/alerts/)

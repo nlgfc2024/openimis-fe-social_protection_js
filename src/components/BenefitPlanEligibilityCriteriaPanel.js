@@ -8,7 +8,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 import AddCircle from '@material-ui/icons/Add';
 import {
-  Button, Divider, Grid, Paper, TextField, Typography,
+  Button, Divider, Grid, Paper, Typography,
 } from '@material-ui/core';
 import {
   CLEARED_STATE_FILTER,
@@ -19,12 +19,7 @@ import {
   isBase64Encoded,
   mandatoryEligibilityRuleKeys,
   normalizeAdvancedCriteria,
-  parseEnrollmentRankingText,
-  rankingEditorContextKey,
-  rankingTextForStatus,
-  resolveEnrollmentRanking,
   safeParseJsonObject,
-  updateEnrollmentRanking,
 } from '../util/advanced-criteria-utils';
 
 const useStyles = makeStyles((theme) => ({
@@ -52,10 +47,7 @@ function BenefitPlanEligibilityCriteriaPanel({
   const { formatMessage, formatMessageWithValues } = useTranslations('socialProtection', modulesManager);
   const customFilters = useSelector((state) => state.core.customFilters);
   const [filters, setFilters] = useState([]);
-  const [rankingText, setRankingText] = useState('');
-  const [rankingError, setRankingError] = useState('');
   const editedBenefitPlanRef = useRef(editedBenefitPlan);
-  const savedPlanContextRef = useRef(null);
   const canUpdateCriteria = rights.includes(RIGHT_BENEFIT_PLAN_CRITERIA_UPDATE) && !confirmed;
 
   useEffect(() => {
@@ -84,74 +76,6 @@ function BenefitPlanEligibilityCriteriaPanel({
 
     return criteria[status] || [];
   }, [benefitPlan?.advancedCriteria, benefitPlan?.jsonExt]);
-  const editedJsonData = safeParseJsonObject(editedBenefitPlan?.jsonExt);
-  const hasEditedRanking = Object.prototype.hasOwnProperty.call(editedJsonData, 'enrolment_ranking');
-  const ranking = hasEditedRanking
-    ? resolveEnrollmentRanking(editedJsonData.enrolment_ranking, null, status)
-    : resolveEnrollmentRanking(benefitPlan?.enrolmentRanking, benefitPlan?.jsonExt, status);
-  const rankingContextKey = rankingEditorContextKey(benefitPlan, status);
-  const savedPlanContextKey = rankingEditorContextKey(benefitPlan, null);
-  const rankingOrder = (ranking?.order_by || []).map((entry) => (
-    typeof entry === 'string'
-      ? entry
-      : `${entry.field} ${entry.direction || 'asc'}${entry.cast ? ` (${entry.cast})` : ''}`
-  )).join(', ');
-
-  useEffect(() => {
-    const savedPlanChanged = savedPlanContextRef.current !== savedPlanContextKey;
-    setRankingText(rankingTextForStatus(
-      savedPlanChanged ? null : editedBenefitPlanRef.current,
-      benefitPlan,
-      status,
-    ));
-    savedPlanContextRef.current = savedPlanContextKey;
-    setRankingError('');
-    if (editedBenefitPlanRef.current?.enrolmentRankingInvalid) {
-      updateEditedBenefitPlan({
-        enrolmentRankingInvalid: false,
-      });
-    }
-  }, [rankingContextKey]);
-
-  const handleRankingChange = (event) => {
-    const { value } = event.target;
-    setRankingText(value);
-
-    if (!value.trim()) {
-      setRankingError('');
-      const currentBenefitPlan = editedBenefitPlanRef.current || {};
-      updateEditedBenefitPlan({
-        jsonExt: updateEnrollmentRanking(
-          currentBenefitPlan.jsonExt,
-          benefitPlan?.enrolmentRanking,
-          status,
-          null,
-        ),
-        enrolmentRankingInvalid: false,
-      });
-      return;
-    }
-
-    const { ranking: parsed, error } = parseEnrollmentRankingText(value);
-    if (!error) {
-      setRankingError('');
-      const currentBenefitPlan = editedBenefitPlanRef.current || {};
-      updateEditedBenefitPlan({
-        jsonExt: updateEnrollmentRanking(
-          currentBenefitPlan.jsonExt,
-          benefitPlan?.enrolmentRanking,
-          status,
-          parsed,
-        ),
-        enrolmentRankingInvalid: false,
-      });
-    } else {
-      setRankingError(error);
-      updateEditedBenefitPlan({
-        enrolmentRankingInvalid: true,
-      });
-    }
-  };
 
   const handleRemoveFilter = () => {
     setFilters([]);
@@ -260,46 +184,6 @@ function BenefitPlanEligibilityCriteriaPanel({
               {formatMessage('benefitPlan.eligibilityRules.programCriteriaHelp')}
             </Typography>
           </Grid>
-          {(ranking || canUpdateCriteria) && (
-          <Grid item xs={12} style={{ marginBottom: '16px' }}>
-            <Paper elevation={1} style={{ padding: '16px' }}>
-              <Typography variant="subtitle1">
-                {formatMessage('benefitPlan.enrolmentRanking.title')}
-              </Typography>
-              {canUpdateCriteria ? (
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={8}
-                  variant="outlined"
-                  value={rankingText}
-                  onChange={handleRankingChange}
-                  error={Boolean(rankingError)}
-                  helperText={rankingError || formatMessage('benefitPlan.enrolmentRanking.editorHelp')}
-                  aria-label={formatMessage('benefitPlan.enrolmentRanking.editorLabel')}
-                />
-              ) : (
-                <>
-                  <Typography variant="body2">
-                    {formatMessage('benefitPlan.enrolmentRanking.order')}
-                    {': '}
-                    {rankingOrder || ranking.tie_breaker || 'id'}
-                  </Typography>
-                  <Typography variant="body2">
-                    {formatMessage('benefitPlan.enrolmentRanking.limit')}
-                    {': '}
-                    {ranking.limit?.percentage
-                      ? `${ranking.limit.percentage}%`
-                      : formatMessage('benefitPlan.enrolmentRanking.allEligible')}
-                  </Typography>
-                  <Typography variant="caption">
-                    {formatMessage('benefitPlan.enrolmentRanking.readOnly')}
-                  </Typography>
-                </>
-              )}
-            </Paper>
-          </Grid>
-          )}
           {filters.map((filter, index) => (
             // eslint-disable-next-line react/react-in-jsx-scope
             <PublishedComponent
