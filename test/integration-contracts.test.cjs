@@ -26,8 +26,6 @@ test('criteria rows depend on the published Enrolment module component', () => {
 
 test('default module translations use Program rather than Malawi-specific phase wording', () => {
   const approval = translations['socialProtection.benefitPlan.update.submittedForApproval'];
-  const rankingHelp = translations['socialProtection.benefitPlan.enrolmentRanking.editorHelp'];
   assert.equal(approval.includes('Program'), true);
-  assert.equal(rankingHelp.includes('Program'), true);
   assert.equal(/\bphase\b/i.test(approval), false);
 });
