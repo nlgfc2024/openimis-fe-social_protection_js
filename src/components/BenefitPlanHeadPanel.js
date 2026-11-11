@@ -226,7 +226,7 @@ class BenefitPlanHeadPanel extends FormPanel {
           />
         </Grid>
         {canEditSchema && (
-        <Grid item xs={3} className={classes.item}>
+        <Grid item xs={3} className={classes.item} style={{ display: 'none' }}>
           <ValidatedTextAreaInput
             module="socialProtection"
             label="benefitPlan.schema"
