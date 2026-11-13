@@ -51,10 +51,12 @@ function BenefitPlanGroupBeneficiariesFilter({
               value,
               filter: `status: ${value}`,
             },
+            // Meets Criteria is only worked out for a status.
+            ...(value ? [] : [{ id: 'isEligible', value: null }]),
           ])}
         />
       </Grid>
-      {status && (
+      {(status || filterValue('status')) && (
         <Grid item xs={2} className={classes.item}>
           <ConstantBasedPicker
             module="socialProtection"

@@ -43,6 +43,7 @@ import {
   locationFormatter,
 } from '../util/searcher-utils';
 import EnrolmentExportDialog from '../dialogs/EnrolmentExportDialog';
+import { statusFromQueryParams } from '../util/beneficiary-filters';
 
 function BenefitPlanGroupBeneficiariesSearcher({
   rights,
@@ -59,6 +60,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
   clearGroupBeneficiaryExport,
   status,
   readOnly,
+  extraActions = [],
   groupBeneficiaryExport,
   errorGroupBeneficiaryExport,
   updateGroupBeneficiary,
@@ -67,10 +69,12 @@ function BenefitPlanGroupBeneficiariesSearcher({
   const history = useHistory();
   const [updatedGroupBeneficiaries, setUpdatedGroupBeneficiaries] = useState([]);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportStatus, setExportStatus] = useState(null);
 
   const fetch = (params) => fetchGroupBeneficiaries(modulesManager, params);
 
-  const headers = () => {
+  // Meets Criteria needs a status: a fixed one, or the one chosen in the filters.
+  const headers = (filters) => {
     const baseHeaders = [
       'socialProtection.groupBeneficiary.code',
     ];
@@ -78,7 +82,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
     baseHeaders.push(...Array.from({ length: LOC_LEVELS }, (_, i) => `location.locationType.${i}`));
     baseHeaders.push('socialProtection.groupBeneficiary.status');
 
-    if (status) {
+    if (status || filters?.status?.value) {
       baseHeaders.push('socialProtection.beneficiary.isEligible');
     }
 
@@ -120,7 +124,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
     }
   };
 
-  const itemFormatters = () => {
+  const itemFormatters = (filters) => {
     const baseFormatters = [
       (groupBeneficiary) => groupBeneficiary.group.code,
     ];
@@ -144,14 +148,16 @@ function BenefitPlanGroupBeneficiariesSearcher({
       ));
     }
 
-    if (status) {
+    if (status || filters?.status?.value) {
       const yes = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.true');
       const no = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.false');
-      result.push((beneficiary) => (
-        beneficiary.isEligible
+      result.push((beneficiary) => {
+        // null: not checked (no criteria for the status, or filters not applied yet).
+        if (beneficiary.isEligible === null || beneficiary.isEligible === undefined) return '';
+        return beneficiary.isEligible
           ? <Tooltip title={yes} placement="right"><CheckCircleIcon aria-label={yes} /></Tooltip>
-          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>
-      ));
+          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>;
+      });
     }
 
     if (rights.includes(RIGHT_GROUP_SEARCH)) {
@@ -258,8 +264,11 @@ function BenefitPlanGroupBeneficiariesSearcher({
           label: formatMessage(intl, 'socialProtection', 'export.label'),
           icon: <GetAppIcon />,
           authorized: true,
-          onClick: () => setExportDialogOpen(true),
-        }]}
+          onClick: (params) => {
+            setExportStatus(statusFromQueryParams(params));
+            setExportDialogOpen(true);
+          },
+        }, ...extraActions]}
         headers={headers}
         itemFormatters={itemFormatters}
         sorts={sorts}
@@ -288,7 +297,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
         onExport={downloadGroupBeneficiaries}
         intl={intl}
         benefitPlan={benefitPlan}
-        status={status}
+        status={status || exportStatus}
       />
       {failedExport && (
         <Dialog open={failedExport} fullWidth maxWidth="sm">
