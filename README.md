@@ -13,6 +13,12 @@ The Social Protection enrolment criteria and nested enrolment navigation require
 Enrolment frontend integration from `nlgfc2024/openimis-fe-enrolment_js#1`. The frontend hub must
 register the published component `enrolment.AdvancedCriteriaRowValue`.
 
+A saved Program's details end with its enrolment eligibility, for a status chosen there: the fixed
+and enrolment profile rules, read-only, from the Enrolment module's published component
+`enrolment.ProgrammeProfileSummary` (which reads the backend `enrolmentProgrammeProfile` query), and
+the Program's custom enrolment criteria for that status, which the Program form saves with the rest
+of the Program. The section needs the criteria view right; editing needs the criteria update right.
+
 Deploy this together with `nlgfc2024/openimis-fe-individual_js#22`, which removes the legacy
 Individual-owned enrolment routes and translations. This module intentionally does not fall back
 to the old `individual.AdvancedCriteriaRowValue` reference.
