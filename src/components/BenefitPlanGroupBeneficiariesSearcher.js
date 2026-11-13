@@ -71,7 +71,8 @@ function BenefitPlanGroupBeneficiariesSearcher({
 
   const fetch = (params) => fetchGroupBeneficiaries(modulesManager, params);
 
-  const headers = () => {
+  // Meets Criteria needs a status: a fixed one, or the one chosen in the filters.
+  const headers = (filters) => {
     const baseHeaders = [
       'socialProtection.groupBeneficiary.code',
     ];
@@ -79,7 +80,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
     baseHeaders.push(...Array.from({ length: LOC_LEVELS }, (_, i) => `location.locationType.${i}`));
     baseHeaders.push('socialProtection.groupBeneficiary.status');
 
-    if (status) {
+    if (status || filters?.status?.value) {
       baseHeaders.push('socialProtection.beneficiary.isEligible');
     }
 
@@ -121,7 +122,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
     }
   };
 
-  const itemFormatters = () => {
+  const itemFormatters = (filters) => {
     const baseFormatters = [
       (groupBeneficiary) => groupBeneficiary.group.code,
     ];
@@ -145,14 +146,16 @@ function BenefitPlanGroupBeneficiariesSearcher({
       ));
     }
 
-    if (status) {
+    if (status || filters?.status?.value) {
       const yes = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.true');
       const no = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.false');
-      result.push((beneficiary) => (
-        beneficiary.isEligible
+      result.push((beneficiary) => {
+        // null: not checked (no criteria for the status, or filters not applied yet).
+        if (beneficiary.isEligible === null || beneficiary.isEligible === undefined) return '';
+        return beneficiary.isEligible
           ? <Tooltip title={yes} placement="right"><CheckCircleIcon aria-label={yes} /></Tooltip>
-          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>
-      ));
+          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>;
+      });
     }
 
     if (rights.includes(RIGHT_GROUP_SEARCH)) {

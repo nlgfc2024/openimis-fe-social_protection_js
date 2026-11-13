@@ -70,7 +70,8 @@ function BenefitPlanBeneficiariesSearcher({
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const fetch = (params) => fetchBeneficiaries(modulesManager, params);
 
-  const headers = () => {
+  // Meets Criteria needs a status: a fixed one, or the one chosen in the filters.
+  const headers = (filters) => {
     const baseHeaders = [
       'socialProtection.beneficiary.firstName',
       'socialProtection.beneficiary.lastName',
@@ -80,7 +81,7 @@ function BenefitPlanBeneficiariesSearcher({
     baseHeaders.push(...Array.from({ length: LOC_LEVELS }, (_, i) => `location.locationType.${i}`));
     baseHeaders.push('socialProtection.beneficiary.status');
 
-    if (status) {
+    if (status || filters?.status?.value) {
       baseHeaders.push('socialProtection.beneficiary.isEligible');
     }
 
@@ -122,7 +123,7 @@ function BenefitPlanBeneficiariesSearcher({
     }
   };
 
-  const itemFormatters = () => {
+  const itemFormatters = (filters) => {
     const baseFormatters = [
       (beneficiary) => beneficiary.individual.firstName,
       (beneficiary) => beneficiary.individual.lastName,
@@ -148,14 +149,16 @@ function BenefitPlanBeneficiariesSearcher({
       ));
     }
 
-    if (status) {
+    if (status || filters?.status?.value) {
       const yes = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.true');
       const no = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.false');
-      result.push((beneficiary) => (
-        beneficiary.isEligible
+      result.push((beneficiary) => {
+        // null: not checked (no criteria for the status, or filters not applied yet).
+        if (beneficiary.isEligible === null || beneficiary.isEligible === undefined) return '';
+        return beneficiary.isEligible
           ? <Tooltip title={yes} placement="right"><CheckCircleIcon aria-label={yes} /></Tooltip>
-          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>
-      ));
+          : <Tooltip title={no} placement="right"><ErrorIcon aria-label={no} /></Tooltip>;
+      });
     }
 
     if (rights.includes(RIGHT_BENEFICIARY_SEARCH)) {
