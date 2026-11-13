@@ -5,7 +5,6 @@ const loadEsModule = require('./load-es-module.cjs');
 
 const {
   normalizeAdvancedCriteria,
-  mandatoryEligibilityRuleKeys,
   jsonExtWithPhaseCriteria,
   phaseCriteriaByStatus,
   safeParseJsonObject,
@@ -31,15 +30,6 @@ test('parses JSON objects without allowing malformed JSON to crash the page', ()
   assert.deepEqual(safeParseJsonObject('{"preserved":true}'), { preserved: true });
   assert.deepEqual(safeParseJsonObject('{invalid'), {});
   assert.deepEqual(safeParseJsonObject([]), {});
-});
-
-test('fixed backend eligibility rules distinguish group and individual programs', () => {
-  assert.deepEqual(mandatoryEligibilityRuleKeys('GROUP'), [
-    'benefitPlan.eligibilityRules.groupVerifiedAuthoritativePrimaryWorker',
-  ]);
-  assert.deepEqual(mandatoryEligibilityRuleKeys('INDIVIDUAL'), [
-    'benefitPlan.eligibilityRules.individualWithoutActiveHousehold',
-  ]);
 });
 
 const fit = { field: 'fit_for_work', filter: 'exact', type: 'integer', value: 1 };

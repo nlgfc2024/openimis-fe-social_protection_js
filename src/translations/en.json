@@ -144,8 +144,6 @@
   "socialProtection.benefitUploadRecord.sourceName": "Filename",
   "socialProtection.benefitUploadRecord.workflow": "Workflow",
   "socialProtection.benefitUploadRecord.percentageOfInvalidItems": "Percentage of invalid items",
-  "socialProtection.benefitPlan.eligibilityRules.groupVerifiedAuthoritativePrimaryWorker": "Group Programs enrol only VERIFIED households with exactly one authoritative active primary worker. An individual's validation_status = VERIFIED does not satisfy this household restriction.",
-  "socialProtection.benefitPlan.eligibilityRules.individualWithoutActiveHousehold": "Individual Programs enrol only individuals who do not have an active household membership.",
   "socialProtection.benefitPlan.eligibilityRules.title": "Enrolment eligibility",
   "socialProtection.benefitPlan.eligibilityRules.rulesHelp": "Applied by the enrolment module to every enrolment into this Program and status; they cannot be changed here.",
   "socialProtection.benefitPlan.eligibilityRules.customTitle": "Custom enrolment criteria for this Program",

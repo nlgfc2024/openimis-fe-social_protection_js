@@ -29,16 +29,6 @@ export function normalizeAdvancedCriteria(value) {
   return criteria && typeof criteria === 'object' ? criteria : {};
 }
 
-export function mandatoryEligibilityRuleKeys(benefitPlanType) {
-  if (benefitPlanType === 'GROUP') {
-    return ['benefitPlan.eligibilityRules.groupVerifiedAuthoritativePrimaryWorker'];
-  }
-  if (benefitPlanType === 'INDIVIDUAL') {
-    return ['benefitPlan.eligibilityRules.individualWithoutActiveHousehold'];
-  }
-  return [];
-}
-
 // The Phase's saved criteria by status, from the form's unsaved edits when there
 // are any, else as loaded. The API returns them as advancedCriteria and leaves
 // them out of jsonExt until the form writes them back there.
