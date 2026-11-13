@@ -39,6 +39,13 @@ const BENEFIT_PLAN_FULL_PROJECTION = () => [
   'hasPaymentPlans',
 ];
 
+// Computed on BenefitPlanGQLType only: BenefitPlanHistoryGQLType has no such
+// fields, and a query that asks for them is rejected as a whole.
+const CURRENT_VERSION_ONLY_FIELDS = ['advancedCriteria', 'updatesRequireApproval'];
+
+const BENEFIT_PLAN_HISTORY_PROJECTION = () => BENEFIT_PLAN_FULL_PROJECTION()
+  .filter((field) => !CURRENT_VERSION_ONLY_FIELDS.includes(field));
+
 const UPLOAD_HISTORY_FULL_PROJECTION = () => [
   'id',
   'uuid',
@@ -287,7 +294,7 @@ export function fetchPendingBeneficiaryUploads(variables) {
 }
 
 export function fetchBenefitPlanHistory(params) {
-  const payload = formatPageQueryWithCount('benefitPlanHistory', params, BENEFIT_PLAN_FULL_PROJECTION());
+  const payload = formatPageQueryWithCount('benefitPlanHistory', params, BENEFIT_PLAN_HISTORY_PROJECTION());
   return graphql(payload, ACTION_TYPE.SEARCH_BENEFIT_PLANS_HISTORY);
 }
 

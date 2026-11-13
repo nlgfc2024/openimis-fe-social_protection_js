@@ -29,3 +29,9 @@ test('default module translations use Program rather than Malawi-specific phase 
   assert.equal(approval.includes('Program'), true);
   assert.equal(/\bphase\b/i.test(approval), false);
 });
+
+test('the changelog does not ask the history type for current-version-only fields', () => {
+  const actionsSource = fs.readFileSync(path.join(__dirname, '../src/actions.js'), 'utf8');
+  assert.match(actionsSource, /formatPageQueryWithCount\('benefitPlanHistory', params, BENEFIT_PLAN_HISTORY_PROJECTION\(\)\)/);
+  assert.match(actionsSource, /CURRENT_VERSION_ONLY_FIELDS = \['advancedCriteria', 'updatesRequireApproval'\]/);
+});
