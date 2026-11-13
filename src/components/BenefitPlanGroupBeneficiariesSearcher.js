@@ -59,6 +59,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
   clearGroupBeneficiaryExport,
   status,
   readOnly,
+  extraActions = [],
   groupBeneficiaryExport,
   errorGroupBeneficiaryExport,
   updateGroupBeneficiary,
@@ -259,7 +260,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
           icon: <GetAppIcon />,
           authorized: true,
           onClick: () => setExportDialogOpen(true),
-        }]}
+        }, ...extraActions]}
         headers={headers}
         itemFormatters={itemFormatters}
         sorts={sorts}
