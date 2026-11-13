@@ -43,6 +43,7 @@ import {
   locationFormatter,
 } from '../util/searcher-utils';
 import EnrolmentExportDialog from '../dialogs/EnrolmentExportDialog';
+import { statusFromQueryParams } from '../util/beneficiary-filters';
 
 function BenefitPlanGroupBeneficiariesSearcher({
   rights,
@@ -68,6 +69,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
   const history = useHistory();
   const [updatedGroupBeneficiaries, setUpdatedGroupBeneficiaries] = useState([]);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportStatus, setExportStatus] = useState(null);
 
   const fetch = (params) => fetchGroupBeneficiaries(modulesManager, params);
 
@@ -262,7 +264,10 @@ function BenefitPlanGroupBeneficiariesSearcher({
           label: formatMessage(intl, 'socialProtection', 'export.label'),
           icon: <GetAppIcon />,
           authorized: true,
-          onClick: () => setExportDialogOpen(true),
+          onClick: (params) => {
+            setExportStatus(statusFromQueryParams(params));
+            setExportDialogOpen(true);
+          },
         }, ...extraActions]}
         headers={headers}
         itemFormatters={itemFormatters}
@@ -292,7 +297,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
         onExport={downloadGroupBeneficiaries}
         intl={intl}
         benefitPlan={benefitPlan}
-        status={status}
+        status={status || exportStatus}
       />
       {failedExport && (
         <Dialog open={failedExport} fullWidth maxWidth="sm">
