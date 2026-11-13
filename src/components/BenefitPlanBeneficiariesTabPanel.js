@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Grid, Tab, Button, Tooltip,
 } from '@material-ui/core';
@@ -12,15 +12,15 @@ import {
 import {
   MODULE_NAME,
   BENEFIT_PLAN_BENEFICIARIES_TAB_WRAPPER_VALUE,
-  BENEFIT_PLAN_BENEFICIARIES_LIST_TAB_VALUE,
-  BENEFIT_PLAN_BENEFICIARY_TABS_LABEL_CONTRIBUTION_KEY,
-  BENEFIT_PLAN_BENEFICIARY_TABS_PANEL_CONTRIBUTION_KEY,
+  BENEFIT_PLAN_TYPE,
   DEDUPLICATION_SELECT_FIELD_DIALOG_CONTRIBUTION_KEY,
   PAYROLL_CREATE_RIGHTS_PUB_REF,
   PAYROLL_PAYROLL_ROUTE,
 } from '../constants';
 import BenefitPlanBeneficiariesUploadDialog from '../dialogs/BenefitPlanBeneficiariesUploadDialog';
 import BenefitPlanBeneficiariesUploadHistoryDialog from '../dialogs/BenefitPlanBeneficiariesUploadHistoryDialog';
+import BenefitPlanBeneficiariesSearcher from './BenefitPlanBeneficiariesSearcher';
+import BenefitPlanGroupBeneficiariesSearcher from './BenefitPlanGroupBeneficiariesSearcher';
 
 function BenefitPlanBeneficiariesTabLabel({
   intl, onChange, tabStyle, isSelected,
@@ -36,8 +36,10 @@ function BenefitPlanBeneficiariesTabLabel({
   );
 }
 
+// One list of the Phase's beneficiaries, filtered by status in its search
+// criteria. The Phase's beneficiary actions sit with Export in the list header.
 function BenefitPlanBeneficiariesTabPanel({
-  intl, rights, benefitPlan, setConfirmedAction, value, classes,
+  intl, rights, benefitPlan, value, classes,
 }) {
   if (value !== BENEFIT_PLAN_BENEFICIARIES_TAB_WRAPPER_VALUE) {
     return null;
@@ -46,15 +48,6 @@ function BenefitPlanBeneficiariesTabPanel({
   const history = useHistory();
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations(MODULE_NAME, modulesManager);
-  const [activeTab, setActiveTab] = useState(BENEFIT_PLAN_BENEFICIARIES_LIST_TAB_VALUE);
-
-  const isSelected = (tab) => tab === activeTab;
-  const tabStyle = (tab) => (isSelected(tab) ? classes.selectedTab : classes.unselectedTab);
-
-  const handleChange = (_, tab) => {
-    setActiveTab(tab);
-  };
-
   const payrollCreateRights = modulesManager.getRef(PAYROLL_CREATE_RIGHTS_PUB_REF);
 
   const handleCreatePayrollButton = () => {
@@ -63,67 +56,50 @@ function BenefitPlanBeneficiariesTabPanel({
     );
   };
 
+  const beneficiaryActions = [
+    {
+      authorized: rights.includes(payrollCreateRights),
+      render: () => (
+        <Tooltip
+          title={formatMessage('benefitPlan.benefitPlanTabPanel.createPayroll.tooltip')}
+          disableHoverListener={benefitPlan?.hasPaymentPlans}
+        >
+          <span>
+            <Button
+              onClick={handleCreatePayrollButton}
+              variant="outlined"
+              disabled={!benefitPlan?.hasPaymentPlans}
+              className={classes.button}
+              style={{ border: '0px', marginTop: '6px' }}
+            >
+              {formatMessage('benefitPlan.benefitPlanTabPanel.createPayroll')}
+            </Button>
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      authorized: true,
+      render: () => (
+        <Contributions
+          contributionKey={DEDUPLICATION_SELECT_FIELD_DIALOG_CONTRIBUTION_KEY}
+          intl={intl}
+          benefitPlan={benefitPlan}
+        />
+      ),
+    },
+    { authorized: true, render: () => <BenefitPlanBeneficiariesUploadDialog benefitPlan={benefitPlan} /> },
+    { authorized: true, render: () => <BenefitPlanBeneficiariesUploadHistoryDialog benefitPlan={benefitPlan} /> },
+  ];
+
   return (
     <Grid container>
-      <Grid item xs={12} style={{ paddingLeft: '10px' }}>
-        <div style={{ width: '100%' }}>
-          <div style={{ float: 'left' }}>
-            <Contributions
-              contributionKey={BENEFIT_PLAN_BENEFICIARY_TABS_LABEL_CONTRIBUTION_KEY}
-              intl={intl}
-              rights={rights}
-              value={activeTab}
-              onChange={handleChange}
-              isSelected={isSelected}
-              tabStyle={tabStyle}
-            />
-          </div>
-          <div style={{ float: 'right', paddingRight: '16px' }}>
-            {rights.includes(payrollCreateRights) && (
-            <Tooltip
-              title={formatMessage('benefitPlan.benefitPlanTabPanel.createPayroll.tooltip')}
-              disableHoverListener={benefitPlan?.hasPaymentPlans}
-            >
-              <span>
-                <Button
-                  onClick={handleCreatePayrollButton}
-                  variant="outlined"
-                  color="#DFEDEF"
-                  disabled={!benefitPlan?.hasPaymentPlans}
-                  className={classes.button}
-                  style={{
-                    border: '0px',
-                    marginTop: '6px',
-                  }}
-                >
-                  {formatMessage('benefitPlan.benefitPlanTabPanel.createPayroll')}
-                </Button>
-              </span>
-            </Tooltip>
-            )}
-
-            <Contributions
-              contributionKey={DEDUPLICATION_SELECT_FIELD_DIALOG_CONTRIBUTION_KEY}
-              intl={intl}
-              benefitPlan={benefitPlan}
-            />
-            <BenefitPlanBeneficiariesUploadDialog
-              benefitPlan={benefitPlan}
-            />
-            <BenefitPlanBeneficiariesUploadHistoryDialog
-              benefitPlan={benefitPlan}
-            />
-          </div>
-        </div>
-      </Grid>
       <Grid item xs={12}>
-        <Contributions
-          contributionKey={BENEFIT_PLAN_BENEFICIARY_TABS_PANEL_CONTRIBUTION_KEY}
-          rights={rights}
-          value={activeTab}
-          benefitPlan={benefitPlan}
-          setConfirmedAction={setConfirmedAction}
-        />
+        {benefitPlan?.type === BENEFIT_PLAN_TYPE.INDIVIDUAL ? (
+          <BenefitPlanBeneficiariesSearcher benefitPlan={benefitPlan} extraActions={beneficiaryActions} />
+        ) : (
+          <BenefitPlanGroupBeneficiariesSearcher benefitPlan={benefitPlan} extraActions={beneficiaryActions} />
+        )}
       </Grid>
     </Grid>
   );

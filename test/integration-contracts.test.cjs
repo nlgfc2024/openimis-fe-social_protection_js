@@ -40,3 +40,17 @@ test('the eligibility section sits in the Phase details, not under the beneficia
   assert.equal(read('BenefitPlanBeneficiariesTabPanel.js').includes('BenefitPlanEligibilityCriteriaPanel'), false);
   assert.equal(panelSource.includes('household={edited?.type === \'GROUP\'}'), true);
 });
+
+test('beneficiaries are one list with the Phase actions in its header', () => {
+  const read = (file) => fs.readFileSync(path.join(__dirname, '../src', file), 'utf8');
+  const tabPanel = read('components/BenefitPlanBeneficiariesTabPanel.js');
+  assert.equal(tabPanel.includes('BeneficiaryTabPanel'), false);
+  assert.equal(tabPanel.includes('extraActions={beneficiaryActions}'), true);
+  for (const file of ['components/BenefitPlanBeneficiariesSearcher.js', 'components/BenefitPlanGroupBeneficiariesSearcher.js']) {
+    assert.equal(read(file).includes('}, ...extraActions]}'), true, file);
+  }
+  for (const file of ['components/BenefitPlanBeneficiariesFilter.js', 'components/BenefitPlanGroupBeneficiariesFilter.js']) {
+    assert.equal(read(file).includes("{(status || filterValue('status')) && ("), true, file);
+  }
+  assert.equal(read('index.js').includes('BenefitPlanBeneficiariesListTab'), false);
+});
