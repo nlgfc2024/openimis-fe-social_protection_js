@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Grid, Tab, Button, Tooltip,
 } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import {
   Contributions,
   formatMessage,
@@ -36,6 +37,10 @@ function BenefitPlanBeneficiariesTabLabel({
   );
 }
 
+const useStyles = makeStyles((theme) => ({
+  payrollButton: { border: 0, marginTop: theme.spacing(0.75) },
+}));
+
 // One list of the Phase's beneficiaries, filtered by status in its search
 // criteria. The Phase's beneficiary actions sit with Export in the list header.
 function BenefitPlanBeneficiariesTabPanel({
@@ -46,6 +51,7 @@ function BenefitPlanBeneficiariesTabPanel({
   }
 
   const history = useHistory();
+  const ownClasses = useStyles();
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations(MODULE_NAME, modulesManager);
   const payrollCreateRights = modulesManager.getRef(PAYROLL_CREATE_RIGHTS_PUB_REF);
@@ -69,8 +75,7 @@ function BenefitPlanBeneficiariesTabPanel({
               onClick={handleCreatePayrollButton}
               variant="outlined"
               disabled={!benefitPlan?.hasPaymentPlans}
-              className={classes.button}
-              style={{ border: '0px', marginTop: '6px' }}
+              className={`${classes.button} ${ownClasses.payrollButton}`}
             >
               {formatMessage('benefitPlan.benefitPlanTabPanel.createPayroll')}
             </Button>
