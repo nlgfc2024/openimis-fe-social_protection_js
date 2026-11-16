@@ -10,7 +10,7 @@ import BeneficiaryStatusPicker from '../pickers/BeneficiaryStatusPicker';
 import { DEFAULT_DEBOUNCE_TIME, EMPTY_STRING } from '../constants';
 
 function BenefitPlanGroupBeneficiariesFilter({
-  classes, filters, onChangeFilters, readOnly, status,
+  classes, filters, onChangeFilters, readOnly, status, eligibilityStatuses = [],
 }) {
   const debouncedOnChangeFilters = _debounce(onChangeFilters, DEFAULT_DEBOUNCE_TIME);
 
@@ -51,12 +51,12 @@ function BenefitPlanGroupBeneficiariesFilter({
               value,
               filter: `status: ${value}`,
             },
-            // Meets Criteria is only worked out for a status.
-            ...(value ? [] : [{ id: 'isEligible', value: null }]),
+            // Meets Criteria is only worked out for a status with custom criteria.
+            ...(eligibilityStatuses.includes(value) ? [] : [{ id: 'isEligible', value: null }]),
           ])}
         />
       </Grid>
-      {(status || filterValue('status')) && (
+      {eligibilityStatuses.includes(status || filterValue('status')) && (
         <Grid item xs={2} className={classes.item}>
           <ConstantBasedPicker
             module="socialProtection"

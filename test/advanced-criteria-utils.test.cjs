@@ -7,6 +7,7 @@ const {
   normalizeAdvancedCriteria,
   jsonExtWithPhaseCriteria,
   phaseCriteriaByStatus,
+  statusesWithCriteria,
   safeParseJsonObject,
 } = loadEsModule(path.join(__dirname, '../src/util/advanced-criteria-utils.js'));
 
@@ -55,4 +56,11 @@ test('nothing is written when the criteria do not change', () => {
   const edited = { advancedCriteria: { ACTIVE: [fit] }, jsonExt: '{}' };
   assert.equal(jsonExtWithPhaseCriteria(edited, null, 'ACTIVE', [fit]), null);
   assert.equal(jsonExtWithPhaseCriteria(edited, null, 'POTENTIAL', [{ field: '' }]), null);
+});
+
+test('Meets Criteria is offered only for statuses with saved custom criteria', () => {
+  assert.deepEqual(statusesWithCriteria({ advancedCriteria: { ACTIVE: [fit], POTENTIAL: [] } }), ['ACTIVE']);
+  assert.deepEqual(statusesWithCriteria({ jsonExt: JSON.stringify({ advanced_criteria: [fit] }) }), ['POTENTIAL']);
+  assert.deepEqual(statusesWithCriteria({}), []);
+  assert.deepEqual(statusesWithCriteria(undefined), []);
 });

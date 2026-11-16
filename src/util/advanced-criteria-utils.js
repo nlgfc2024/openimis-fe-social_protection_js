@@ -53,3 +53,11 @@ export function jsonExtWithPhaseCriteria(edited, benefitPlan, status, rows) {
   if (JSON.stringify(criteria) === JSON.stringify(current)) return null;
   return JSON.stringify({ ...safeParseJsonObject(edited?.jsonExt), advanced_criteria: criteria });
 }
+
+// The statuses for which a Phase has saved custom criteria. The backend works
+// out Meets Criteria (isEligible) only for those, so it is offered only there.
+export function statusesWithCriteria(benefitPlan) {
+  return Object.entries(phaseCriteriaByStatus(null, benefitPlan))
+    .filter(([, rows]) => Array.isArray(rows) && rows.length > 0)
+    .map(([status]) => status);
+}

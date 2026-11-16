@@ -44,6 +44,7 @@ import {
 } from '../util/searcher-utils';
 import EnrolmentExportDialog from '../dialogs/EnrolmentExportDialog';
 import { statusFromQueryParams } from '../util/beneficiary-filters';
+import { statusesWithCriteria } from '../util/advanced-criteria-utils';
 
 function BenefitPlanBeneficiariesSearcher({
   rights,
@@ -72,7 +73,10 @@ function BenefitPlanBeneficiariesSearcher({
   const [exportStatus, setExportStatus] = useState(null);
   const fetch = (params) => fetchBeneficiaries(modulesManager, params);
 
-  // Meets Criteria needs a status: a fixed one, or the one chosen in the filters.
+  // Meets Criteria needs a status (a fixed one, or the one chosen in the
+  // filters) for which the Phase has saved custom criteria.
+  const criteriaStatuses = statusesWithCriteria(benefitPlan);
+  const checksEligibility = (filters) => criteriaStatuses.includes(status || filters?.status?.value);
   const headers = (filters) => {
     const baseHeaders = [
       'socialProtection.beneficiary.firstName',
@@ -83,7 +87,7 @@ function BenefitPlanBeneficiariesSearcher({
     baseHeaders.push(...Array.from({ length: LOC_LEVELS }, (_, i) => `location.locationType.${i}`));
     baseHeaders.push('socialProtection.beneficiary.status');
 
-    if (status || filters?.status?.value) {
+    if (checksEligibility(filters)) {
       baseHeaders.push('socialProtection.beneficiary.isEligible');
     }
 
@@ -151,7 +155,7 @@ function BenefitPlanBeneficiariesSearcher({
       ));
     }
 
-    if (status || filters?.status?.value) {
+    if (checksEligibility(filters)) {
       const yes = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.true');
       const no = formatMessage(intl, 'socialProtection', 'beneficiary.isEligible.false');
       result.push((beneficiary) => {
@@ -243,6 +247,7 @@ function BenefitPlanBeneficiariesSearcher({
       onChangeFilters={props.onChangeFilters}
       readOnly={readOnly}
       status={status}
+      eligibilityStatuses={criteriaStatuses}
     />
   );
 

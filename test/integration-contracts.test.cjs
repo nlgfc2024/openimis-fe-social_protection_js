@@ -50,7 +50,7 @@ test('beneficiaries are one list with the Phase actions in its header', () => {
     assert.equal(read(file).includes('}, ...extraActions]}'), true, file);
   }
   for (const file of ['components/BenefitPlanBeneficiariesFilter.js', 'components/BenefitPlanGroupBeneficiariesFilter.js']) {
-    assert.equal(read(file).includes("{(status || filterValue('status')) && ("), true, file);
+    assert.equal(read(file).includes("{eligibilityStatuses.includes(status || filterValue('status')) && ("), true, file);
   }
   assert.equal(read('index.js').includes('BenefitPlanBeneficiariesListTab'), false);
 });
