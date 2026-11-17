@@ -17,6 +17,9 @@ function EnrolmentExportDialog({ open, onClose, onExport, intl, benefitPlan, sta
       ...activeFilters(filters),
       ...(status ? [`status: ${status}`] : []),
       ...(microCatchment ? [`microCatchmentUuid: "${microCatchment.uuid}"`] : []),
+      // Phase beneficiary-list export: one primary-recipient row per household.
+      // The Household page's standard download remains an all-members export.
+      'phaseBeneficiarySummaryOnly: true',
       'fileFormat: "xlsx"',
       'fields: ["id"]',
       'fieldsColumns: "{}"',
