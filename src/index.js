@@ -17,26 +17,6 @@ import {
   BenefitPlanBeneficiariesTabLabel,
 } from './components/BenefitPlanBeneficiariesTabPanel';
 import {
-  BenefitPlanBeneficiariesListTabPanel,
-  BenefitPlanBeneficiariesListTabLabel,
-} from './components/BenefitPlanBeneficiariesListTab';
-import {
-  BenefitPlanBeneficiariesActiveTabLabel,
-  BenefitPlanBeneficiariesActiveTabPanel,
-} from './components/BenefitPlanBeneficiariesActiveTab';
-import {
-  BenefitPlanBeneficiariesPotentialTabLabel,
-  BenefitPlanBeneficiariesPotentialTabPanel,
-} from './components/BenefitPlanBeneficiariesPotentialTab';
-import {
-  BenefitPlanBeneficiariesSuspendedTabLabel,
-  BenefitPlanBeneficiariesSuspendedTabPanel,
-} from './components/BenefitPlanBeneficiariesSuspendedTab';
-import {
-  BenefitPlanBeneficiariesGraduatedTabLabel,
-  BenefitPlanBeneficiariesGraduatedTabPanel,
-} from './components/BenefitPlanBeneficiariesGraduatedTab';
-import {
   BenefitPackageBenefitsTabLabel,
   BenefitPackageBenefitsTabPanel,
 } from './components/BenefitPackageBenefitsTab';
@@ -114,20 +94,6 @@ const DEFAULT_CONFIG = {
     BenefitPlanBeneficiariesTabPanel,
     BenefitPlanChangelogTabPanel,
     BenefitPlanTaskTabPanel,
-  ],
-  'benefitPlan.BeneficiaryTabPanel.label': [
-    BenefitPlanBeneficiariesListTabLabel,
-    BenefitPlanBeneficiariesPotentialTabLabel,
-    BenefitPlanBeneficiariesActiveTabLabel,
-    BenefitPlanBeneficiariesGraduatedTabLabel,
-    BenefitPlanBeneficiariesSuspendedTabLabel,
-  ],
-  'benefitPlan.BeneficiaryTabPanel.panel': [
-    BenefitPlanBeneficiariesListTabPanel,
-    BenefitPlanBeneficiariesPotentialTabPanel,
-    BenefitPlanBeneficiariesActiveTabPanel,
-    BenefitPlanBeneficiariesGraduatedTabPanel,
-    BenefitPlanBeneficiariesSuspendedTabPanel,
   ],
   'benefitPackage.TabPanel.label': [
     BenefitPackageMembersTabLabel,

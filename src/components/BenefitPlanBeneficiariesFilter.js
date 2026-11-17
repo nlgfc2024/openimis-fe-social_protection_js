@@ -11,7 +11,7 @@ import { defaultFilterStyles } from '../util/styles';
 import BeneficiaryStatusPicker from '../pickers/BeneficiaryStatusPicker';
 
 function BenefitPlanBeneficiariesFilter({
-  intl, classes, filters, onChangeFilters, readOnly, status,
+  intl, classes, filters, onChangeFilters, readOnly, status, eligibilityStatuses = [],
 }) {
   const any = formatMessage(intl, 'socialProtection', 'any');
 
@@ -87,10 +87,12 @@ function BenefitPlanBeneficiariesFilter({
               value,
               filter: `status: ${value}`,
             },
+            // Meets Criteria is only worked out for a status with custom criteria.
+            ...(eligibilityStatuses.includes(value) ? [] : [{ id: 'isEligible', value: null }]),
           ])}
         />
       </Grid>
-      {status && (
+      {eligibilityStatuses.includes(status || filterValue('status')) && (
         <Grid item xs={2} className={classes.item}>
           <ConstantBasedPicker
             module="socialProtection"
