@@ -298,6 +298,63 @@ export function fetchBenefitPlanHistory(params) {
   return graphql(payload, ACTION_TYPE.SEARCH_BENEFIT_PLANS_HISTORY);
 }
 
+const BENEFIT_PLAN_USER_ACCESS_PROJECTION = [
+  'id',
+  'uuid',
+  'dateCreated',
+  'user { id username iUser { lastName otherNames } }',
+];
+
+export function fetchBenefitPlanUserAccess(params) {
+  const payload = formatPageQueryWithCount(
+    'benefitPlanUserAccess',
+    params,
+    BENEFIT_PLAN_USER_ACCESS_PROJECTION,
+  );
+  return graphql(payload, ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS);
+}
+
+export function assignBenefitPlanUser(benefitPlanId, userId, clientMutationLabel) {
+  const input = `benefitPlanId: "${benefitPlanId}", userId: "${userId}"`;
+  const mutation = formatMutation('assignBenefitPlanUser', input, clientMutationLabel);
+  return graphql(
+    mutation.payload,
+    [
+      REQUEST(ACTION_TYPE.MUTATION),
+      SUCCESS(ACTION_TYPE.ASSIGN_BENEFIT_PLAN_USER),
+      ERROR(ACTION_TYPE.MUTATION),
+    ],
+    {
+      actionType: ACTION_TYPE.ASSIGN_BENEFIT_PLAN_USER,
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime: new Date(),
+    },
+  );
+}
+
+export function revokeBenefitPlanUserAccess(assignmentId, clientMutationLabel) {
+  const mutation = formatMutation(
+    'revokeBenefitPlanUserAccess',
+    `id: "${assignmentId}"`,
+    clientMutationLabel,
+  );
+  return graphql(
+    mutation.payload,
+    [
+      REQUEST(ACTION_TYPE.MUTATION),
+      SUCCESS(ACTION_TYPE.REVOKE_BENEFIT_PLAN_USER_ACCESS),
+      ERROR(ACTION_TYPE.MUTATION),
+    ],
+    {
+      actionType: ACTION_TYPE.REVOKE_BENEFIT_PLAN_USER_ACCESS,
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime: new Date(),
+    },
+  );
+}
+
 export function deleteBenefitPlan(benefitPlan, clientMutationLabel) {
   const benefitPlanUuids = `ids: ["${benefitPlan?.id}"]`;
   const mutation = formatMutation('deleteBenefitPlan', benefitPlanUuids, clientMutationLabel);

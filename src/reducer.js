@@ -47,6 +47,9 @@ export const ACTION_TYPE = {
   GET_PENDING_BENEFICIARIES_UPLOAD: 'GET_PENDING_BENEFICIARIES_UPLOAD',
   RESOLVE_TASK: 'TASK_MANAGEMENT_RESOLVE_TASK',
   SEARCH_BENEFIT_PLANS_HISTORY: 'BENEFIT_PLAN_BENEFIT_PLANS_HISTORY',
+  SEARCH_BENEFIT_PLAN_USER_ACCESS: 'BENEFIT_PLAN_USER_ACCESS_SEARCH',
+  ASSIGN_BENEFIT_PLAN_USER: 'BENEFIT_PLAN_USER_ACCESS_ASSIGN',
+  REVOKE_BENEFIT_PLAN_USER_ACCESS: 'BENEFIT_PLAN_USER_ACCESS_REVOKE',
   SEARCH_PROJECTS: 'BENEFIT_PLAN_PROJECTS',
   SEARCH_PROJECTS_HISTORY: 'BENEFIT_PLAN_PROJECTS_HISTORY',
   GET_PROJECT: 'BENEFIT_PLAN_PROJECT',
@@ -129,6 +132,11 @@ function reducer(
     pendingBeneficiariesPageInfo: {},
     fetchingBenefitPlansHistory: false,
     errorBenefitPlansHistory: null,
+    fetchingBenefitPlanUserAccess: false,
+    fetchedBenefitPlanUserAccess: false,
+    benefitPlanUserAccess: [],
+    benefitPlanUserAccessTotalCount: 0,
+    errorBenefitPlanUserAccess: null,
     fetchedBenefitPlansHistory: false,
     benefitPlansHistory: [],
     benefitPlansHistoryPageInfo: {},
@@ -174,6 +182,14 @@ function reducer(
         benefitPlansPageInfo: {},
         benefitPlansTotalCount: 0,
         errorBenefitPlans: null,
+      };
+    case REQUEST(ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS):
+      return {
+        ...state,
+        fetchingBenefitPlanUserAccess: true,
+        fetchedBenefitPlanUserAccess: false,
+        benefitPlanUserAccess: [],
+        errorBenefitPlanUserAccess: null,
       };
     case REQUEST(ACTION_TYPE.GET_BENEFIT_PLAN):
       return {
@@ -330,6 +346,22 @@ function reducer(
         benefitPlansPageInfo: pageInfo(action.payload.data.benefitPlan),
         benefitPlansTotalCount: action.payload.data.benefitPlan ? action.payload.data.benefitPlan.totalCount : null,
         errorBenefitPlans: formatGraphQLError(action.payload),
+      };
+    case SUCCESS(ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS):
+      return {
+        ...state,
+        fetchingBenefitPlanUserAccess: false,
+        fetchedBenefitPlanUserAccess: true,
+        benefitPlanUserAccess: parseData(action.payload.data.benefitPlanUserAccess)?.map((assignment) => ({
+          ...assignment,
+          id: decodeId(assignment.id),
+          user: {
+            ...assignment.user,
+            id: assignment.user?.id ? decodeId(assignment.user.id) : null,
+          },
+        })) || [],
+        benefitPlanUserAccessTotalCount: action.payload.data.benefitPlanUserAccess?.totalCount || 0,
+        errorBenefitPlanUserAccess: formatGraphQLError(action.payload),
       };
     case SUCCESS(ACTION_TYPE.GET_FIELDS_FROM_BF_SCHEMA):
       return {
@@ -501,6 +533,12 @@ function reducer(
         ...state,
         fetchingBenefitPlans: false,
         errorBenefitPlans: formatServerError(action.payload),
+      };
+    case ERROR(ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS):
+      return {
+        ...state,
+        fetchingBenefitPlanUserAccess: false,
+        errorBenefitPlanUserAccess: formatServerError(action.payload),
       };
     case ERROR(ACTION_TYPE.GET_BENEFIT_PLAN):
       return {
@@ -1005,6 +1043,10 @@ function reducer(
       return dispatchMutationResp(state, 'undoDeleteBenefitPlan', action);
     case SUCCESS(ACTION_TYPE.UPDATE_BENEFIT_PLAN):
       return dispatchMutationResp(state, 'updateBenefitPlan', action);
+    case SUCCESS(ACTION_TYPE.ASSIGN_BENEFIT_PLAN_USER):
+      return dispatchMutationResp(state, 'assignBenefitPlanUser', action);
+    case SUCCESS(ACTION_TYPE.REVOKE_BENEFIT_PLAN_USER_ACCESS):
+      return dispatchMutationResp(state, 'revokeBenefitPlanUserAccess', action);
     case SUCCESS(ACTION_TYPE.UPDATE_BENEFICIARY):
       return dispatchMutationResp(state, 'updateBeneficiary', action);
     case SUCCESS(ACTION_TYPE.UPDATE_GROUP_BENEFICIARY):
