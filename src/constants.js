@@ -19,6 +19,8 @@ export const RIGHT_BENEFIT_PLAN_SEARCH = 160001;
 export const RIGHT_BENEFIT_PLAN_CREATE = 160002;
 export const RIGHT_BENEFIT_PLAN_UPDATE = 160003;
 export const RIGHT_BENEFIT_PLAN_DELETE = 160004;
+export const RIGHT_BENEFIT_PLAN_ALL_ACCESS = 160006;
+export const RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE = 160007;
 export const RIGHT_BENEFICIARY_SEARCH = 170001;
 export const RIGHT_BENEFICIARY_UPDATE = 170003;
 
@@ -122,6 +124,7 @@ export const PAYROLL_PAYROLL_ROUTE = 'payroll.route.payroll';
 export const BENEFIT_PLAN_CHANGELOG_TAB_VALUE = 'BenefitPlanChangelogTab';
 export const TASK_CONTRIBUTION_KEY = 'tasksManagement.tasks';
 export const BENEFIT_PLAN_TASK_TAB_VALUE = 'BenefitPlanTaskTab';
+export const BENEFIT_PLAN_USERS_TAB_VALUE = 'BenefitPlanUsersTab';
 export const BENEFITS_CONTRIBUTION_KEY = 'payroll.benefitConsumptionPayrollSearcher';
 export const PYTHON_DEFAULT_IMPORT_WORKFLOW = 'Python Beneficiaries Upload';
 export const BENEFICIARIES_QUANTITY_LIMIT = 100;

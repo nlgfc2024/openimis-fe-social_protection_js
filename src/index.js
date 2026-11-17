@@ -48,6 +48,7 @@ import { fetchBenefitPlanSchemaFields } from './actions';
 import BenefitPlanHistorySearcher from './components/BenefitPlanHistorySearcher';
 import { BenefitPlanChangelogTabLabel, BenefitPlanChangelogTabPanel } from './components/BenefitPlanChangelogTab';
 import { BenefitPlanTaskTabLabel, BenefitPlanTaskTabPanel } from './components/BenefitPlanTaskTab';
+import { BenefitPlanUsersTabLabel, BenefitPlanUsersTabPanel } from './components/BenefitPlanUsersTabPanel';
 import { BENEFIT_PLAN_LABEL, RIGHT_BENEFIT_PLAN_SEARCH } from './constants';
 import BeneficiaryPicker from './pickers/BeneficiaryPicker';
 
@@ -89,11 +90,13 @@ const DEFAULT_CONFIG = {
     BenefitPlanBeneficiariesTabLabel,
     BenefitPlanChangelogTabLabel,
     BenefitPlanTaskTabLabel,
+    BenefitPlanUsersTabLabel,
   ],
   'benefitPlan.TabPanel.panel': [
     BenefitPlanBeneficiariesTabPanel,
     BenefitPlanChangelogTabPanel,
     BenefitPlanTaskTabPanel,
+    BenefitPlanUsersTabPanel,
   ],
   'benefitPackage.TabPanel.label': [
     BenefitPackageMembersTabLabel,
