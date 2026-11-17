@@ -135,6 +135,7 @@ function reducer(
     fetchingBenefitPlanUserAccess: false,
     fetchedBenefitPlanUserAccess: false,
     benefitPlanUserAccess: [],
+    benefitPlanUserAccessPageInfo: {},
     benefitPlanUserAccessTotalCount: 0,
     errorBenefitPlanUserAccess: null,
     fetchedBenefitPlansHistory: false,
@@ -189,6 +190,7 @@ function reducer(
         fetchingBenefitPlanUserAccess: true,
         fetchedBenefitPlanUserAccess: false,
         benefitPlanUserAccess: [],
+        benefitPlanUserAccessPageInfo: {},
         errorBenefitPlanUserAccess: null,
       };
     case REQUEST(ACTION_TYPE.GET_BENEFIT_PLAN):
@@ -360,6 +362,7 @@ function reducer(
             id: assignment.user?.id ? decodeId(assignment.user.id) : null,
           },
         })) || [],
+        benefitPlanUserAccessPageInfo: pageInfo(action.payload.data.benefitPlanUserAccess),
         benefitPlanUserAccessTotalCount: action.payload.data.benefitPlanUserAccess?.totalCount || 0,
         errorBenefitPlanUserAccess: formatGraphQLError(action.payload),
       };

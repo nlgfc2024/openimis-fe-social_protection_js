@@ -57,6 +57,7 @@ const ROUTE_BENEFIT_PLAN = 'benefitPlans/benefitPlan';
 const ROUTE_BENEFIT_PACKAGE = 'benefitPackage';
 
 const DEFAULT_CONFIG = {
+  enable_benefit_plan_access_control: false,
   translations: [{ key: 'en', messages: flatten(messages_en) }],
   reducers: [{ key: 'socialProtection', reducer }],
   'core.MainMenu': [{ name: 'BenefitPlanMainMenu', component: BenefitPlanMainMenu }],

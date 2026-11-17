@@ -302,7 +302,7 @@ const BENEFIT_PLAN_USER_ACCESS_PROJECTION = [
   'id',
   'uuid',
   'dateCreated',
-  'user { id username iUser { lastName otherNames } }',
+  'user { id username firstName lastName }',
 ];
 
 export function fetchBenefitPlanUserAccess(params) {

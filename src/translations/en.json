@@ -191,6 +191,8 @@
   "social_protection.gql_benefit_plan_close_perms": "Social Protection | Program Close",
   "social_protection.gql_benefit_plan_criteria_search_perms": "Social Protection | Program Eligibility Criteria Search",
   "social_protection.gql_benefit_plan_criteria_update_perms": "Social Protection | Program Eligibility Criteria Update",
+  "social_protection.gql_benefit_plan_all_access_perms": "Social Protection | Benefit Plan Access All",
+  "social_protection.gql_benefit_plan_assignment_manage_perms": "Social Protection | Benefit Plan User Assignments Manage",
   "social_protection.gql_beneficiary_search_perms": "Social Protection | Beneficiary Search",
   "social_protection.gql_beneficiary_create_perms": "Social Protection | Beneficiary Create",
   "social_protection.gql_beneficiary_update_perms": "Social Protection | Beneficiary Update",

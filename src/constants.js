@@ -5,6 +5,7 @@ export const DEFAULT_PAGE_SIZE = 10;
 export const DEFAULT_MAX_WORKING_DAYS = 1000;
 export const EMPTY_STRING = '';
 export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
+export const BENEFIT_PLAN_ACCESS_CONTROL_CONFIG = 'enable_benefit_plan_access_control';
 
 export const RIGHT_INDIVIDUAL_SEARCH = 159001;
 export const RIGHT_INDIVIDUAL_CREATE = 159002;
