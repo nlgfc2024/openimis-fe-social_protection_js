@@ -10,6 +10,7 @@ const panelSource = readSource('src/components/BenefitPlanUsersTabPanel.js');
 const actionsSource = readSource('src/actions.js');
 const constantsSource = readSource('src/constants.js');
 const reducerSource = readSource('src/reducer.js');
+const pageSource = readSource('src/pages/BenefitPlanPage.js');
 const translations = JSON.parse(readSource('src/translations/en.json'));
 
 test('registers the Users tab through the Benefit Plan extension points', () => {
@@ -45,9 +46,10 @@ test('decodes the selected Relay user ID before assignment', () => {
 });
 
 test('waits for successful final mutation status before refreshing', () => {
-  assert.match(panelSource, /journalize\(mutation\)/);
   assert.match(panelSource, /waitForMutation\(pendingMutation\.clientMutationId\)/);
-  assert.match(panelSource, /result\?\.status === 2/);
+  assert.match(panelSource, /applyAssignmentMutationOutcome\(result/);
+  assert.doesNotMatch(panelSource, /journalize/);
+  assert.equal((pageSource.match(/journalize\(mutation\)/g) || []).length, 1);
   assert.doesNotMatch(panelSource, /if \(mutation\?\.id\) \{\s*coreAlert/);
 });
 
@@ -55,10 +57,23 @@ test('uses Relay pagination and theme spacing', () => {
   assert.match(panelSource, /TablePagination/);
   assert.match(panelSource, /endCursor/);
   assert.match(panelSource, /startCursor/);
+  assert.match(panelSource, /onPageChange=/);
+  assert.doesNotMatch(panelSource, /onChangePage=/);
+  assert.match(panelSource, /onRowsPerPageChange=/);
+  assert.doesNotMatch(panelSource, /onChangeRowsPerPage=/);
+  assert.match(actionsSource, /\{ requestId \}/);
+  assert.match(reducerSource, /benefitPlanUserAccessRequestId/);
   assert.match(panelSource, /theme\.spacing\(2\)/);
   assert.doesNotMatch(panelSource, /first: 100/);
   assert.doesNotMatch(panelSource, /style=\{\{ padding: 16 \}\}/);
   assert.match(reducerSource, /benefitPlanUserAccessPageInfo: pageInfo/);
+});
+
+test('confirms revocation and renders query status with valid table markup', () => {
+  assert.match(panelSource, /coreConfirm\(/);
+  assert.match(panelSource, /benefitPlan\.users\.revoke\.confirm\.message/);
+  assert.match(panelSource, /<TableCell colSpan=\{3\}>\s*<ProgressOrError/);
+  assert.match(panelSource, /&& !errorBenefitPlanUserAccess/);
 });
 
 test('provides all Users tab translations', () => {
