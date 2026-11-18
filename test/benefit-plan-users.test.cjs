@@ -12,6 +12,7 @@ const constantsSource = readSource('src/constants.js');
 const reducerSource = readSource('src/reducer.js');
 const pageSource = readSource('src/pages/BenefitPlanPage.js');
 const translations = JSON.parse(readSource('src/translations/en.json'));
+const readmeSource = readSource('README.md');
 
 test('registers the Users tab through the Benefit Plan extension points', () => {
   assert.match(indexSource, /'benefitPlan\.TabPanel\.label'/);
@@ -25,13 +26,15 @@ test('uses the Admin UserPicker and the dedicated assignment permission', () => 
   assert.match(panelSource, /RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE/);
   assert.match(constantsSource, /RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE = 160007/);
   assert.doesNotMatch(panelSource, /RIGHT_BENEFIT_PLAN_UPDATE/);
+  assert.match(constantsSource, /RIGHT_BENEFICIARY_SEARCH = 170001/);
+  assert.match(readmeSource, /`121701`.*admin\.UserPicker/);
+  assert.match(readmeSource, /`160003`.*not a substitute[\s\S]*`160007`/);
 });
 
 test('requires the frontend access-control flag as well as permission 160007', () => {
   assert.match(constantsSource, /enable_benefit_plan_access_control/);
   assert.match(indexSource, /enable_benefit_plan_access_control: false/);
-  assert.match(panelSource, /isBenefitPlanAccessControlEnabled/);
-  assert.match(panelSource, /&& rights\.includes\(RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE\)/);
+  assert.match(panelSource, /canManageBenefitPlanUsers/);
 });
 
 test('defines backend-backed query, assignment, and revocation actions', () => {
@@ -71,6 +74,11 @@ test('uses Relay pagination and theme spacing', () => {
 
 test('confirms revocation and renders query status with valid table markup', () => {
   assert.match(panelSource, /coreConfirm\(/);
+  assert.match(panelSource, /setConfirmedAction\(\(\) => revokeAction\)/);
+  assert.doesNotMatch(panelSource, /state\.core\.confirmed/);
+  assert.doesNotMatch(panelSource, /clearConfirm/);
+  assert.match(pageSource, /consumeConfirmedAction/);
+  assert.match(pageSource, /confirmedActionRef\.current = null/);
   assert.match(panelSource, /benefitPlan\.users\.revoke\.confirm\.message/);
   assert.match(panelSource, /<TableCell colSpan=\{3\}>\s*<ProgressOrError/);
   assert.match(panelSource, /&& !errorBenefitPlanUserAccess/);
@@ -83,6 +91,11 @@ test('provides all Users tab translations', () => {
     'socialProtection.benefitPlan.users.assign',
     'socialProtection.benefitPlan.users.revoke',
     'socialProtection.benefitPlan.users.empty',
+    'socialProtection.benefitPlan.users.error.assignmentExists',
+    'socialProtection.benefitPlan.users.error.benefitPlanNotFound',
+    'socialProtection.benefitPlan.users.error.assignmentNotFound',
+    'socialProtection.benefitPlan.users.error.permissionDenied',
+    'socialProtection.benefitPlan.users.error.userInactive',
   ].forEach((key) => assert.equal(typeof translations[key], 'string'));
 
   assert.equal(

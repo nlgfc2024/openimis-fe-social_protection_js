@@ -32,6 +32,7 @@ import BenefitPlanHeadPanel from '../components/BenefitPlanHeadPanel';
 import BenefitPlanTabPanel from '../components/BenefitPlanTabPanel';
 import { ACTION_TYPE } from '../reducer';
 import benefitPlanUpdateSuccessMessageKey from '../util/benefit-plan-messages';
+import { consumeConfirmedAction } from '../util/confirmation-actions';
 
 const styles = (theme) => ({
   page: theme.page,
@@ -65,7 +66,12 @@ function BenefitPlanPage({
   isBenefitPlanSchemaValid,
 }) {
   const [editedBenefitPlan, setEditedBenefitPlan] = useState({});
-  const [confirmedAction, setConfirmedAction] = useState(() => null);
+  const confirmedActionRef = useRef(null);
+  const setConfirmedAction = (action) => {
+    confirmedActionRef.current = typeof action === 'function'
+      ? action(confirmedActionRef.current)
+      : action;
+  };
   const [reset, setReset] = useState(() => false);
   const prevSubmittingMutationRef = useRef();
   const canUpdateBenefitPlan = rights.includes(RIGHT_BENEFIT_PLAN_UPDATE);
@@ -78,9 +84,13 @@ function BenefitPlanPage({
   }, [benefitPlanUuid]);
 
   useEffect(() => {
-    if (confirmed && confirmedAction) confirmedAction();
-    return () => confirmed && clearConfirm(null);
-  }, [confirmed]);
+    consumeConfirmedAction({
+      confirmed,
+      confirmedAction: confirmedActionRef.current,
+      clearConfirmedAction: () => { confirmedActionRef.current = null; },
+      clearConfirm,
+    });
+  }, [confirmed, clearConfirm]);
 
   const back = () => history.goBack();
 

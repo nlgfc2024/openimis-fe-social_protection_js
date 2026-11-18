@@ -74,3 +74,29 @@ None
 
 ## Configuration Options
 * `maxWorkingDays`: Maximum number of working days allowed for a project. This limits both the input validation on the project form and the number of day columns rendered in the beneficiaries table. Default: `1000`
+
+### Benefit Plan user assignment access
+
+An assignment-manager role needs all of the following rights for the complete
+Users-tab workflow:
+
+* `160007` — manage Benefit Plan user assignments and display the Users tab.
+* `170001` — access the Benefit Plan tab area containing the Users tab.
+* `121701` — query users through the published `admin.UserPicker` component.
+
+Permission `160003` is the Benefit Plan update right; it is not a substitute
+for assignment-management permission `160007`. These frontend checks control
+visibility only. The backend remains responsible for enforcing assignment and
+Benefit Plan scope permissions.
+
+The complete workflow also requires two separate Boolean deployment settings:
+
+* Frontend module configuration:
+  `fe-social_protection.enable_benefit_plan_access_control`.
+* Backend `social_protection` module configuration:
+  `enable_benefit_plan_access_control`.
+
+Both settings default to `false` and must be enabled together. Enabling only
+the frontend does not bypass backend assignment or Benefit Plan scope checks;
+enabling only the backend does not make the Users tab visible. The frontend
+does not query the backend flag at runtime.

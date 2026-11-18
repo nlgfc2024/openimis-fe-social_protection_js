@@ -7,6 +7,17 @@ const loadEsModule = require('./load-es-module.cjs');
 const root = path.join(__dirname, '..');
 const users = loadEsModule(path.join(root, 'src/util/benefit-plan-users.js'));
 
+test('Users tab access requires the frontend flag and permission 160007', () => {
+  const enabled = { getConf: () => true };
+  const disabled = { getConf: () => false };
+  const missing = { getConf: (_module, _key, fallback) => fallback };
+  assert.equal(users.canManageBenefitPlanUsers(enabled, [160007], 160007), true);
+  assert.equal(users.canManageBenefitPlanUsers(enabled, [], 160007), false);
+  assert.equal(users.canManageBenefitPlanUsers(disabled, [160007], 160007), false);
+  assert.equal(users.canManageBenefitPlanUsers(missing, [160007], 160007), false);
+  assert.equal(users.canManageBenefitPlanUsers(null, [160007], 160007), false);
+});
+
 test('successful final mutation refreshes the list and no failure handler', () => {
   let refreshes = 0;
   let failures = 0;
@@ -36,6 +47,50 @@ test('failed and pending mutations report feedback without refreshing', () => {
   assert.equal(
     users.assignmentMutationError([{ detail: 'duplicate' }], 'fallback'),
     'duplicate',
+  );
+});
+
+test('known assignment errors are translated from arrays and serialized arrays', () => {
+  const labels = {
+    'benefitPlan.users.error.assignmentExists': 'Already assigned',
+    'benefitPlan.users.error.permissionDenied': 'Not permitted',
+    'benefitPlan.users.error.assignmentNotFound': 'Assignment missing',
+  };
+  const translate = (key) => labels[key];
+  assert.equal(
+    users.assignmentMutationError(
+      [{ detail: 'mutation.benefit_plan_user_assignment_exists' }],
+      'fallback',
+      translate,
+    ),
+    'Already assigned',
+  );
+  assert.equal(
+    users.assignmentMutationError(
+      "['Benefit Plan assignment-management permission is required.']",
+      'fallback',
+      translate,
+    ),
+    'Not permitted',
+  );
+  assert.equal(
+    users.assignmentMutationError(
+      "['mutation.benefit_plan_user_assignment_not_found', 'mutation.benefit_plan_user_assignment_exists']",
+      'fallback',
+      translate,
+    ),
+    'Assignment missing\nAlready assigned',
+  );
+});
+
+test('unknown technical errors use a safe fallback while readable errors are preserved', () => {
+  assert.equal(
+    users.assignmentMutationError("['mutation.unknown_failure']", 'Please try again'),
+    'Please try again',
+  );
+  assert.equal(
+    users.assignmentMutationError('The service is temporarily unavailable.', 'Please try again'),
+    'The service is temporarily unavailable.',
   );
 });
 
