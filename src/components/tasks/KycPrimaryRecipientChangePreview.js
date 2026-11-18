@@ -4,14 +4,9 @@ import {
 } from '@material-ui/core';
 import { formatMessage } from '@openimis/fe-core';
 import { useIntl } from 'react-intl';
+import parseJsonObject from '../../util/parse-json-object';
 
 const KYC_DETAILS_WORKFLOW = 'Python KYC Details';
-
-const parseJson = (value) => {
-  if (value && typeof value === 'object') return value;
-  if (typeof value !== 'string') return {};
-  return JSON.parse(value);
-};
 
 const recipientLabel = (recipient, missingLabel) => {
   if (!recipient) return missingLabel;
@@ -20,7 +15,7 @@ const recipientLabel = (recipient, missingLabel) => {
 
 export default function KycPrimaryRecipientChangePreview({ task }) {
   const intl = useIntl();
-  const taskJsonExt = parseJson(task?.jsonExt);
+  const taskJsonExt = parseJsonObject(task?.jsonExt);
   if (taskJsonExt.workflow !== KYC_DETAILS_WORKFLOW) return null;
 
   const changes = taskJsonExt.primary_recipient_changes || [];
