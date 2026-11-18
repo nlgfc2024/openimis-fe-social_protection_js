@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Dialog, DialogActions, DialogContent, DialogTitle, Button, Grid,
+  Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, Button, FormControlLabel, Grid,
+  FormHelperText,
 } from '@material-ui/core';
 import { PublishedComponent, formatMessage } from '@openimis/fe-core';
 
@@ -9,10 +10,11 @@ const activeFilters = (filters) => Object.values(filters)
   .filter(Boolean);
 
 function EnrolmentExportDialog({
-  open, onClose, onExport, intl, benefitPlan, status, summaryOnly = false,
+  open, onClose, onExport, intl, benefitPlan, status, allowSummaryOnly = false,
 }) {
   const [filters, setFilters] = useState({});
   const [microCatchment, setMicroCatchment] = useState(null);
+  const [summaryOnly, setSummaryOnly] = useState(false);
 
   const download = () => {
     const parameters = [
@@ -22,7 +24,7 @@ function EnrolmentExportDialog({
       ...(status ? [`status: ${status}`] : []),
       ...(microCatchment ? [`microCatchmentUuid: "${microCatchment.uuid}"`] : []),
       // Only the household Phase export supports a primary-recipient summary.
-      ...(summaryOnly ? ['phaseBeneficiarySummaryOnly: true'] : []),
+      ...(allowSummaryOnly && summaryOnly ? ['phaseBeneficiarySummaryOnly: true'] : []),
       'fileFormat: "xlsx"',
       'fields: ["id"]',
       'fieldsColumns: "{}"',
@@ -55,6 +57,23 @@ function EnrolmentExportDialog({
               anchor="parentLocation"
             />
           </Grid>
+          {allowSummaryOnly && (
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={summaryOnly}
+                    onChange={(event) => setSummaryOnly(event.target.checked)}
+                    color="primary"
+                  />
+                )}
+                label={formatMessage(intl, 'socialProtection', 'export.enrolments.summaryOnly')}
+              />
+              <FormHelperText>
+                {formatMessage(intl, 'socialProtection', 'export.enrolments.membersDefault')}
+              </FormHelperText>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
       <DialogActions>
