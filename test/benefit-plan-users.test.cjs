@@ -94,6 +94,7 @@ test('provides all Users tab translations', () => {
     'socialProtection.benefitPlan.users.error.assignmentExists',
     'socialProtection.benefitPlan.users.error.benefitPlanNotFound',
     'socialProtection.benefitPlan.users.error.assignmentNotFound',
+    'socialProtection.benefitPlan.users.error.selfRevoke',
     'socialProtection.benefitPlan.users.error.permissionDenied',
     'socialProtection.benefitPlan.users.error.userInactive',
   ].forEach((key) => assert.equal(typeof translations[key], 'string'));

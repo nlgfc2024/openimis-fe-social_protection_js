@@ -55,6 +55,7 @@ test('known assignment errors are translated from arrays and serialized arrays',
     'benefitPlan.users.error.assignmentExists': 'Already assigned',
     'benefitPlan.users.error.permissionDenied': 'Not permitted',
     'benefitPlan.users.error.assignmentNotFound': 'Assignment missing',
+    'benefitPlan.users.error.selfRevoke': 'Cannot remove your own access',
   };
   const translate = (key) => labels[key];
   assert.equal(
@@ -81,6 +82,35 @@ test('known assignment errors are translated from arrays and serialized arrays',
     ),
     'Assignment missing\nAlready assigned',
   );
+  assert.equal(
+    users.assignmentMutationError(
+      [{ detail: 'mutation.benefit_plan_user_assignment_self_revoke' }],
+      'fallback',
+      translate,
+    ),
+    'Cannot remove your own access',
+  );
+});
+
+test('self-revocation failure shows its message without refreshing', () => {
+  const events = [];
+  const translate = () => 'You cannot remove your own access to this Benefit Plan.';
+  users.applyAssignmentMutationOutcome(
+    {
+      status: 1,
+      error: [{ detail: 'mutation.benefit_plan_user_assignment_self_revoke' }],
+    },
+    {
+      onSuccess: () => events.push('refresh'),
+      onFailure: (error) => events.push(
+        users.assignmentMutationError(error, 'fallback', translate),
+      ),
+      onPending: () => events.push('pending'),
+    },
+  );
+  assert.deepEqual(events, [
+    'You cannot remove your own access to this Benefit Plan.',
+  ]);
 });
 
 test('unknown technical errors use a safe fallback while readable errors are preserved', () => {

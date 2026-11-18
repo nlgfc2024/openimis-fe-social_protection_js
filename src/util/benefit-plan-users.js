@@ -22,6 +22,7 @@ export const ASSIGNMENT_ERROR_TRANSLATIONS = {
   'mutation.benefit_plan_user_assignment_exists': 'benefitPlan.users.error.assignmentExists',
   'mutation.benefit_plan_not_found': 'benefitPlan.users.error.benefitPlanNotFound',
   'mutation.benefit_plan_user_assignment_not_found': 'benefitPlan.users.error.assignmentNotFound',
+  'mutation.benefit_plan_user_assignment_self_revoke': 'benefitPlan.users.error.selfRevoke',
   'mutation.user_not_found': 'benefitPlan.users.error.userInactive',
   'Benefit Plan assignment-management permission is required.': 'benefitPlan.users.error.permissionDenied',
   'Benefit Plan assignment-management permission and plan access are required.':

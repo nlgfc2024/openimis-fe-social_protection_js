@@ -187,6 +187,7 @@
   "socialProtection.benefitPlan.users.error.assignmentExists": "This user is already assigned to this programme.",
   "socialProtection.benefitPlan.users.error.benefitPlanNotFound": "The selected programme could not be found.",
   "socialProtection.benefitPlan.users.error.assignmentNotFound": "This user assignment could not be found.",
+  "socialProtection.benefitPlan.users.error.selfRevoke": "You cannot remove your own access to this Benefit Plan.",
   "socialProtection.benefitPlan.users.error.permissionDenied": "You do not have permission to perform this action.",
   "socialProtection.benefitPlan.users.error.userInactive": "This user is inactive and cannot be assigned.",
   "socialProtection.group.code": "Code",
