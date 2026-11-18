@@ -48,6 +48,7 @@ import { fetchBenefitPlanSchemaFields } from './actions';
 import BenefitPlanHistorySearcher from './components/BenefitPlanHistorySearcher';
 import { BenefitPlanChangelogTabLabel, BenefitPlanChangelogTabPanel } from './components/BenefitPlanChangelogTab';
 import { BenefitPlanTaskTabLabel, BenefitPlanTaskTabPanel } from './components/BenefitPlanTaskTab';
+import { BenefitPlanUsersTabLabel, BenefitPlanUsersTabPanel } from './components/BenefitPlanUsersTabPanel';
 import { BENEFIT_PLAN_LABEL, RIGHT_BENEFIT_PLAN_SEARCH } from './constants';
 import BeneficiaryPicker from './pickers/BeneficiaryPicker';
 
@@ -56,6 +57,7 @@ const ROUTE_BENEFIT_PLAN = 'benefitPlans/benefitPlan';
 const ROUTE_BENEFIT_PACKAGE = 'benefitPackage';
 
 const DEFAULT_CONFIG = {
+  enable_benefit_plan_access_control: false,
   translations: [{ key: 'en', messages: flatten(messages_en) }],
   reducers: [{ key: 'socialProtection', reducer }],
   'core.MainMenu': [{ name: 'BenefitPlanMainMenu', component: BenefitPlanMainMenu }],
@@ -89,11 +91,13 @@ const DEFAULT_CONFIG = {
     BenefitPlanBeneficiariesTabLabel,
     BenefitPlanChangelogTabLabel,
     BenefitPlanTaskTabLabel,
+    BenefitPlanUsersTabLabel,
   ],
   'benefitPlan.TabPanel.panel': [
     BenefitPlanBeneficiariesTabPanel,
     BenefitPlanChangelogTabPanel,
     BenefitPlanTaskTabPanel,
+    BenefitPlanUsersTabPanel,
   ],
   'benefitPackage.TabPanel.label': [
     BenefitPackageMembersTabLabel,

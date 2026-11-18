@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function BenefitPlanTabPanel({
-  intl, rights, benefitPlan, setConfirmedAction, onActiveTabChange, confirmed,
+  intl, rights, benefitPlan, setConfirmedAction, onActiveTabChange,
   edited, onEditedChanged,
 }) {
   const classes = useStyles();
@@ -71,7 +71,6 @@ function BenefitPlanTabPanel({
         benefitPlan={benefitPlan}
         setConfirmedAction={setConfirmedAction}
         classes={classes}
-        confirmed={confirmed}
         edited={edited}
         onEditedChanged={onEditedChanged}
       />

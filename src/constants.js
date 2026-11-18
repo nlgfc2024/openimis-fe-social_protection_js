@@ -5,6 +5,7 @@ export const DEFAULT_PAGE_SIZE = 10;
 export const DEFAULT_MAX_WORKING_DAYS = 1000;
 export const EMPTY_STRING = '';
 export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
+export const BENEFIT_PLAN_ACCESS_CONTROL_CONFIG = 'enable_benefit_plan_access_control';
 
 export const RIGHT_INDIVIDUAL_SEARCH = 159001;
 export const RIGHT_INDIVIDUAL_CREATE = 159002;
@@ -19,6 +20,8 @@ export const RIGHT_BENEFIT_PLAN_SEARCH = 160001;
 export const RIGHT_BENEFIT_PLAN_CREATE = 160002;
 export const RIGHT_BENEFIT_PLAN_UPDATE = 160003;
 export const RIGHT_BENEFIT_PLAN_DELETE = 160004;
+export const RIGHT_BENEFIT_PLAN_ALL_ACCESS = 160006;
+export const RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE = 160007;
 export const RIGHT_BENEFICIARY_SEARCH = 170001;
 export const RIGHT_BENEFICIARY_UPDATE = 170003;
 
@@ -122,6 +125,7 @@ export const PAYROLL_PAYROLL_ROUTE = 'payroll.route.payroll';
 export const BENEFIT_PLAN_CHANGELOG_TAB_VALUE = 'BenefitPlanChangelogTab';
 export const TASK_CONTRIBUTION_KEY = 'tasksManagement.tasks';
 export const BENEFIT_PLAN_TASK_TAB_VALUE = 'BenefitPlanTaskTab';
+export const BENEFIT_PLAN_USERS_TAB_VALUE = 'BenefitPlanUsersTab';
 export const BENEFITS_CONTRIBUTION_KEY = 'payroll.benefitConsumptionPayrollSearcher';
 export const PYTHON_DEFAULT_IMPORT_WORKFLOW = 'Python Beneficiaries Upload';
 export const BENEFICIARIES_QUANTITY_LIMIT = 100;
