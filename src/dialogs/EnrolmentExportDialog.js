@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Grid } from '@material-ui/core';
+import {
+  Dialog, DialogActions, DialogContent, DialogTitle, Button, Grid,
+} from '@material-ui/core';
 import { PublishedComponent, formatMessage } from '@openimis/fe-core';
 
 const activeFilters = (filters) => Object.values(filters)
   .map((filter) => filter?.filter)
   .filter(Boolean);
 
-function EnrolmentExportDialog({ open, onClose, onExport, intl, benefitPlan, status }) {
+function EnrolmentExportDialog({
+  open, onClose, onExport, intl, benefitPlan, status, summaryOnly = false,
+}) {
   const [filters, setFilters] = useState({});
   const [microCatchment, setMicroCatchment] = useState(null);
 
@@ -17,9 +21,8 @@ function EnrolmentExportDialog({ open, onClose, onExport, intl, benefitPlan, sta
       ...activeFilters(filters),
       ...(status ? [`status: ${status}`] : []),
       ...(microCatchment ? [`microCatchmentUuid: "${microCatchment.uuid}"`] : []),
-      // Phase beneficiary-list export: one primary-recipient row per household.
-      // The Household page's standard download remains an all-members export.
-      'phaseBeneficiarySummaryOnly: true',
+      // Only the household Phase export supports a primary-recipient summary.
+      ...(summaryOnly ? ['phaseBeneficiarySummaryOnly: true'] : []),
       'fileFormat: "xlsx"',
       'fields: ["id"]',
       'fieldsColumns: "{}"',
