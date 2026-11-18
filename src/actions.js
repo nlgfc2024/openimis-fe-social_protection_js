@@ -305,13 +305,13 @@ const BENEFIT_PLAN_USER_ACCESS_PROJECTION = [
   'user { id username firstName lastName }',
 ];
 
-export function fetchBenefitPlanUserAccess(params) {
+export function fetchBenefitPlanUserAccess(params, requestId) {
   const payload = formatPageQueryWithCount(
     'benefitPlanUserAccess',
     params,
     BENEFIT_PLAN_USER_ACCESS_PROJECTION,
   );
-  return graphql(payload, ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS);
+  return graphql(payload, ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS, { requestId });
 }
 
 export function assignBenefitPlanUser(benefitPlanId, userId, clientMutationLabel) {

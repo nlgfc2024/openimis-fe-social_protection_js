@@ -21,9 +21,10 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {
   coreAlert,
+  clearConfirm,
+  coreConfirm,
   decodeId,
   formatMessage,
-  journalize,
   ProgressOrError,
   PublishedComponent,
   waitForMutation,
@@ -41,12 +42,18 @@ import {
   ROWS_PER_PAGE_OPTIONS,
 } from '../constants';
 import { ACTION_TYPE } from '../reducer';
+import {
+  applyAssignmentMutationOutcome,
+  assignmentMutationError,
+} from '../util/benefit-plan-users';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(2),
   },
 }));
+
+let benefitPlanAccessRequestSequence = 0;
 
 const isBenefitPlanAccessControlEnabled = (modulesManager) => modulesManager?.getConf(
   'fe-social_protection',
@@ -88,13 +95,15 @@ function BenefitPlanUsersTabPanel({
   benefitPlanUserAccessPageInfo,
   benefitPlanUserAccessTotalCount,
   errorBenefitPlanUserAccess,
+  confirmed,
   submittingMutation,
   mutation,
   fetchBenefitPlanUserAccess,
   assignBenefitPlanUser,
   revokeBenefitPlanUserAccess,
   coreAlert,
-  journalize,
+  clearConfirm,
+  coreConfirm,
   waitForMutation,
 }) {
   const classes = useStyles();
@@ -102,23 +111,44 @@ function BenefitPlanUsersTabPanel({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_PAGE_SIZE);
   const [pendingMutation, setPendingMutation] = useState(null);
+  const [assignmentToRevoke, setAssignmentToRevoke] = useState(null);
   const previousSubmitting = useRef(false);
+  const latestAccessRequest = useRef(0);
   const authorised = isBenefitPlanAccessControlEnabled(modulesManager)
     && rights.includes(RIGHT_BENEFIT_PLAN_ASSIGNMENT_MANAGE);
   const mutationInProgress = submittingMutation || !!pendingMutation;
 
-  const loadAssignments = useCallback((pagination) => {
+  const loadAssignments = useCallback(async (pagination) => {
     if (authorised && benefitPlan?.id) {
-      fetchBenefitPlanUserAccess([
-        `benefitPlanId: "${benefitPlan.id}"`,
-        ...pagination,
-      ]);
+      benefitPlanAccessRequestSequence += 1;
+      const requestId = benefitPlanAccessRequestSequence;
+      latestAccessRequest.current = requestId;
+      try {
+        const response = await fetchBenefitPlanUserAccess([
+          `benefitPlanId: "${benefitPlan.id}"`,
+          ...pagination,
+        ], requestId);
+        const failed = response?.error || response?.payload?.errors?.length;
+        return requestId === latestAccessRequest.current && !failed;
+      } catch (error) {
+        if (requestId === latestAccessRequest.current) {
+          coreAlert(
+            formatMessage(intl, 'socialProtection', 'benefitPlan.users.list.failed'),
+            assignmentMutationError(
+              error,
+              formatMessage(intl, 'socialProtection', 'benefitPlan.users.list.failed.message'),
+            ),
+          );
+        }
+        return false;
+      }
     }
-  }, [authorised, benefitPlan?.id, fetchBenefitPlanUserAccess]);
+    return false;
+  }, [authorised, benefitPlan?.id, coreAlert, fetchBenefitPlanUserAccess, intl]);
 
-  const loadFirstPage = useCallback(() => {
-    setPage(0);
-    loadAssignments([`first: ${rowsPerPage}`]);
+  const loadFirstPage = useCallback(async () => {
+    const loaded = await loadAssignments([`first: ${rowsPerPage}`]);
+    if (loaded) setPage(0);
   }, [loadAssignments, rowsPerPage]);
 
   useEffect(() => {
@@ -137,14 +167,13 @@ function BenefitPlanUsersTabPanel({
       && mutation?.id
       && mutation?.clientMutationId
     ) {
-      journalize(mutation);
       setPendingMutation({
         actionType: mutation.actionType,
         clientMutationId: mutation.clientMutationId,
       });
     }
     previousSubmitting.current = submittingMutation;
-  }, [submittingMutation, mutation, journalize]);
+  }, [submittingMutation, mutation]);
 
   useEffect(() => {
     if (!pendingMutation) return undefined;
@@ -154,17 +183,40 @@ function BenefitPlanUsersTabPanel({
       try {
         const result = await waitForMutation(pendingMutation.clientMutationId);
         if (cancelled) return;
-        if (result?.status === 2) {
-          setSelectedUser(null);
-          loadFirstPage();
+        applyAssignmentMutationOutcome(result, {
+          onSuccess: () => {
+            setSelectedUser(null);
+            loadFirstPage();
+            coreAlert(
+              formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.success'),
+              formatMessage(
+                intl,
+                'socialProtection',
+                pendingMutation.actionType === ACTION_TYPE.ASSIGN_BENEFIT_PLAN_USER
+                  ? 'benefitPlan.users.assign.success'
+                  : 'benefitPlan.users.revoke.success',
+              ),
+            );
+          },
+          onFailure: (error) => coreAlert(
+            formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.failed'),
+            assignmentMutationError(
+              error,
+              formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.failed.message'),
+            ),
+          ),
+          onPending: () => coreAlert(
+            formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.pending'),
+            formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.pending.message'),
+          ),
+        });
+      } catch (error) {
+        if (!cancelled) {
           coreAlert(
-            formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.success'),
-            formatMessage(
-              intl,
-              'socialProtection',
-              pendingMutation.actionType === ACTION_TYPE.ASSIGN_BENEFIT_PLAN_USER
-                ? 'benefitPlan.users.assign.success'
-                : 'benefitPlan.users.revoke.success',
+            formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.failed'),
+            assignmentMutationError(
+              error,
+              formatMessage(intl, 'socialProtection', 'benefitPlan.users.alert.polling.message'),
             ),
           );
         }
@@ -177,6 +229,24 @@ function BenefitPlanUsersTabPanel({
     return () => { cancelled = true; };
   }, [pendingMutation, waitForMutation, loadFirstPage, coreAlert, intl]);
 
+  useEffect(() => {
+    if (confirmed === null || !assignmentToRevoke) return;
+    if (confirmed) {
+      revokeBenefitPlanUserAccess(
+        assignmentToRevoke.id,
+        formatMessage(intl, 'socialProtection', 'benefitPlan.users.revoke.mutationLabel'),
+      );
+    }
+    setAssignmentToRevoke(null);
+    clearConfirm(null);
+  }, [
+    confirmed,
+    assignmentToRevoke,
+    clearConfirm,
+    intl,
+    revokeBenefitPlanUserAccess,
+  ]);
+
   if (!authorised || value !== BENEFIT_PLAN_USERS_TAB_VALUE) return null;
 
   const assign = () => {
@@ -188,25 +258,28 @@ function BenefitPlanUsersTabPanel({
     );
   };
 
-  const revoke = (assignment) => {
+  const confirmRevoke = (assignment) => {
     if (mutationInProgress) return;
-    revokeBenefitPlanUserAccess(
-      assignment.id,
-      formatMessage(intl, 'socialProtection', 'benefitPlan.users.revoke.mutationLabel'),
+    setAssignmentToRevoke(assignment);
+    coreConfirm(
+      formatMessage(intl, 'socialProtection', 'benefitPlan.users.revoke.confirm.title'),
+      formatMessage(intl, 'socialProtection', 'benefitPlan.users.revoke.confirm.message'),
+      null,
+      'warning',
     );
   };
 
-  const changePage = (_, newPage) => {
+  const changePage = async (_, newPage) => {
     if (newPage === page) return;
     const movingForward = newPage > page;
     const cursor = movingForward
       ? benefitPlanUserAccessPageInfo?.endCursor
       : benefitPlanUserAccessPageInfo?.startCursor;
     if (!cursor) return;
-    setPage(newPage);
-    loadAssignments(movingForward
+    const loaded = await loadAssignments(movingForward
       ? [`first: ${rowsPerPage}`, `after: "${cursor}"`]
       : [`last: ${rowsPerPage}`, `before: "${cursor}"`]);
+    if (loaded) setPage(newPage);
   };
 
   const changeRowsPerPage = (event) => {
@@ -248,11 +321,19 @@ function BenefitPlanUsersTabPanel({
               </TableRow>
             </TableHead>
             <TableBody>
-              <ProgressOrError
-                progress={fetchingBenefitPlanUserAccess}
-                error={errorBenefitPlanUserAccess}
-              />
-              {!fetchingBenefitPlanUserAccess && !benefitPlanUserAccess.length && (
+              {(fetchingBenefitPlanUserAccess || errorBenefitPlanUserAccess) && (
+                <TableRow>
+                  <TableCell colSpan={3}>
+                    <ProgressOrError
+                      progress={fetchingBenefitPlanUserAccess}
+                      error={errorBenefitPlanUserAccess}
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+              {!fetchingBenefitPlanUserAccess
+                && !errorBenefitPlanUserAccess
+                && !benefitPlanUserAccess.length && (
                 <TableRow>
                   <TableCell colSpan={3}>
                     {formatMessage(intl, 'socialProtection', 'benefitPlan.users.empty')}
@@ -268,7 +349,7 @@ function BenefitPlanUsersTabPanel({
                       <span>
                         <IconButton
                           disabled={mutationInProgress}
-                          onClick={() => revoke(assignment)}
+                          onClick={() => confirmRevoke(assignment)}
                         >
                           <DeleteIcon />
                         </IconButton>
@@ -286,8 +367,8 @@ function BenefitPlanUsersTabPanel({
           page={page}
           rowsPerPage={rowsPerPage}
           rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-          onChangePage={changePage}
-          onChangeRowsPerPage={changeRowsPerPage}
+          onPageChange={changePage}
+          onRowsPerPageChange={changeRowsPerPage}
         />
       </Grid>
     </Grid>
@@ -301,6 +382,7 @@ const mapStateToProps = (state) => ({
   benefitPlanUserAccessPageInfo: state.socialProtection.benefitPlanUserAccessPageInfo,
   benefitPlanUserAccessTotalCount: state.socialProtection.benefitPlanUserAccessTotalCount,
   errorBenefitPlanUserAccess: state.socialProtection.errorBenefitPlanUserAccess,
+  confirmed: state.core.confirmed,
   submittingMutation: state.socialProtection.submittingMutation,
   mutation: state.socialProtection.mutation,
 });
@@ -310,7 +392,8 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({
   assignBenefitPlanUser,
   revokeBenefitPlanUserAccess,
   coreAlert,
-  journalize,
+  clearConfirm,
+  coreConfirm,
   waitForMutation,
 }, dispatch);
 

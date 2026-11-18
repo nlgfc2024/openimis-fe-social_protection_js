@@ -31,7 +31,6 @@ import {
 import BenefitPlanHeadPanel from '../components/BenefitPlanHeadPanel';
 import BenefitPlanTabPanel from '../components/BenefitPlanTabPanel';
 import { ACTION_TYPE } from '../reducer';
-import { areBenefitPlanFieldsValid } from '../util/benefit-plan-validation';
 import benefitPlanUpdateSuccessMessageKey from '../util/benefit-plan-messages';
 
 const styles = (theme) => ({
@@ -87,7 +86,7 @@ function BenefitPlanPage({
 
   useEffect(() => {
     if (prevSubmittingMutationRef.current && !submittingMutation) {
-      journalize(mutation);
+      if (mutation?.id) journalize(mutation);
       if (
         mutation?.id
         && [
@@ -204,7 +203,7 @@ function BenefitPlanPage({
 
   const stopBenefitPlanCallback = () => closeBenefitPlan(
     benefitPlan,
-    formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.delete.mutationLabel', {
+    formatMessageWithValues(intl, 'socialProtection', 'benefitPlan.suspend.mutationLabel', {
       name: benefitPlan?.name,
     }),
   );

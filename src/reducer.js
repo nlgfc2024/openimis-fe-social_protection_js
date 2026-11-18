@@ -192,6 +192,7 @@ function reducer(
         benefitPlanUserAccess: [],
         benefitPlanUserAccessPageInfo: {},
         errorBenefitPlanUserAccess: null,
+        benefitPlanUserAccessRequestId: action.meta?.requestId,
       };
     case REQUEST(ACTION_TYPE.GET_BENEFIT_PLAN):
       return {
@@ -350,6 +351,7 @@ function reducer(
         errorBenefitPlans: formatGraphQLError(action.payload),
       };
     case SUCCESS(ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS):
+      if (action.meta?.requestId !== state.benefitPlanUserAccessRequestId) return state;
       return {
         ...state,
         fetchingBenefitPlanUserAccess: false,
@@ -359,7 +361,7 @@ function reducer(
           id: decodeId(assignment.id),
           user: {
             ...assignment.user,
-            id: assignment.user?.id ? decodeId(assignment.user.id) : null,
+            id: assignment.user?.id || null,
           },
         })) || [],
         benefitPlanUserAccessPageInfo: pageInfo(action.payload.data.benefitPlanUserAccess),
@@ -538,6 +540,7 @@ function reducer(
         errorBenefitPlans: formatServerError(action.payload),
       };
     case ERROR(ACTION_TYPE.SEARCH_BENEFIT_PLAN_USER_ACCESS):
+      if (action.meta?.requestId !== state.benefitPlanUserAccessRequestId) return state;
       return {
         ...state,
         fetchingBenefitPlanUserAccess: false,
@@ -1037,7 +1040,10 @@ function reducer(
     case REQUEST(ACTION_TYPE.MUTATION):
       return dispatchMutationReq(state, action);
     case ERROR(ACTION_TYPE.MUTATION):
-      return dispatchMutationErr(state, action);
+      return {
+        ...dispatchMutationErr(state, action),
+        submittingMutation: false,
+      };
     case SUCCESS(ACTION_TYPE.CREATE_BENEFIT_PLAN):
       return dispatchMutationResp(state, 'createBenefitPlan', action);
     case SUCCESS(ACTION_TYPE.DELETE_BENEFIT_PLAN):
