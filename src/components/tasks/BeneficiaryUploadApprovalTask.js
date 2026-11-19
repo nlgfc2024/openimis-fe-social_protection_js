@@ -5,13 +5,13 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-return-assign */
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { Paper, Fab, makeStyles, Grid, Checkbox, FormControlLabel, Divider, GridItem } from "@material-ui/core";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import {
-  Paper, Fab, makeStyles, Grid, Checkbox, FormControlLabel, Divider, GridItem,
-} from '@material-ui/core';
-import { shallowEqual, useDispatch, useSelector } from 'react-redux';
-import {
-  Table, coreConfirm, SelectDialog,
+  Table,
+  coreConfirm,
+  SelectDialog,
   withModulesManager,
   decodeId,
   PublishedComponent,
@@ -20,62 +20,75 @@ import {
   formatMessage,
   formatMessageWithValues,
   useModulesManager,
-} from '@openimis/fe-core';
-import ClearIcon from '@material-ui/icons/Clear';
-import CheckIcon from '@material-ui/icons/Check';
+} from "@openimis/fe-core";
+import ClearIcon from "@material-ui/icons/Clear";
+import CheckIcon from "@material-ui/icons/Check";
 
-import { useIntl } from 'react-intl';
-import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
-import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
-import KycPrimaryRecipientChangePreview from './KycPrimaryRecipientChangePreview';
+import { useIntl } from "react-intl";
+import { TASK_STATUS, APPROVED, FAILED } from "../../constants";
+import { fetchPendingBeneficiaryUploads, resolveTask } from "../../actions";
+import KycPrimaryRecipientChangePreview from "./KycPrimaryRecipientChangePreview";
 
 const DEFAULT_APPROVAL_TABLE_CONFIG = {
-  leadingFields: ['last_name', 'first_name', 'dob'],
+  leadingFields: [
+    "district",
+    "traditional_authority",
+    "gvh",
+    "village",
+    "catchment",
+    "phase_name",
+    "form_number",
+    "first_name",
+    "last_name",
+    "nid",
+    "dob",
+    "gender",
+    "bank",
+    "account_name",
+    "account_number",
+  ],
   trailingFields: [],
   hiddenFields: [
-    'uuid',
-    'ID',
-    'Unnamed: 0',
-    'ta',
+    "uuid",
+    "ID",
+    "Unnamed: 0",
+    "ta",
     // KYC payment-detail uploads supply the current National ID as `nid`.
     // Hide the legacy profile fields so the review table has no duplicate or
     // empty columns.
-    'national_id',
-    'fit_for_work',
-    'validation_status',
-    'household_mobile_number',
-    'household_wealth_quintile',
-    'household_pmt_score',
+    "national_id",
+    "fit_for_work",
+    "validation_status",
+    "household_mobile_number",
+    "household_wealth_quintile",
+    "household_pmt_score",
   ],
 };
-const LOCATION_TYPE_FIELDS = { R: 'district', D: 'traditional_authority', W: 'gvh', V: 'village' };
+const LOCATION_TYPE_FIELDS = { R: "district", D: "traditional_authority", W: "gvh", V: "village" };
 
-const humanizeFieldName = (fieldName) => fieldName
-  .replace(/_/g, ' ')
-  .replace(/\b\w/g, (character) => character.toUpperCase());
+const humanizeFieldName = (fieldName) =>
+  fieldName.replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
 
 const locationColumns = (location) => {
   const columns = {};
   let current = location;
   while (current) {
-    if (LOCATION_TYPE_FIELDS[current.type]) columns[LOCATION_TYPE_FIELDS[current.type]] = current.name || '';
+    if (LOCATION_TYPE_FIELDS[current.type]) columns[LOCATION_TYPE_FIELDS[current.type]] = current.name || "";
     current = current.parent;
   }
   return columns;
 };
 
 const formatCellValue = (key, value, intl) => {
-  if (key !== 'fit_for_work') return value;
-  if ([1, '1', true, 'true', 'yes', 'YES'].includes(value)) return formatMessage(intl, 'common', 'true');
-  if ([0, '0', false, 'false', 'no', 'NO'].includes(value)) return formatMessage(intl, 'common', 'false');
+  if (key !== "fit_for_work") return value;
+  if ([1, "1", true, "true", "yes", "YES"].includes(value)) return formatMessage(intl, "common", "true");
+  if ([0, "0", false, "false", "no", "NO"].includes(value)) return formatMessage(intl, "common", "false");
   return value;
 };
 
 const approvalTableHeader = (intl, fieldName) => {
   const messageId = `socialProtection.approvalTable.${fieldName}`;
-  return intl.messages[messageId]
-    ? intl.formatMessage({ id: messageId })
-    : humanizeFieldName(fieldName);
+  return intl.messages[messageId] ? intl.formatMessage({ id: messageId }) : humanizeFieldName(fieldName);
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -83,24 +96,21 @@ const useStyles = makeStyles((theme) => ({
   title: theme.paper.title,
   button: theme.paper.button,
   fabContainer: {
-    display: 'flex',
-    justifyContent: 'center',
+    display: "flex",
+    justifyContent: "center",
   },
   fabHeaderContainer: {
-    justifyContent: 'center',
-    textAlign: 'center',
-    fontSize: '16px',
-    fontWeight: 'bold',
+    justifyContent: "center",
+    textAlign: "center",
+    fontSize: "16px",
+    fontWeight: "bold",
   },
   fab: {
     margin: theme.spacing(1),
   },
-
 }));
 
-function BeneficiaryUploadTaskDisplay({
-  businessData, setAdditionalData, jsonExt,
-}) {
+function BeneficiaryUploadTaskDisplay({ businessData, setAdditionalData, jsonExt }) {
   const {
     errorPendingBeneficiaries,
     pendingBeneficiaries,
@@ -110,20 +120,19 @@ function BeneficiaryUploadTaskDisplay({
   } = useSelector((state) => state.socialProtection);
   const intl = useIntl();
   const modulesManager = useModulesManager();
-  const configuredApprovalTable = modulesManager.getConf(
-    'fe-social_protection',
-    'approvalTable',
-    {},
-  );
+  const configuredApprovalTable = modulesManager.getConf("fe-social_protection", "approvalTable", {});
   const approvalTableConfig = {
     ...DEFAULT_APPROVAL_TABLE_CONFIG,
     ...configuredApprovalTable,
-    // Module configuration may add column order rules, but it must not
-    // reintroduce duplicate or unsupported KYC fields.
-    hiddenFields: [...new Set([
-      ...DEFAULT_APPROVAL_TABLE_CONFIG.hiddenFields,
-      ...(configuredApprovalTable.hiddenFields || []),
-    ])],
+    // KYC review has a fixed audit-friendly sequence. Do not let a generic
+    // module configuration reorder these columns.
+    leadingFields: DEFAULT_APPROVAL_TABLE_CONFIG.leadingFields,
+    trailingFields: DEFAULT_APPROVAL_TABLE_CONFIG.trailingFields,
+    // Module configuration may add table options, but it must not reintroduce
+    // duplicate or unsupported KYC fields.
+    hiddenFields: [
+      ...new Set([...DEFAULT_APPROVAL_TABLE_CONFIG.hiddenFields, ...(configuredApprovalTable.hiddenFields || [])]),
+    ],
   };
   const [pending, setPending] = useState([]);
   const [keys, setKeys] = useState([]);
@@ -174,11 +183,13 @@ function BeneficiaryUploadTaskDisplay({
     const { leadingFields, trailingFields, hiddenFields } = approvalTableConfig;
     const uniqueKeys = [...leadingFields];
 
-    data.forEach((i) => Object.keys(i).forEach((k) => {
-      if (!uniqueKeys.includes(k)) {
-        uniqueKeys.push(k);
-      }
-    }));
+    data.forEach((i) =>
+      Object.keys(i).forEach((k) => {
+        if (!uniqueKeys.includes(k)) {
+          uniqueKeys.push(k);
+        }
+      }),
+    );
 
     // Remove internal identifiers
     // Unnamed 0 is ordinal often found in the uploaded CSVs, it shoun't appear in new
@@ -194,20 +205,22 @@ function BeneficiaryUploadTaskDisplay({
 
   useEffect(() => {
     // eslint-disable-next-line max-len
-    setPending(pendingBeneficiaries.map((x) => {
-      const uploaded = x.jsonExt ? JSON.parse(x.jsonExt) : {};
-      const location = locationColumns(x.individual?.location);
-      return {
-        ...uploaded,
-        ...location,
-        // KYC payment-detail uploads name this field `ta`, whereas the
-        // location hierarchy uses `traditional_authority`.
-        traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || '',
-        uuid: x.uuid,
-      };
-    }));
+    setPending(
+      pendingBeneficiaries.map((x) => {
+        const uploaded = x.jsonExt ? JSON.parse(x.jsonExt) : {};
+        const location = locationColumns(x.individual?.location);
+        return {
+          ...uploaded,
+          ...location,
+          // KYC payment-detail uploads name this field `ta`, whereas the
+          // location hierarchy uses `traditional_authority`.
+          traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || "",
+          uuid: x.uuid,
+        };
+      }),
+    );
     const withIndividuals = {};
-    pendingBeneficiaries.map((x) => withIndividuals[x.id] = x.individual?.id);
+    pendingBeneficiaries.map((x) => (withIndividuals[x.id] = x.individual?.id));
     setStoredIndividuals(withIndividuals);
   }, [pendingBeneficiaries]);
 
@@ -227,14 +240,20 @@ function BeneficiaryUploadTaskDisplay({
     };
   });
 
-  const headers = () => [
-    task?.status === TASK_STATUS.ACCEPTED
-      ? formatMessage(intl, 'socialProtection', 'selectForEvaluation') : formatMessage(intl, 'socialProtection', 'evaluated'),
-    ...keys.map((key) => approvalTableHeader(intl, key))] || [];
+  const headers = () =>
+    [
+      task?.status === TASK_STATUS.ACCEPTED
+        ? formatMessage(intl, "socialProtection", "selectForEvaluation")
+        : formatMessage(intl, "socialProtection", "evaluated"),
+      ...keys.map((key) => approvalTableHeader(intl, key)),
+    ] || [];
 
   const changeCheckboxState = (pending) => {
-    setSelectedRecords(selectedRecords.includes(pending.uuid)
-      ? selectedRecords.filter((x) => x !== pending.uuid) : [...selectedRecords, pending.uuid]);
+    setSelectedRecords(
+      selectedRecords.includes(pending.uuid)
+        ? selectedRecords.filter((x) => x !== pending.uuid)
+        : [...selectedRecords, pending.uuid],
+    );
   };
 
   const itemFormatters = () => {
@@ -256,14 +275,13 @@ function BeneficiaryUploadTaskDisplay({
               disabled
             />
           )}
-
         </>
       ),
     ];
 
-    keys.map((key) => items.push((pending) => (
-      pending.hasOwnProperty(key) ? formatCellValue(key, pending[key], intl) : '-'
-    )));
+    keys.map((key) =>
+      items.push((pending) => (pending.hasOwnProperty(key) ? formatCellValue(key, pending[key], intl) : "-")),
+    );
     return items;
   };
 
@@ -281,14 +299,12 @@ function BeneficiaryUploadTaskDisplay({
   const onChangePage = (page, nbr) => {
     const next = nbr > state.page;
 
-    setState(
-      {
-        page: next ? state.page + 1 : state.page - 1,
-        pageSize: state.pageSize,
-        afterCursor: next ? pendingBeneficiariesPageInfo.endCursor : null,
-        beforeCursor: !next ? pendingBeneficiariesPageInfo.startCursor : null,
-      },
-    );
+    setState({
+      page: next ? state.page + 1 : state.page - 1,
+      pageSize: state.pageSize,
+      afterCursor: next ? pendingBeneficiariesPageInfo.endCursor : null,
+      beforeCursor: !next ? pendingBeneficiariesPageInfo.startCursor : null,
+    });
   };
 
   const isCurrentUserInTaskGroup = () => {
@@ -298,28 +314,30 @@ function BeneficiaryUploadTaskDisplay({
 
   const isRowDisabled = (_) => !isCurrentUserInTaskGroup() || task?.status !== TASK_STATUS.ACCEPTED;
 
-  const [approveOrFail, setApproveOrFail] = useState('');
+  const [approveOrFail, setApproveOrFail] = useState("");
   const [confirmed, setConfirmed] = useState(null);
   const [openModal, setOpenModal] = useState(null);
   const [disabled, setDisable] = useState(false);
 
   const clear = () => {
     setOpenModal(null);
-    setApproveOrFail('');
-    setConfirmed('');
+    setApproveOrFail("");
+    setConfirmed("");
   };
 
   useEffect(() => {
     if (task?.id && currentUser?.id) {
       if (confirmed) {
         setDisable(true);
-        dispatch(resolveTask(
-          task,
-          formatMessage(intl, 'tasksManagement', 'task.resolve.mutationLabel'),
-          currentUser,
-          approveOrFail,
-          selectedRecords,
-        ));
+        dispatch(
+          resolveTask(
+            task,
+            formatMessage(intl, "tasksManagement", "task.resolve.mutationLabel"),
+            currentUser,
+            approveOrFail,
+            selectedRecords,
+          ),
+        );
       }
     }
     return () => confirmed && clear(false);
@@ -350,20 +368,22 @@ function BeneficiaryUploadTaskDisplay({
         onClose={onClose}
         module="socialProtection"
         confirmTitle="taskConfirmation.title"
-        confirmMessage={formatMessageWithValues(intl, 'socialProtection', 'atomicApprove', { count: selectedRecords.length })}
+        confirmMessage={formatMessageWithValues(intl, "socialProtection", "atomicApprove", {
+          count: selectedRecords.length,
+        })}
         confirmationButton="dialogActions.continue"
         rejectionButton="dialogActions.goBack"
       />
       <Table
         module="socialProtection"
         headers={headers()}
-          // headerActions={headerActions}
+        // headerActions={headerActions}
         itemFormatters={itemFormatters()}
         items={(!!pending && pending) || []}
         fetching={fetchingPendingBeneficiaries}
         error={errorPendingBeneficiaries}
-          // onDoubleClick={this.onDoubleClick}
-        withSelection={!isRowDisabled() ? 'multiple' : ''}
+        // onDoubleClick={this.onDoubleClick}
+        withSelection={!isRowDisabled() ? "multiple" : ""}
         onChangeSelection={onChangeSelection}
         withPagination
         rowsPerPageOptions={[10, 20, 10, 100]}
@@ -376,40 +396,43 @@ function BeneficiaryUploadTaskDisplay({
         rowDisabled={isRowDisabled}
       />
 
-      {isCurrentUserInTaskGroup()
-    && (
-    <>
-      {' '}
-      <Paper className={classes.paper}>
-        <div className={classes.fabHeaderContainer}>
-          {formatMessage(intl, 'socialProtection', 'resolveSelectedTasks')}
-          <Divider />
-        </div>
-        <div className={classes.fabContainer}>
-          <div className={classes.fab}>
-            <Fab
-              color="primary"
-              disabled={disabled || task?.status === TASK_STATUS.RECEIVED || isRowDisabled() || selectedRecords.length === 0}
-              onClick={() => handleButtonClick('ACCEPT')}
-            >
-              <CheckIcon />
-            </Fab>
-            {formatMessage(intl, 'socialProtection', 'acceptSelected')}
-          </div>
-          <div className={classes.fab}>
-            <Fab
-              color="primary"
-              disabled={disabled || task?.status === TASK_STATUS.RECEIVED || isRowDisabled() || selectedRecords.length === 0}
-              onClick={() => handleButtonClick('REJECT')}
-            >
-              <ClearIcon />
-            </Fab>
-            {formatMessage(intl, 'socialProtection', 'rejectSelected')}
-          </div>
-        </div>
-      </Paper>
-    </>
-    )}
+      {isCurrentUserInTaskGroup() && (
+        <>
+          {" "}
+          <Paper className={classes.paper}>
+            <div className={classes.fabHeaderContainer}>
+              {formatMessage(intl, "socialProtection", "resolveSelectedTasks")}
+              <Divider />
+            </div>
+            <div className={classes.fabContainer}>
+              <div className={classes.fab}>
+                <Fab
+                  color="primary"
+                  disabled={
+                    disabled || task?.status === TASK_STATUS.RECEIVED || isRowDisabled() || selectedRecords.length === 0
+                  }
+                  onClick={() => handleButtonClick("ACCEPT")}
+                >
+                  <CheckIcon />
+                </Fab>
+                {formatMessage(intl, "socialProtection", "acceptSelected")}
+              </div>
+              <div className={classes.fab}>
+                <Fab
+                  color="primary"
+                  disabled={
+                    disabled || task?.status === TASK_STATUS.RECEIVED || isRowDisabled() || selectedRecords.length === 0
+                  }
+                  onClick={() => handleButtonClick("REJECT")}
+                >
+                  <ClearIcon />
+                </Fab>
+                {formatMessage(intl, "socialProtection", "rejectSelected")}
+              </div>
+            </div>
+          </Paper>
+        </>
+      )}
     </>
   );
 }
@@ -418,11 +441,7 @@ const UploadResolutionTaskTableHeaders = () => [];
 
 const UploadResolutionItemFormatters = () => [
   (businessData, jsonExt, formatterIndex, setAdditionalData) => (
-    <BeneficiaryUploadTaskDisplay
-      businessData={businessData}
-      setAdditionalData={setAdditionalData}
-      jsonExt={jsonExt}
-    />
+    <BeneficiaryUploadTaskDisplay businessData={businessData} setAdditionalData={setAdditionalData} jsonExt={jsonExt} />
   ),
 ];
 
@@ -434,8 +453,8 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
   const [disabled, setDisable] = useState(defaultDisabled);
 
   const [openModal, setOpenModal] = useState(null);
-  const [approveOrFail, setApproveOrFail] = useState('');
-  const [confirmed, setConfirmed] = useState('');
+  const [approveOrFail, setApproveOrFail] = useState("");
+  const [confirmed, setConfirmed] = useState("");
 
   const onConfirm = () => {
     setOpenModal(false);
@@ -456,8 +475,8 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
 
   const clear = () => {
     setOpenModal(null);
-    setApproveOrFail('');
-    setConfirmed('');
+    setApproveOrFail("");
+    setConfirmed("");
   };
 
   const handleButtonClick = (choiceString) => {
@@ -474,13 +493,14 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
     if (task?.id && currentUser?.id) {
       if (confirmed) {
         setDisable(true);
-        dispatch(resolveTask(
-          task,
-          formatMessage(intl, 'tasksManagement', 'task.resolve.mutationLabel'),
-          currentUser,
-          approveOrFail,
-
-        ));
+        dispatch(
+          resolveTask(
+            task,
+            formatMessage(intl, "tasksManagement", "task.resolve.mutationLabel"),
+            currentUser,
+            approveOrFail,
+          ),
+        );
       }
     }
     return () => confirmed && clear();
@@ -494,27 +514,22 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
         onClose={onClose}
         module="socialProtection"
         confirmTitle="taskConfirmation.title"
-        confirmMessage={formatMessage(intl, 'socialProtection', 'bulkApprove')}
+        confirmMessage={formatMessage(intl, "socialProtection", "bulkApprove")}
         confirmationButton="dialogActions.continue"
         rejectionButton="dialogActions.goBack"
       />
       <Paper className={classes.paper}>
         <div className={classes.fabHeaderContainer}>
-          {formatMessage(intl, 'socialProtection', 'resolveAllRemainingTasks')}
+          {formatMessage(intl, "socialProtection", "resolveAllRemainingTasks")}
           <Divider />
         </div>
         <KycPrimaryRecipientChangePreview task={task} />
         <div className={classes.fabContainer}>
           <div className={classes.fab}>
-            <Fab
-              color="primary"
-              disabled={disabled || isRowDisabled()}
-              onClick={() => handleButtonClick(APPROVED)}
-            >
+            <Fab color="primary" disabled={disabled || isRowDisabled()} onClick={() => handleButtonClick(APPROVED)}>
               <CheckIcon />
             </Fab>
-            {formatMessage(intl, 'socialProtection', 'approveAll')}
-
+            {formatMessage(intl, "socialProtection", "approveAll")}
           </div>
           <div className={classes.fab}>
             <Fab
@@ -524,7 +539,7 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
             >
               <ClearIcon />
             </Fab>
-            {formatMessage(intl, 'socialProtection', 'rejectAll')}
+            {formatMessage(intl, "socialProtection", "rejectAll")}
           </div>
         </div>
       </Paper>
