@@ -793,9 +793,17 @@ export function resolveTask(task, clientMutationLabel, user, approveOrFail, addi
     {
       ...mutation2.variables.input,
     },
-    ['TASK_MANAGEMENT_MUTATION_REQ', 'TASK_MANAGEMENT_MUTATION_RESP', 'TASK_MANAGEMENT_MUTATION_ERR'],
+    [
+      `${ACTION_TYPE.TASK_MUTATION}_REQ`,
+      `${ACTION_TYPE.RESOLVE_TASK}_RESP`,
+      `${ACTION_TYPE.TASK_MUTATION}_ERR`,
+    ],
     {
-      requestedDateTime, clientMutationId: mutation.clientMutationId, clientMutationLabel, userId: user.id,
+      requestedDateTime,
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      userId: user.id,
+      actionType: ACTION_TYPE.RESOLVE_TASK,
     },
   );
 }

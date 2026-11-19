@@ -69,3 +69,11 @@ test('the changelog does not ask the history type for current-version-only field
   assert.match(actionsSource, /formatPageQueryWithCount\('benefitPlanHistory', params, BENEFIT_PLAN_HISTORY_PROJECTION\(\)\)/);
   assert.match(actionsSource, /CURRENT_VERSION_ONLY_FIELDS = \['advancedCriteria', 'updatesRequireApproval'\]/);
 });
+
+test('task resolution dispatches the success action handled by the task reducers', () => {
+  const actionsSource = fs.readFileSync(path.join(__dirname, '../src/actions.js'), 'utf8');
+  const reducerSource = fs.readFileSync(path.join(__dirname, '../src/reducer.js'), 'utf8');
+  assert.match(actionsSource, /`\$\{ACTION_TYPE\.RESOLVE_TASK\}_RESP`/);
+  assert.match(actionsSource, /actionType: ACTION_TYPE\.RESOLVE_TASK/);
+  assert.match(reducerSource, /case SUCCESS\(ACTION_TYPE\.RESOLVE_TASK\):/);
+});
