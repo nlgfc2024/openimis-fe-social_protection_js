@@ -36,6 +36,7 @@ const DEFAULT_APPROVAL_TABLE_CONFIG = {
     'uuid',
     'ID',
     'Unnamed: 0',
+    'ta',
     // KYC payment-detail uploads supply the current National ID as `nid`.
     // Hide the legacy profile fields so the review table has no duplicate or
     // empty columns.
@@ -193,11 +194,18 @@ function BeneficiaryUploadTaskDisplay({
 
   useEffect(() => {
     // eslint-disable-next-line max-len
-    setPending(pendingBeneficiaries.map((x) => ({
-      ...(x.jsonExt ? JSON.parse(x.jsonExt) : {}),
-      ...locationColumns(x.individual?.location),
-      uuid: x.uuid,
-    })));
+    setPending(pendingBeneficiaries.map((x) => {
+      const uploaded = x.jsonExt ? JSON.parse(x.jsonExt) : {};
+      const location = locationColumns(x.individual?.location);
+      return {
+        ...uploaded,
+        ...location,
+        // KYC payment-detail uploads name this field `ta`, whereas the
+        // location hierarchy uses `traditional_authority`.
+        traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || '',
+        uuid: x.uuid,
+      };
+    }));
     const withIndividuals = {};
     pendingBeneficiaries.map((x) => withIndividuals[x.id] = x.individual?.id);
     setStoredIndividuals(withIndividuals);
