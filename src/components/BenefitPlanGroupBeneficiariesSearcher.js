@@ -303,6 +303,7 @@ function BenefitPlanGroupBeneficiariesSearcher({
         intl={intl}
         benefitPlan={benefitPlan}
         status={status || exportStatus}
+        allowSummaryOnly
       />
       {failedExport && (
         <Dialog open={failedExport} fullWidth maxWidth="sm">

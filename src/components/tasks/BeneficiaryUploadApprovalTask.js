@@ -27,6 +27,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
+import KycPrimaryRecipientChangePreview from './KycPrimaryRecipientChangePreview';
 
 const DEFAULT_APPROVAL_TABLE_CONFIG = {
   leadingFields: ['last_name', 'first_name', 'dob'],
@@ -470,6 +471,7 @@ function UploadConfirmationPanel({ defaultAction, defaultDisabled }) {
           {formatMessage(intl, 'socialProtection', 'resolveAllRemainingTasks')}
           <Divider />
         </div>
+        <KycPrimaryRecipientChangePreview task={task} />
         <div className={classes.fabContainer}>
           <div className={classes.fab}>
             <Fab

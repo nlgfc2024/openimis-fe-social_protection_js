@@ -55,6 +55,15 @@ test('beneficiaries are one list with the Phase actions in its header', () => {
   assert.equal(read('index.js').includes('BenefitPlanBeneficiariesListTab'), false);
 });
 
+test('only the group beneficiary export requests Phase summary rows', () => {
+  const read = (file) => fs.readFileSync(path.join(__dirname, '../src', file), 'utf8');
+  const dialog = read('dialogs/EnrolmentExportDialog.js');
+  assert.equal(dialog.includes("allowSummaryOnly && summaryOnly ? ['phaseBeneficiarySummaryOnly: true']"), true);
+  assert.equal(dialog.includes('checked={summaryOnly}'), true);
+  assert.equal(read('components/BenefitPlanGroupBeneficiariesSearcher.js').includes('allowSummaryOnly'), true);
+  assert.equal(read('components/BenefitPlanBeneficiariesSearcher.js').includes('allowSummaryOnly'), false);
+});
+
 test('the changelog does not ask the history type for current-version-only fields', () => {
   const actionsSource = fs.readFileSync(path.join(__dirname, '../src/actions.js'), 'utf8');
   assert.match(actionsSource, /formatPageQueryWithCount\('benefitPlanHistory', params, BENEFIT_PLAN_HISTORY_PROJECTION\(\)\)/);
