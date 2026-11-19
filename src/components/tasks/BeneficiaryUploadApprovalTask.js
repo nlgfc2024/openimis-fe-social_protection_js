@@ -32,7 +32,20 @@ import KycPrimaryRecipientChangePreview from './KycPrimaryRecipientChangePreview
 const DEFAULT_APPROVAL_TABLE_CONFIG = {
   leadingFields: ['last_name', 'first_name', 'dob'],
   trailingFields: [],
-  hiddenFields: ['uuid', 'ID', 'Unnamed: 0'],
+  hiddenFields: [
+    'uuid',
+    'ID',
+    'Unnamed: 0',
+    // KYC payment-detail uploads supply the current National ID as `nid`.
+    // Hide the legacy profile fields so the review table has no duplicate or
+    // empty columns.
+    'national_id',
+    'fit_for_work',
+    'validation_status',
+    'household_mobile_number',
+    'household_wealth_quintile',
+    'household_pmt_score',
+  ],
 };
 const LOCATION_TYPE_FIELDS = { R: 'district', D: 'traditional_authority', W: 'gvh', V: 'village' };
 
@@ -96,9 +109,20 @@ function BeneficiaryUploadTaskDisplay({
   } = useSelector((state) => state.socialProtection);
   const intl = useIntl();
   const modulesManager = useModulesManager();
+  const configuredApprovalTable = modulesManager.getConf(
+    'fe-social_protection',
+    'approvalTable',
+    {},
+  );
   const approvalTableConfig = {
     ...DEFAULT_APPROVAL_TABLE_CONFIG,
-    ...modulesManager.getConf('fe-social_protection', 'approvalTable', {}),
+    ...configuredApprovalTable,
+    // Module configuration may add column order rules, but it must not
+    // reintroduce duplicate or unsupported KYC fields.
+    hiddenFields: [...new Set([
+      ...DEFAULT_APPROVAL_TABLE_CONFIG.hiddenFields,
+      ...(configuredApprovalTable.hiddenFields || []),
+    ])],
   };
   const [pending, setPending] = useState([]);
   const [keys, setKeys] = useState([]);
