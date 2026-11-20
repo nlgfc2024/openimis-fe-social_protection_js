@@ -226,9 +226,13 @@ function BeneficiaryUploadTaskDisplay({
         return {
           ...uploaded,
           ...location,
-          // KYC payment-detail uploads name this field `ta`, whereas the
-          // location hierarchy uses `traditional_authority`.
-          traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || '',
+          ...(isKycTask
+            ? {
+              // KYC payment-detail uploads name this field `ta`, whereas the
+              // location hierarchy uses `traditional_authority`.
+              traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || '',
+            }
+            : {}),
           uuid: x.uuid,
         };
       }),
