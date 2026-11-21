@@ -171,6 +171,14 @@ function BeneficiaryUploadTaskDisplay({
     // eslint-disable-next-line max-len
     setPending(pendingBeneficiaries.map((x) => ({
       ...(x.jsonExt ? JSON.parse(x.jsonExt) : {}),
+      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountNumber')
+        ? { account_number: x.paymentDetails.accountNumber } : {}),
+      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountName')
+        ? { account_name: x.paymentDetails.accountName } : {}),
+      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'bank')
+        ? { bank: x.paymentDetails.bank } : {}),
+      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'paymentProviderCode')
+        ? { payment_provider_code: x.paymentDetails.paymentProviderCode } : {}),
       ...locationColumns(x.individual?.location),
       uuid: x.uuid,
     })));

@@ -269,6 +269,9 @@ export function fetchPendingBeneficiaryUploads(variables) {
             node
             {
               id, uuid, jsonExt,
+              paymentDetails {
+                accountNumber, accountName, bank, paymentProviderCode
+              },
               individual {
                 id, lastName,
                 location {
