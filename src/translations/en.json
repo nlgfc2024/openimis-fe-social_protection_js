@@ -94,6 +94,7 @@
   "socialProtection.approval.primaryRecipientChanges.proposedRecipient": "Proposed primary recipient",
   "socialProtection.approval.primaryRecipientChanges.noCurrentRecipient": "No current primary recipient",
   "socialProtection.approval.primaryRecipientChanges.none": "No primary recipient changes.",
+  "socialProtection.approvalTable.payment_provider_code": "Payment provider",
   "socialProtection.validation.benefitPlan.invalidSchema": "Invalid schema",
   "socialProtection.benefitPackage.overviewButtonTooltip": "Show Benefit Package",
   "socialProtection.benefitPackage.GroupPanel.title": "Group",
