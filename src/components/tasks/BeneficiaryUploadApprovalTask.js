@@ -28,13 +28,52 @@ import { useIntl } from 'react-intl';
 import { TASK_STATUS, APPROVED, FAILED } from '../../constants';
 import { fetchPendingBeneficiaryUploads, resolveTask } from '../../actions';
 import KycPrimaryRecipientChangePreview from './KycPrimaryRecipientChangePreview';
+import parseJsonObject from '../../util/parse-json-object';
 
+const KYC_DETAILS_WORKFLOW = 'Python KYC Details';
 const DEFAULT_APPROVAL_TABLE_CONFIG = {
   leadingFields: ['last_name', 'first_name', 'dob'],
   trailingFields: [],
   hiddenFields: ['uuid', 'ID', 'Unnamed: 0'],
 };
-const LOCATION_TYPE_FIELDS = { R: 'district', D: 'traditional_authority', W: 'gvh', V: 'village' };
+const KYC_APPROVAL_TABLE_CONFIG = {
+  leadingFields: [
+    'district',
+    'traditional_authority',
+    'gvh',
+    'village',
+    'catchment',
+    'phase_name',
+    'form_number',
+    'first_name',
+    'last_name',
+    'nid',
+    'dob',
+    'gender',
+    'bank',
+    'account_name',
+    'account_number',
+  ],
+  trailingFields: [],
+  hiddenFields: [
+    'uuid',
+    'ID',
+    'Unnamed: 0',
+    'ta',
+    // KYC payment-detail uploads supply the current National ID as `nid`.
+    // Hide the legacy profile fields so the review table has no duplicate or
+    // empty columns.
+    'national_id',
+    'fit_for_work',
+    'validation_status',
+    'household_mobile_number',
+    'household_wealth_quintile',
+    'household_pmt_score',
+  ],
+};
+const LOCATION_TYPE_FIELDS = {
+  R: 'district', D: 'traditional_authority', W: 'gvh', V: 'village',
+};
 
 const humanizeFieldName = (fieldName) => fieldName
   .replace(/_/g, ' ')
@@ -96,9 +135,21 @@ function BeneficiaryUploadTaskDisplay({
   } = useSelector((state) => state.socialProtection);
   const intl = useIntl();
   const modulesManager = useModulesManager();
+  const { task } = useSelector((state) => state.tasksManagement);
+  const configuredApprovalTable = modulesManager.getConf('fe-social_protection', 'approvalTable', {});
+  const isKycTask = parseJsonObject(task?.jsonExt).workflow === KYC_DETAILS_WORKFLOW;
   const approvalTableConfig = {
     ...DEFAULT_APPROVAL_TABLE_CONFIG,
-    ...modulesManager.getConf('fe-social_protection', 'approvalTable', {}),
+    ...configuredApprovalTable,
+    ...(isKycTask
+      ? {
+        leadingFields: KYC_APPROVAL_TABLE_CONFIG.leadingFields,
+        trailingFields: KYC_APPROVAL_TABLE_CONFIG.trailingFields,
+        hiddenFields: [
+          ...new Set([...KYC_APPROVAL_TABLE_CONFIG.hiddenFields, ...(configuredApprovalTable.hiddenFields || [])]),
+        ],
+      }
+      : {}),
   };
   const [pending, setPending] = useState([]);
   const [keys, setKeys] = useState([]);
@@ -116,7 +167,6 @@ function BeneficiaryUploadTaskDisplay({
     isDeleted: isTaskResolved() ? undefined : false,
   });
 
-  const { task } = useSelector((state) => state.tasksManagement);
   const currentUser = useSelector((state) => state.core.user);
 
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -169,19 +219,32 @@ function BeneficiaryUploadTaskDisplay({
 
   useEffect(() => {
     // eslint-disable-next-line max-len
-    setPending(pendingBeneficiaries.map((x) => ({
-      ...(x.jsonExt ? JSON.parse(x.jsonExt) : {}),
-      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountNumber')
-        ? { account_number: x.paymentDetails.accountNumber } : {}),
-      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountName')
-        ? { account_name: x.paymentDetails.accountName } : {}),
-      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'bank')
-        ? { bank: x.paymentDetails.bank } : {}),
-      ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'paymentProviderCode')
-        ? { payment_provider_code: x.paymentDetails.paymentProviderCode } : {}),
-      ...locationColumns(x.individual?.location),
-      uuid: x.uuid,
-    })));
+    setPending(
+      pendingBeneficiaries.map((x) => {
+        const uploaded = x.jsonExt ? JSON.parse(x.jsonExt) : {};
+        const location = locationColumns(x.individual?.location);
+        return {
+          ...uploaded,
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountNumber')
+            ? { account_number: x.paymentDetails.accountNumber } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountName')
+            ? { account_name: x.paymentDetails.accountName } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'bank')
+            ? { bank: x.paymentDetails.bank } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'paymentProviderCode')
+            ? { payment_provider_code: x.paymentDetails.paymentProviderCode } : {}),
+          ...location,
+          ...(isKycTask
+            ? {
+              // KYC payment-detail uploads name this field `ta`, whereas the
+              // location hierarchy uses `traditional_authority`.
+              traditional_authority: location.traditional_authority || uploaded.traditional_authority || uploaded.ta || '',
+            }
+            : {}),
+          uuid: x.uuid,
+        };
+      }),
+    );
     const withIndividuals = {};
     pendingBeneficiaries.map((x) => withIndividuals[x.id] = x.individual?.id);
     setStoredIndividuals(withIndividuals);
