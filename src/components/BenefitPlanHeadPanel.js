@@ -10,6 +10,8 @@ import {
   PublishedComponent,
   TextInput,
   SelectInput,
+  NumberInput,
+  Autocomplete,
   formatMessage,
 } from '@openimis/fe-core';
 import { injectIntl } from 'react-intl';
@@ -44,6 +46,15 @@ const configuredOptions = (configured, currentValue) => {
   }
   return options;
 };
+
+// Training programmes (UPG, RMEP, UMEP) set the grant types they allow and, for a
+// non-continuous training (UMEP), the completion percentage below which participants are
+// disqualified. Both live in json_ext and are shown only on a training deployment, read
+// from the backend's project_type like the Training screens.
+const GRANT_TYPES = ['CASH', 'EQUIPMENT', 'SERVICE'];
+const isTrainingDeployment = (modulesManager) => modulesManager.getConf(
+  'project_social_protection', 'project_type', 'WORK',
+) === 'TRAINING';
 
 const styles = (theme) => ({
   tableTitle: theme.table.title,
@@ -88,6 +99,15 @@ class BenefitPlanHeadPanel extends FormPanel {
     const dataSourceOptions = configuredOptions(
       modulesManager.getConf('fe-social_protection', 'dataSources', []),
       jsonData.data_source,
+    );
+    const trainingSettings = isTrainingDeployment(modulesManager);
+    const grantTypeOptions = GRANT_TYPES.map((type) => ({
+      id: type, label: formatMessage(intl, 'socialProtection', `benefitPlan.grantType.${type}`),
+    }));
+    const allowedGrantTypes = Array.isArray(jsonData.allowed_grant_types) ? jsonData.allowed_grant_types : [];
+    const updateJsonExt = (key, value) => this.updateAttribute(
+      'jsonExt',
+      JSON.stringify({ ...safeParseJsonObject(benefitPlan?.jsonExt), [key]: value }),
     );
     const canEditSchema = benefitPlan?.id
       ? rights.includes(RIGHT_SCHEMA_UPDATE)
@@ -216,6 +236,41 @@ class BenefitPlanHeadPanel extends FormPanel {
             )}
             value={jsonData.data_source ?? ''}
             readOnly={readOnly}
+          />
+        </Grid>
+        )}
+        {trainingSettings && (
+        <Grid item xs={3} className={classes.item}>
+          <Autocomplete
+            multiple
+            readOnly={readOnly}
+            label={formatMessage(intl, 'socialProtection', 'benefitPlan.allowedGrantTypes')}
+            withPlaceholder={false}
+            filterSelectedOptions
+            options={grantTypeOptions}
+            value={grantTypeOptions.filter((option) => allowedGrantTypes.includes(option.id))}
+            onChange={(chosen) => {
+              const chosenIds = (chosen || []).map((option) => option.id);
+              const types = GRANT_TYPES.filter((type) => chosenIds.includes(type));
+              updateJsonExt('allowed_grant_types', types.length ? types : undefined);
+            }}
+            onInputChange={() => {}}
+          />
+        </Grid>
+        )}
+        {trainingSettings && (
+        <Grid item xs={3} className={classes.item}>
+          <NumberInput
+            module="socialProtection"
+            label="benefitPlan.trainingDisqualificationPercentage"
+            min={0}
+            max={100}
+            readOnly={readOnly}
+            value={jsonData.training_disqualification_percentage ?? ''}
+            onChange={(v) => updateJsonExt(
+              'training_disqualification_percentage',
+              v === '' || v === null || v === undefined ? undefined : Number(v),
+            )}
           />
         </Grid>
         )}
