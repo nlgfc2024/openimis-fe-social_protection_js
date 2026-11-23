@@ -225,6 +225,14 @@ function BeneficiaryUploadTaskDisplay({
         const location = locationColumns(x.individual?.location);
         return {
           ...uploaded,
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountNumber')
+            ? { account_number: x.paymentDetails.accountNumber } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'accountName')
+            ? { account_name: x.paymentDetails.accountName } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'bank')
+            ? { bank: x.paymentDetails.bank } : {}),
+          ...(x.paymentDetails && Object.prototype.hasOwnProperty.call(x.paymentDetails, 'paymentProviderCode')
+            ? { payment_provider_code: x.paymentDetails.paymentProviderCode } : {}),
           ...location,
           ...(isKycTask
             ? {
