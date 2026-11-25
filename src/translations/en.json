@@ -106,6 +106,8 @@
   "socialProtection.benefitPlan.tasks.searcherResultsTitle": "{benefitPlanTasksTotalCount} Tasks",
   "socialProtection.benefitPlan.tasks.update.title": "Program Update Tasks",
   "socialProtection.beneficiary.tasks.title": "Beneficiary Tasks",
+  "socialProtection.groupBeneficiary.tasks.title": "Household programme beneficiary approval",
+  "socialProtection.groupBeneficiary.task.group.id": "Household UUID",
   "socialProtection.beneficiary.task.individual.id": "Individual",
   "socialProtection.beneficiary.task.benefitPlan.id": "Program",
   "socialProtection.calculation.tasks.title": "Payment Verification Tasks",

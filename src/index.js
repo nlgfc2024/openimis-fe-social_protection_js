@@ -55,6 +55,7 @@ import {
   BenefitPlanTaskTableHeaders,
 } from './components/tasks/BenefitPlanTasks';
 import { BeneficiaryTaskItemFormatters, BeneficiaryTaskTableHeaders } from './components/tasks/BeneficiaryTasks';
+import { GroupBeneficiaryTaskItemFormatters, GroupBeneficiaryTaskTableHeaders } from './components/tasks/GroupBeneficiaryTasks';
 import {
   CalculationSocialProtectionItemFormatters,
   CalculationSocialProtectionTableHeaders,
@@ -151,6 +152,12 @@ const DEFAULT_CONFIG = {
     tableHeaders: BeneficiaryTaskTableHeaders,
     itemFormatters: BeneficiaryTaskItemFormatters,
     taskSource: ['BeneficiaryService'],
+  },
+  {
+    text: <FormattedMessage module="socialProtection" id="groupBeneficiary.tasks.title" />,
+    tableHeaders: GroupBeneficiaryTaskTableHeaders,
+    itemFormatters: GroupBeneficiaryTaskItemFormatters,
+    taskSource: ['GroupBeneficiaryService'],
   },
   {
     text: <FormattedMessage module="socialProtection" id="calculation.tasks.title" />,

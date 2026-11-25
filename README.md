@@ -55,3 +55,15 @@ None
 
 ## Configuration Options
 * `maxWorkingDays`: Maximum number of working days allowed for a project. This limits both the input validation on the project form and the number of day columns rendered in the beneficiaries table. Default: `1000`
+## Household beneficiary approval tasks
+
+`GroupBeneficiaryService` is registered with the existing
+`tasksManagement.tasks` contribution system. This enables the household source
+in task-group selection and displays household UUID, programme and requested
+status when reviewing create requests. Individual beneficiary approval previews
+remain separate.
+
+Route this source to an existing authorised beneficiary executor group. The host
+automatically assigns future requests to the group; previously unassigned
+RECEIVED requests also need normal task assignment before approval. ACCEPTED means
+assigned for review, not approved. No approval is performed by this frontend.
